@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>netlab: fundamentos de redes na prática</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E7ECF0;
+  --panel:#FFFFFF;
+  --ink:#14212E;
+  --soft:#53687A;
+  --rule:#C2CCD5;
+  --blue:#1B4FA8;
+  --blue-tint:#E3EAF7;
+  --orange:#D75C12;
+  --orange-tint:#FBE9DC;
+  --green:#1B7A48;
+  --green-tint:#DFF0E6;
+  --brown:#7A5240;
+  --sans:"Archivo","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"Courier New",monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:16px;line-height:1.55;
+}
+h1,h2,h3{margin:0;font-weight:600;letter-spacing:-0.015em;line-height:1.15}
+p{margin:0 0 .9rem}
+a{color:var(--blue)}
+code,.mono{font-family:var(--mono)}
+
+/* ---------- topo ---------- */
+.top{
+  border-bottom:1px solid var(--rule);background:var(--panel);
+}
+.top-in{
+  max-width:1140px;margin:0 auto;padding:1.4rem 1.25rem 1.6rem;
+}
+.brand{display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap}
+.brand h1{font-size:1.6rem}
+.brand span{color:var(--soft);font-size:.95rem}
+
+/* faixa de 32 bits do topo */
+.hero{margin-top:1.3rem}
+.hero-lead{color:var(--soft);font-size:.95rem;margin-bottom:.55rem}
+.bitstrip{display:flex;gap:2px;flex-wrap:wrap}
+.bitstrip .oct{display:flex;gap:2px;margin-right:9px}
+.bit{
+  width:19px;height:30px;border:1px solid var(--rule);background:#fff;
+  font-family:var(--mono);font-size:.72rem;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;padding:0;color:var(--ink);
+  transition:background .12s,border-color .12s;
+}
+.bit.net{background:var(--blue-tint);border-color:#9DB4DC}
+.bit.host{background:var(--orange-tint);border-color:#E8BB9A}
+.bit.on{font-weight:700}
+.bit:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.hero-read{
+  margin-top:.75rem;display:flex;gap:1.6rem;flex-wrap:wrap;
+  font-family:var(--mono);font-size:.9rem
+}
+.hero-read b{font-weight:700}
+.hero-read i{font-style:normal;color:var(--soft)}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1140px;margin:0 auto;padding:1.5rem 1.25rem 4rem;display:grid;gap:1.5rem}
+@media(min-width:900px){.wrap{grid-template-columns:212px 1fr;align-items:start}}
+
+nav ol{list-style:none;margin:0;padding:0;display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.3rem}
+@media(min-width:900px){
+  nav{position:sticky;top:1.2rem}
+  nav ol{flex-direction:column;overflow:visible}
+}
+nav button{
+  width:100%;text-align:left;background:transparent;border:0;border-left:3px solid transparent;
+  padding:.45rem .6rem;font-family:var(--sans);font-size:.92rem;color:var(--soft);
+  cursor:pointer;white-space:nowrap;display:flex;gap:.55rem;align-items:baseline;
+}
+nav button .n{font-family:var(--mono);font-size:.78rem;color:var(--rule)}
+nav button:hover{color:var(--ink)}
+nav button[aria-current="true"]{color:var(--ink);font-weight:600;border-left-color:var(--orange);background:var(--panel)}
+nav button[aria-current="true"] .n{color:var(--orange)}
+nav button.done .n::after{content:" ok";color:var(--green)}
+nav button:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+
+.panel{background:var(--panel);border:1px solid var(--rule);padding:1.6rem}
+@media(min-width:700px){.panel{padding:2rem 2.2rem}}
+.mod{display:none}
+.mod.on{display:block}
+.mod h2{font-size:1.55rem;margin-bottom:.35rem}
+.kicker{color:var(--soft);font-size:.9rem;font-family:var(--mono);margin-bottom:1rem}
+.mod p{max-width:66ch}
+
+.lab{border:1px solid var(--rule);background:#FBFCFD;padding:1.1rem;margin:1.2rem 0}
+.lab h3{font-size:1rem;margin-bottom:.7rem}
+.row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+label{font-size:.85rem;color:var(--soft)}
+input[type=text],input[type=number],select{
+  font-family:var(--mono);font-size:.95rem;padding:.4rem .5rem;
+  border:1px solid var(--rule);background:#fff;color:var(--ink);border-radius:0
+}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+input.bad{border-color:var(--orange);background:var(--orange-tint)}
+.btn{
+  font-family:var(--sans);font-size:.9rem;font-weight:500;padding:.45rem .9rem;
+  background:var(--ink);color:#fff;border:1px solid var(--ink);cursor:pointer;border-radius:0
+}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+input[type=range]{width:100%;accent-color:var(--blue)}
+
+table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:.86rem;margin:.4rem 0}
+th,td{border:1px solid var(--rule);padding:.4rem .55rem;text-align:left}
+th{background:#F1F4F7;font-weight:700;font-family:var(--sans);font-size:.8rem}
+tr.hit td{background:var(--green-tint)}
+tr.miss td{color:#93A2AE}
+
+.note{border-left:3px solid var(--blue);padding:.15rem 0 .15rem .8rem;color:var(--soft);font-size:.92rem;margin:1rem 0;max-width:64ch}
+.ok{color:var(--green);font-weight:600}
+.no{color:var(--orange);font-weight:600}
+.tag{font-family:var(--mono);font-size:.78rem;padding:.1rem .35rem;border:1px solid var(--rule);background:#fff}
+
+/* camadas */
+.stack{display:grid;gap:0;max-width:620px}
+.layer{border:1px solid var(--rule);padding:.75rem .9rem;cursor:pointer;background:#fff}
+.layer + .layer{border-top:0}
+.layer.act{background:var(--blue-tint);border-color:#9DB4DC}
+.layer .lt{font-weight:600;font-size:.95rem;display:flex;justify-content:space-between;gap:1rem}
+.layer .lp{font-family:var(--mono);font-size:.78rem;color:var(--soft)}
+.layer .ld{font-size:.88rem;color:var(--soft);margin-top:.35rem;display:none}
+.layer.act .ld{display:block}
+
+.encap{margin-top:1rem;font-family:var(--mono);font-size:.78rem}
+.encap .box{border:1px solid var(--rule);padding:.45rem;margin:0}
+.encap .hdr{background:#F1F4F7;padding:.25rem .4rem;display:inline-block;margin-bottom:.4rem;border:1px solid var(--rule)}
+.encap .e4{border-color:var(--brown)}
+.encap .e3{border-color:var(--blue)}
+.encap .e2{border-color:var(--green)}
+.encap .e1{border-color:var(--orange)}
+.encap .pay{background:var(--orange-tint);padding:.4rem;word-break:break-word}
+
+svg{max-width:100%;height:auto;display:block}
+.host-box{fill:#fff;stroke:var(--rule)}
+.host-box.lit{fill:var(--blue-tint);stroke:var(--blue)}
+.host-box.src{fill:var(--green-tint);stroke:var(--green)}
+.svgtxt{font-family:var(--mono);font-size:11px;fill:var(--ink)}
+.svgsm{font-family:var(--mono);font-size:9.5px;fill:var(--soft)}
+.link{stroke:var(--rule);stroke-width:2.5;cursor:pointer}
+.link.up{stroke:#9AA8B4}
+.link.down{stroke:var(--orange);stroke-dasharray:5 4}
+.link.path{stroke:var(--green);stroke-width:5}
+.rt{fill:#fff;stroke:var(--ink);stroke-width:1.5}
+.rt.on{fill:var(--green-tint)}
+
+.steps{font-size:.9rem}
+.step{border-left:2px solid var(--rule);padding:.15rem 0 .15rem .8rem;margin:.45rem 0;color:#B4BEC7}
+.step.done{border-left-color:var(--blue);color:var(--ink)}
+.step.now{border-left-color:var(--orange);color:var(--ink);font-weight:600}
+
+.q{border:1px solid var(--rule);background:#fff;padding:.9rem;margin-top:.9rem}
+.q .qt{font-size:.95rem;margin-bottom:.6rem}
+.fb{margin-top:.6rem;font-size:.9rem}
+.small{font-size:.85rem;color:var(--soft)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <h1>netlab</h1>
+      <span>fundamentos de redes, mexendo em vez de decorar</span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-lead">Um endereço IPv4 são 32 bits. Clique num bit para trocar 0 e 1, e arraste a barra para mover a fronteira entre a parte de rede (azul) e a parte de host (laranja).</div>
+      <div class="bitstrip" id="heroBits"></div>
+      <input type="range" id="heroPfx" min="0" max="32" value="24" style="margin-top:.7rem" aria-label="tamanho do prefixo">
+      <div class="hero-read">
+        <span><i>endereço</i> <b id="heroIp">192.168.10.37</b></span>
+        <span><i>prefixo</i> <b id="heroP">/24</b></span>
+        <span><i>máscara</i> <b id="heroMask">255.255.255.0</b></span>
+        <span><i>rede</i> <b id="heroNet">192.168.10.0</b></span>
+        <span><i>hosts</i> <b id="heroH">254</b></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav aria-label="módulos">
+    <ol id="nav"></ol>
+  </nav>
+
+  <main class="panel">
+
+  <!-- 1 CAMADAS -->
+  <section class="mod on" id="m0">
+    <h2>Camadas TCP/IP</h2>
+    <div class="kicker">o que cada camada resolve</div>
+    <p>Rede é dividida em camadas para que cada parte resolva um problema só. A de baixo entrega o quadro para o vizinho no mesmo cabo. A de cima entrega o dado para o programa certo. Clique numa camada para ver o que ela faz.</p>
+
+    <div class="stack" id="stack"></div>
+
+    <div class="lab">
+      <h3>Encapsulamento: o que o seu texto vira na rede</h3>
+      <div class="row">
+        <input type="text" id="payload" value="GET /index.html" size="24" aria-label="dado da aplicação">
+        <button class="btn" id="encapBtn">Descer as camadas</button>
+        <button class="btn ghost" id="decapBtn">Subir de volta</button>
+      </div>
+      <div class="encap" id="encapOut"></div>
+      <p class="small" style="margin-top:.8rem">Cada camada embrulha o que veio de cima e coloca o próprio cabeçalho na frente. No destino acontece o contrário: cada camada tira o cabeçalho dela e entrega o miolo para a de cima.</p>
+    </div>
+
+    <div class="note">O nome dos dados muda conforme a camada: dado na aplicação, segmento no transporte, pacote na rede, quadro no enlace. É a mesma informação com embrulhos diferentes.</div>
+  </section>
+
+  <!-- 2 ENDERECAMENTO -->
+  <section class="mod" id="m1">
+    <h2>Endereçamento IPv4 e IPv6</h2>
+    <div class="kicker">o número que identifica a interface</div>
+    <p>O endereço IPv4 tem 32 bits escritos como quatro números de 0 a 255, um por octeto. Escrever em decimal é só conveniência: quem decide tudo é o binário. Mude os octetos e veja os bits.</p>
+
+    <div class="lab">
+      <h3>Decimal e binário</h3>
+      <div class="row">
+        <input type="number" class="oc" id="o0" min="0" max="255" value="172" style="width:5.5rem">
+        <input type="number" class="oc" id="o1" min="0" max="255" value="16" style="width:5.5rem">
+        <input type="number" class="oc" id="o2" min="0" max="255" value="200" style="width:5.5rem">
+        <input type="number" class="oc" id="o3" min="0" max="255" value="9" style="width:5.5rem">
+      </div>
+      <table style="margin-top:.9rem">
+        <tr><th>peso do bit</th><td class="mono" colspan="8">128 64 32 16 8 4 2 1 em cada octeto</td></tr>
+        <tr><th>binário</th><td class="mono" colspan="8" id="binOut">10101100 00010000 11001000 00001001</td></tr>
+        <tr><th>tipo</th><td colspan="8" id="typeOut">privado</td></tr>
+      </table>
+      <p class="small">Faixas privadas: 10.0.0.0/8, 172.16.0.0/12 e 192.168.0.0/16. Elas não trafegam na internet pública, por isso aparecem dentro de VPC, de rede de pods e da sua casa.</p>
+    </div>
+
+    <div class="lab">
+      <h3>IPv6: encurtar e expandir</h3>
+      <p class="small">IPv6 tem 128 bits em oito grupos de quatro dígitos hexadecimais. Duas regras encurtam a escrita: zeros à esquerda de cada grupo somem, e a maior sequência de grupos zerados vira <span class="mono">::</span>, uma vez só no endereço.</p>
+      <div class="row">
+        <input type="text" id="v6in" value="2001:0db8:0000:0000:0000:ff00:0042:8329" size="42">
+        <button class="btn" id="v6btn">Converter</button>
+      </div>
+      <table style="margin-top:.7rem">
+        <tr><th>completo</th><td class="mono" id="v6full"></td></tr>
+        <tr><th>encurtado</th><td class="mono" id="v6short"></td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 3 CIDR -->
+  <section class="mod" id="m2">
+    <h2>Máscara de rede e CIDR</h2>
+    <div class="kicker">onde termina a rede e começa o host</div>
+    <p>A máscara diz quantos bits da esquerda identificam a rede. O resto identifica o host dentro dela. A notação CIDR é só o número desses bits: <span class="mono">/24</span> quer dizer 24 bits de rede e 8 de host.</p>
+
+    <div class="lab">
+      <h3>Calculadora</h3>
+      <div class="row">
+        <input type="text" id="cidrIp" value="192.168.10.37" size="16">
+        <span class="mono">/</span>
+        <input type="number" id="cidrPfx" min="0" max="32" value="24" style="width:5rem">
+      </div>
+      <input type="range" id="cidrRange" min="0" max="32" value="24" style="margin-top:.8rem">
+      <div class="bitstrip" id="cidrBits" style="margin-top:.6rem"></div>
+      <table style="margin-top:.9rem">
+        <tr><th>máscara</th><td class="mono" id="cMask"></td><th>bits de rede</th><td class="mono" id="cNb"></td></tr>
+        <tr><th>endereço de rede</th><td class="mono" id="cNet"></td><th>broadcast</th><td class="mono" id="cBc"></td></tr>
+        <tr><th>primeiro host</th><td class="mono" id="cF"></td><th>último host</th><td class="mono" id="cL"></td></tr>
+        <tr><th>hosts úteis</th><td class="mono" id="cH"></td><th>total de endereços</th><td class="mono" id="cT"></td></tr>
+      </table>
+      <p class="small">O endereço de rede é o que tem todos os bits de host em zero, e o broadcast é o que tem todos em um. Por isso sobram dois endereços a menos para as máquinas.</p>
+    </div>
+
+    <div class="note">Regra de bolso que resolve quase tudo: cada bit a mais no prefixo divide a quantidade de endereços pela metade. /24 tem 256, /25 tem 128, /26 tem 64.</div>
+  </section>
+
+  <!-- 4 SUBREDES -->
+  <section class="mod" id="m3">
+    <h2>Sub-redes</h2>
+    <div class="kicker">dividir um bloco em blocos menores</div>
+    <p>Dividir uma rede é pegar bits emprestados da parte de host e transformar em parte de rede. Um <span class="mono">/24</span> vira dois <span class="mono">/25</span>, quatro <span class="mono">/26</span>, oito <span class="mono">/27</span>, e assim por diante.</p>
+
+    <div class="lab">
+      <h3>Dividir um bloco</h3>
+      <div class="row">
+        <input type="text" id="spNet" value="192.168.10.0" size="16">
+        <span class="mono">/</span>
+        <input type="number" id="spPfx" min="0" max="30" value="24" style="width:4.5rem">
+        <label for="spNew">novo prefixo</label>
+        <input type="number" id="spNew" min="1" max="32" value="26" style="width:4.5rem">
+        <button class="btn" id="spBtn">Dividir</button>
+      </div>
+      <div id="spOut"></div>
+    </div>
+
+    <div class="lab">
+      <h3>Exercício</h3>
+      <p class="small">Gera uma questão nova a cada clique. Responda no campo e confira.</p>
+      <div class="q">
+        <div class="qt" id="exQ"></div>
+        <div class="row">
+          <input type="text" id="exA" size="18" placeholder="sua resposta">
+          <button class="btn" id="exCheck">Conferir</button>
+          <button class="btn ghost" id="exNew">Outra questão</button>
+        </div>
+        <div class="fb" id="exFb"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 ARP -->
+  <section class="mod" id="m4">
+    <h2>ARP</h2>
+    <div class="kicker">do endereço IP para o endereço MAC</div>
+    <p>Dentro de uma mesma rede local, o quadro é entregue pelo endereço MAC, não pelo IP. O ARP é quem descobre o MAC correspondente a um IP. Avance passo a passo e veja o que acontece no cabo.</p>
+
+    <div class="lab">
+      <h3>A quer falar com <span class="mono" id="arpTarget">192.168.1.20</span></h3>
+      <div class="row" style="margin-bottom:.8rem">
+        <select id="arpCase">
+          <option value="local">destino na mesma rede (192.168.1.20)</option>
+          <option value="remote">destino em outra rede (8.8.8.8)</option>
+        </select>
+        <button class="btn" id="arpNext">Próximo passo</button>
+        <button class="btn ghost" id="arpReset">Reiniciar</button>
+      </div>
+      <svg viewBox="0 0 620 260" id="arpSvg" role="img" aria-label="rede local com quatro hosts e um roteador"></svg>
+      <div class="steps" id="arpSteps" style="margin-top:.9rem"></div>
+      <table style="margin-top:.9rem">
+        <tr><th>tabela ARP do host A</th></tr>
+        <tr><td class="mono" id="arpTable">vazia</td></tr>
+      </table>
+    </div>
+
+    <div class="note">O detalhe que confunde quase todo mundo: quando o destino está fora da rede local, o ARP não pergunta pelo IP do destino. Ele pergunta pelo MAC do gateway. O IP de destino continua sendo o original dentro do pacote.</div>
+  </section>
+
+  <!-- 6 ROTEAMENTO -->
+  <section class="mod" id="m5">
+    <h2>Tabela de roteamento, next hop e rota default</h2>
+    <div class="kicker">como o roteador escolhe por onde mandar</div>
+    <p>O roteador olha o IP de destino e procura na tabela qual rota casa. Quando mais de uma casa, vence a de prefixo mais longo, ou seja, a mais específica. Se nenhuma casar, vale a rota default <span class="mono">0.0.0.0/0</span>, que casa com tudo por ser a menos específica de todas.</p>
+
+    <div class="lab">
+      <h3>Consultar a tabela</h3>
+      <div class="row">
+        <input type="text" id="rtIp" value="10.20.30.7" size="16">
+        <button class="btn" id="rtBtn">Consultar</button>
+        <span class="small">tente 10.20.30.7, 10.20.99.1, 10.99.0.1 e 8.8.8.8</span>
+      </div>
+      <table style="margin-top:.8rem" id="rtTable">
+        <thead><tr><th>destino</th><th>máscara</th><th>next hop</th><th>interface</th><th>casa?</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="fb" id="rtFb"></div>
+    </div>
+
+    <div class="note">Next hop é o endereço do próximo roteador, não do destino final. Um pacote atravessa a internet sendo repassado de vizinho em vizinho, e cada um só sabe o passo seguinte.</div>
+  </section>
+
+  <!-- 7 OSPF -->
+  <section class="mod" id="m6">
+    <h2>Roteamento estático, dinâmico e OSPF</h2>
+    <div class="kicker">métrica, vizinhança e convergência</div>
+    <p>Rota estática é escrita à mão e não muda sozinha. Roteamento dinâmico faz os roteadores trocarem informação e recalcularem o caminho quando a rede muda. O OSPF é o exemplo clássico dentro de uma organização.</p>
+    <p>Antes de trocar rotas, dois roteadores viram vizinhos: mandam pacotes hello no enlace, se reconhecem e formam adjacência. Depois cada um monta o mapa completo da rede e roda Dijkstra para achar o caminho de menor custo. Custo é a métrica, e por padrão vem da banda do enlace, não da quantidade de saltos.</p>
+
+    <div class="lab">
+      <h3>Calcular o caminho de R1 até R6</h3>
+      <p class="small">Clique num enlace para derrubá-lo e veja o OSPF convergir para outro caminho. O número em cada enlace é o custo.</p>
+      <svg viewBox="0 0 620 340" id="ospfSvg" role="img" aria-label="topologia com seis roteadores"></svg>
+      <div class="row" style="margin-top:.8rem">
+        <button class="btn" id="ospfCalc">Recalcular</button>
+        <button class="btn ghost" id="ospfReset">Levantar todos os enlaces</button>
+      </div>
+      <div class="fb" id="ospfOut"></div>
+    </div>
+
+    <div class="note">Repare que o melhor caminho nem sempre é o de menos saltos. Somar custos baixos por um trajeto mais longo pode sair melhor que dois enlaces caros. É exatamente isso que separa métrica de contagem de saltos.</div>
+  </section>
+
+  </main>
+</div>
+
+<script>
+/* ============ utilidades IPv4 ============ */
+function ipToInt(s){
+  const p=String(s).trim().split(".");
+  if(p.length!==4) return null;
+  let n=0;
+  for(const x of p){
+    if(!/^\d{1,3}$/.test(x)) return null;
+    const v=parseInt(x,10);
+    if(v>255) return null;
+    n=(n*256)+v;
+  }
+  return n>>>0;
+}
+function intToIp(n){
+  n=n>>>0;
+  return [(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join(".");
+}
+function maskInt(p){ return p===0?0:(0xFFFFFFFF<<(32-p))>>>0; }
+function netInt(ip,p){ return (ip & maskInt(p))>>>0; }
+function bcastInt(ip,p){ return (netInt(ip,p) | (~maskInt(p)>>>0))>>>0; }
+function bits32(n){ return (n>>>0).toString(2).padStart(32,"0"); }
+function fmtNum(n){ return n.toLocaleString("pt-BR"); }
+
+/* ============ faixa de bits reaproveitável ============ */
+function renderBits(el,ipInt,prefix,onToggle){
+  el.innerHTML="";
+  const b=bits32(ipInt);
+  for(let o=0;o<4;o++){
+    const g=document.createElement("div");
+    g.className="oct";
+    for(let i=0;i<8;i++){
+      const idx=o*8+i;
+      const btn=document.createElement("button");
+      btn.className="bit "+(idx<prefix?"net":"host")+(b[idx]==="1"?" on":"");
+      btn.textContent=b[idx];
+      btn.title="bit "+(idx+1);
+      if(onToggle) btn.addEventListener("click",()=>onToggle(idx));
+      g.appendChild(btn);
+    }
+    el.appendChild(g);
+  }
+}
+
+/* ============ topo ============ */
+let heroIp=ipToInt("192.168.10.37"), heroPfx=24;
+function heroDraw(){
+  renderBits(document.getElementById("heroBits"),heroIp,heroPfx,idx=>{
+    heroIp=(heroIp ^ (1<<(31-idx)))>>>0; heroDraw();
+  });
+  const hosts=heroPfx>=31?0:Math.pow(2,32-heroPfx)-2;
+  document.getElementById("heroIp").textContent=intToIp(heroIp);
+  document.getElementById("heroP").textContent="/"+heroPfx;
+  document.getElementById("heroMask").textContent=intToIp(maskInt(heroPfx));
+  document.getElementById("heroNet").textContent=intToIp(netInt(heroIp,heroPfx));
+  document.getElementById("heroH").textContent=fmtNum(hosts);
+}
+document.getElementById("heroPfx").addEventListener("input",e=>{heroPfx=+e.target.value;heroDraw();});
+heroDraw();
+
+/* ============ navegação ============ */
+const MODS=["Camadas","Endereçamento","Máscara e CIDR","Sub-redes","ARP","Tabela de rotas","OSPF"];
+const navEl=document.getElementById("nav");
+MODS.forEach((name,i)=>{
+  const li=document.createElement("li");
+  const b=document.createElement("button");
+  b.innerHTML='<span class="n">'+(i+1)+'</span><span>'+name+'</span>';
+  b.setAttribute("aria-current",i===0?"true":"false");
+  b.addEventListener("click",()=>show(i));
+  li.appendChild(b); navEl.appendChild(li);
+});
+function show(i){
+  document.querySelectorAll(".mod").forEach((s,k)=>s.classList.toggle("on",k===i));
+  navEl.querySelectorAll("button").forEach((b,k)=>{
+    b.setAttribute("aria-current",k===i?"true":"false");
+    if(k===i) b.classList.add("done");
+  });
+  window.scrollTo({top:document.querySelector(".wrap").offsetTop-16,behavior:"smooth"});
+}
+
+/* ============ 1. camadas ============ */
+const LAYERS=[
+  {t:"Aplicação",p:"HTTP, DNS, SSH",d:"Onde o programa vive. Define o formato da conversa: um GET, uma consulta de nome, uma sessão remota."},
+  {t:"Transporte",p:"TCP, UDP",d:"Entrega para o processo certo através da porta, e no caso do TCP garante ordem e retransmissão do que se perdeu."},
+  {t:"Rede",p:"IP, ICMP",d:"Endereça e roteia entre redes diferentes. É aqui que existe IP, máscara, rota e next hop."},
+  {t:"Enlace",p:"Ethernet, Wi-Fi, ARP",d:"Entrega o quadro para o vizinho no mesmo meio físico, usando endereço MAC. Não sabe nada além do próprio segmento."}
+];
+const stack=document.getElementById("stack");
+LAYERS.forEach((l,i)=>{
+  const d=document.createElement("div");
+  d.className="layer"+(i===0?" act":"");
+  d.innerHTML='<div class="lt"><span>'+l.t+'</span><span class="lp">'+l.p+'</span></div><div class="ld">'+l.d+'</div>';
+  d.addEventListener("click",()=>{
+    stack.querySelectorAll(".layer").forEach(x=>x.classList.remove("act"));
+    d.classList.add("act");
+  });
+  stack.appendChild(d);
+});
+
+const encOut=document.getElementById("encapOut");
+function encap(){
+  const p=document.getElementById("payload").value||"(vazio)";
+  encOut.innerHTML=
+   '<div class="box e1"><span class="hdr">quadro Ethernet: MAC orig aa:bb:cc:00:01 / MAC dest aa:bb:cc:00:02</span>'+
+    '<div class="box e2"><span class="hdr">cabeçalho IP: 192.168.1.10 para 192.168.1.20, TTL 64</span>'+
+      '<div class="box e3"><span class="hdr">cabeçalho TCP: porta 49152 para porta 80</span>'+
+        '<div class="pay">'+p.replace(/[<>&]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]))+'</div>'+
+      '</div></div></div>';
+}
+function decap(){
+  const p=document.getElementById("payload").value||"(vazio)";
+  encOut.innerHTML='<div class="pay">'+p.replace(/[<>&]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]))+
+   '</div><p class="small">Os três cabeçalhos foram removidos, um por camada, e o dado original chegou ao programa.</p>';
+}
+document.getElementById("encapBtn").addEventListener("click",encap);
+document.getElementById("decapBtn").addEventListener("click",decap);
+encap();
+
+/* ============ 2. endereçamento ============ */
+function octRead(){
+  const v=[0,1,2,3].map(i=>{
+    let x=parseInt(document.getElementById("o"+i).value,10);
+    if(isNaN(x)||x<0) x=0; if(x>255) x=255;
+    return x;
+  });
+  return v;
+}
+function tipoIp(v){
+  if(v[0]===10) return "privado (10.0.0.0/8)";
+  if(v[0]===172 && v[1]>=16 && v[1]<=31) return "privado (172.16.0.0/12)";
+  if(v[0]===192 && v[1]===168) return "privado (192.168.0.0/16)";
+  if(v[0]===127) return "loopback (127.0.0.0/8), é a própria máquina";
+  if(v[0]===169 && v[1]===254) return "link-local (169.254.0.0/16), aparece quando o DHCP falha";
+  if(v[0]>=224 && v[0]<=239) return "multicast (224.0.0.0/4)";
+  if(v[0]===0) return "reservado";
+  return "público, roteável na internet";
+}
+function octDraw(){
+  const v=octRead();
+  document.getElementById("binOut").textContent=v.map(x=>x.toString(2).padStart(8,"0")).join(" ");
+  document.getElementById("typeOut").textContent=tipoIp(v);
+}
+document.querySelectorAll(".oc").forEach(i=>i.addEventListener("input",octDraw));
+octDraw();
+
+function v6Expand(s){
+  s=String(s).trim().toLowerCase();
+  if(!s) return null;
+  let head=s,tail="";
+  if(s.indexOf("::")>=0){
+    const parts=s.split("::");
+    if(parts.length>2) return null;
+    head=parts[0]; tail=parts[1];
+  }
+  const h=head?head.split(":"):[];
+  const t=tail?tail.split(":"):[];
+  if(h.some(x=>x&&!/^[0-9a-f]{1,4}$/.test(x))||t.some(x=>x&&!/^[0-9a-f]{1,4}$/.test(x))) return null;
+  const hf=h.filter(x=>x!==""), tf=t.filter(x=>x!=="");
+  let groups;
+  if(s.indexOf("::")>=0){
+    const fill=8-hf.length-tf.length;
+    if(fill<0) return null;
+    groups=hf.concat(Array(fill).fill("0"),tf);
+  }else{
+    groups=hf;
+    if(groups.length!==8) return null;
+  }
+  return groups.map(x=>x.padStart(4,"0")).join(":");
+}
+function v6Compress(full){
+  const g=full.split(":").map(x=>x.replace(/^0+(?=.)/,""));
+  let bestI=-1,bestL=0,i=0;
+  while(i<8){
+    if(g[i]==="0"){
+      let j=i; while(j<8&&g[j]==="0") j++;
+      if(j-i>bestL){bestL=j-i;bestI=i;}
+      i=j;
+    } else i++;
+  }
+  if(bestL<2) return g.join(":");
+  return (g.slice(0,bestI).join(":"))+"::"+(g.slice(bestI+bestL).join(":"));
+}
+function v6Go(){
+  const full=v6Expand(document.getElementById("v6in").value);
+  const fe=document.getElementById("v6full"), se=document.getElementById("v6short");
+  if(!full){ fe.textContent="endereço inválido"; se.textContent=""; return; }
+  fe.textContent=full;
+  se.textContent=v6Compress(full);
+}
+document.getElementById("v6btn").addEventListener("click",v6Go);
+v6Go();
+
+/* ============ 3. CIDR ============ */
+function cidrDraw(){
+  let ip=ipToInt(document.getElementById("cidrIp").value);
+  const bad=(ip===null);
+  document.getElementById("cidrIp").classList.toggle("bad",bad);
+  if(bad) ip=0;
+  let p=parseInt(document.getElementById("cidrPfx").value,10);
+  if(isNaN(p)||p<0) p=0; if(p>32) p=32;
+  document.getElementById("cidrRange").value=p;
+  renderBits(document.getElementById("cidrBits"),ip,p,idx=>{
+    const ni=(ip ^ (1<<(31-idx)))>>>0;
+    document.getElementById("cidrIp").value=intToIp(ni);
+    cidrDraw();
+  });
+  const net=netInt(ip,p), bc=bcastInt(ip,p), total=Math.pow(2,32-p);
+  document.getElementById("cMask").textContent=intToIp(maskInt(p));
+  document.getElementById("cNb").textContent=p+" de rede, "+(32-p)+" de host";
+  document.getElementById("cNet").textContent=intToIp(net);
+  document.getElementById("cBc").textContent=p>=31?"não se aplica":intToIp(bc);
+  document.getElementById("cF").textContent=p>=31?intToIp(net):intToIp(net+1);
+  document.getElementById("cL").textContent=p>=31?intToIp(bc):intToIp(bc-1);
+  document.getElementById("cH").textContent=p>=31?fmtNum(total)+" (caso especial de enlace ponto a ponto)":fmtNum(total-2);
+  document.getElementById("cT").textContent=fmtNum(total);
+}
+document.getElementById("cidrIp").addEventListener("input",cidrDraw);
+document.getElementById("cidrPfx").addEventListener("input",cidrDraw);
+document.getElementById("cidrRange").addEventListener("input",e=>{
+  document.getElementById("cidrPfx").value=e.target.value; cidrDraw();
+});
+cidrDraw();
+
+/* ============ 4. sub-redes ============ */
+document.getElementById("spBtn").addEventListener("click",()=>{
+  const out=document.getElementById("spOut");
+  const ip=ipToInt(document.getElementById("spNet").value);
+  const p=parseInt(document.getElementById("spPfx").value,10);
+  const np=parseInt(document.getElementById("spNew").value,10);
+  if(ip===null||isNaN(p)||isNaN(np)){ out.innerHTML='<p class="no">Endereço ou prefixo inválido.</p>'; return; }
+  if(np<=p){ out.innerHTML='<p class="no">O novo prefixo precisa ser maior que '+p+'.</p>'; return; }
+  if(np>32){ out.innerHTML='<p class="no">O prefixo máximo é 32.</p>'; return; }
+  const qtd=Math.pow(2,np-p);
+  if(qtd>256){ out.innerHTML='<p class="no">Isso geraria '+fmtNum(qtd)+' sub-redes. Escolha uma diferença de até 8 bits para ver a lista.</p>'; return; }
+  const base=netInt(ip,p), step=Math.pow(2,32-np);
+  let h='<p class="small" style="margin-top:.8rem">Pegando '+(np-p)+' bit(s) emprestado(s) da parte de host, o bloco vira '+qtd+' sub-redes de '+fmtNum(step)+' endereços cada.</p>';
+  h+='<table><thead><tr><th>#</th><th>rede</th><th>primeiro host</th><th>último host</th><th>broadcast</th></tr></thead><tbody>';
+  for(let i=0;i<qtd;i++){
+    const n=(base+i*step)>>>0, b=(n+step-1)>>>0;
+    h+='<tr><td>'+(i+1)+'</td><td>'+intToIp(n)+"/"+np+'</td><td>'+(np>=31?intToIp(n):intToIp(n+1))+
+       '</td><td>'+(np>=31?intToIp(b):intToIp(b-1))+'</td><td>'+(np>=31?"-":intToIp(b))+'</td></tr>';
+  }
+  out.innerHTML=h+'</tbody></table>';
+});
+
+let exState=null;
+function novaQuestao(){
+  const pfx=[25,26,27,28,22,20][Math.floor(Math.random()*6)];
+  const ip=(Math.floor(Math.random()*3)===0)
+    ? ipToInt("10."+r(255)+"."+r(255)+"."+r(255))
+    : ipToInt("192.168."+r(255)+"."+r(255));
+  const kind=Math.floor(Math.random()*3);
+  const net=netInt(ip,pfx), bc=bcastInt(ip,pfx);
+  let q,a,exp;
+  if(kind===0){
+    q="Qual é o endereço de rede de <span class='mono'>"+intToIp(ip)+"/"+pfx+"</span>?";
+    a=intToIp(net);
+    exp="Zerando os "+(32-pfx)+" bits de host de "+intToIp(ip)+" sobra "+a+".";
+  }else if(kind===1){
+    q="Qual é o endereço de broadcast de <span class='mono'>"+intToIp(ip)+"/"+pfx+"</span>?";
+    a=intToIp(bc);
+    exp="Ligando os "+(32-pfx)+" bits de host de "+intToIp(net)+" chega-se a "+a+".";
+  }else{
+    q="Quantos hosts úteis cabem em um bloco <span class='mono'>/"+pfx+"</span>? (só o número)";
+    a=String(Math.pow(2,32-pfx)-2);
+    exp="São "+(32-pfx)+" bits de host, logo 2^"+(32-pfx)+" = "+fmtNum(Math.pow(2,32-pfx))+" endereços, menos rede e broadcast.";
+  }
+  exState={a:a,exp:exp};
+  document.getElementById("exQ").innerHTML=q;
+  document.getElementById("exA").value="";
+  document.getElementById("exFb").innerHTML="";
+}
+function r(n){ return Math.floor(Math.random()*n); }
+document.getElementById("exNew").addEventListener("click",novaQuestao);
+document.getElementById("exCheck").addEventListener("click",()=>{
+  if(!exState) return;
+  const v=document.getElementById("exA").value.trim().replace(/\s/g,"");
+  const fb=document.getElementById("exFb");
+  if(v===exState.a) fb.innerHTML='<span class="ok">Correto.</span> '+exState.exp;
+  else fb.innerHTML='<span class="no">Não é isso.</span> A resposta é <span class="mono">'+exState.a+'</span>. '+exState.exp;
+});
+novaQuestao();
+
+/* ============ 5. ARP ============ */
+const HOSTS=[
+  {id:"A",ip:"192.168.1.10",mac:"aa:00:01"},
+  {id:"B",ip:"192.168.1.20",mac:"aa:00:02"},
+  {id:"C",ip:"192.168.1.30",mac:"aa:00:03"},
+  {id:"GW",ip:"192.168.1.1",mac:"aa:00:fe"}
+];
+let arpStep=0, arpCase="local";
+function arpDraw(){
+  const svg=document.getElementById("arpSvg");
+  const lit=[];
+  if(arpStep>=2) lit.push("B","C","GW");
+  const respondente = arpCase==="local" ? "B" : "GW";
+  let s='<line x1="60" y1="150" x2="560" y2="150" stroke="#9AA8B4" stroke-width="3"/>';
+  s+='<text x="60" y="172" class="svgsm">switch / mesmo domínio de broadcast</text>';
+  const xs={A:70,B:220,C:370,GW:490};
+  HOSTS.forEach(h=>{
+    const x=xs[h.id];
+    let cls="host-box";
+    if(h.id==="A") cls+=" src";
+    else if(arpStep===2 && lit.indexOf(h.id)>=0) cls+=" lit";
+    else if(arpStep>=3 && h.id===respondente) cls+=" lit";
+    s+='<line x1="'+(x+40)+'" y1="105" x2="'+(x+40)+'" y2="150" stroke="#9AA8B4" stroke-width="2"/>';
+    s+='<rect class="'+cls+'" x="'+x+'" y="55" width="80" height="50" rx="2"/>';
+    s+='<text class="svgtxt" x="'+(x+8)+'" y="74">'+h.id+'</text>';
+    s+='<text class="svgsm" x="'+(x+8)+'" y="88">'+h.ip+'</text>';
+    s+='<text class="svgsm" x="'+(x+8)+'" y="99">'+h.mac+'</text>';
+  });
+  if(arpCase==="remote"){
+    s+='<line x1="530" y1="80" x2="600" y2="80" stroke="#9AA8B4" stroke-width="2"/>';
+    s+='<text class="svgsm" x="530" y="42">internet</text>';
+    s+='<text class="svgsm" x="530" y="30">8.8.8.8</text>';
+  }
+  if(arpStep===2){
+    s+='<text class="svgtxt" x="70" y="210" fill="#D75C12">ARP request em broadcast: quem tem '+(arpCase==="local"?"192.168.1.20":"192.168.1.1")+'? responda para aa:00:01</text>';
+  }
+  if(arpStep>=3){
+    s+='<text class="svgtxt" x="70" y="210" fill="#1B7A48">ARP reply unicast de '+respondente+': '+(arpCase==="local"?"192.168.1.20":"192.168.1.1")+' está em '+(arpCase==="local"?"aa:00:02":"aa:00:fe")+'</text>';
+  }
+  svg.innerHTML=s;
+
+  const steps=arpCase==="local"
+    ? ["A compara o IP de destino com a própria máscara e conclui que 192.168.1.20 está na mesma rede.",
+       "A procura 192.168.1.20 na tabela ARP e não encontra, então segura o pacote.",
+       "A envia um ARP request para o MAC de broadcast ff:ff:ff:ff:ff:ff. Todos na LAN recebem.",
+       "Só B se reconhece e responde em unicast com o próprio MAC. C e o gateway descartam.",
+       "A grava o par IP e MAC na tabela e finalmente envia o quadro direto para B."]
+    : ["A compara 8.8.8.8 com a própria máscara e conclui que o destino está fora da rede local.",
+       "Como está fora, A decide mandar para o gateway 192.168.1.1 e procura o MAC dele na tabela ARP.",
+       "Sem entrada na tabela, A envia um ARP request em broadcast perguntando quem tem 192.168.1.1.",
+       "O gateway responde em unicast com o próprio MAC.",
+       "A envia o quadro com MAC de destino do gateway, mas com IP de destino 8.8.8.8 dentro do pacote. O roteador segue encaminhando."];
+  document.getElementById("arpSteps").innerHTML=steps.map((t,i)=>
+    '<div class="step '+(i<arpStep?"done":(i===arpStep?"now":""))+'">'+t+'</div>').join("");
+
+  const tb=document.getElementById("arpTable");
+  if(arpStep>=4) tb.textContent=(arpCase==="local"?"192.168.1.20  aa:00:02":"192.168.1.1  aa:00:fe")+"   (expira em alguns minutos)";
+  else tb.textContent="vazia";
+  document.getElementById("arpTarget").textContent=arpCase==="local"?"192.168.1.20":"8.8.8.8";
+}
+document.getElementById("arpNext").addEventListener("click",()=>{ if(arpStep<4){arpStep++;arpDraw();} });
+document.getElementById("arpReset").addEventListener("click",()=>{ arpStep=0;arpDraw(); });
+document.getElementById("arpCase").addEventListener("change",e=>{ arpCase=e.target.value;arpStep=0;arpDraw(); });
+arpDraw();
+
+/* ============ 6. tabela de rotas ============ */
+const ROUTES=[
+  {d:"10.20.30.0",p:24,nh:"conectada",i:"eth3"},
+  {d:"10.20.0.0",p:16,nh:"172.16.0.6",i:"eth2"},
+  {d:"10.0.0.0",p:8,nh:"172.16.0.2",i:"eth1"},
+  {d:"192.168.1.0",p:24,nh:"conectada",i:"eth0"},
+  {d:"0.0.0.0",p:0,nh:"200.10.5.1",i:"eth9"}
+];
+function rtDraw(dest){
+  const tb=document.querySelector("#rtTable tbody");
+  const ip=dest===undefined?null:ipToInt(dest);
+  let best=-1;
+  if(ip!==null) ROUTES.forEach((r,i)=>{
+    if(netInt(ip,r.p)===ipToInt(r.d)){ if(best<0||r.p>ROUTES[best].p) best=i; }
+  });
+  tb.innerHTML=ROUTES.map((r,i)=>{
+    const casa = ip!==null && netInt(ip,r.p)===ipToInt(r.d);
+    const cls = ip===null?"":(i===best?"hit":(casa?"":"miss"));
+    return '<tr class="'+cls+'"><td>'+r.d+"/"+r.p+'</td><td>'+intToIp(maskInt(r.p))+
+      '</td><td>'+r.nh+'</td><td>'+r.i+'</td><td>'+(ip===null?"":(casa?(i===best?"sim, mais específica":"sim"):"não"))+'</td></tr>';
+  }).join("");
+  const fb=document.getElementById("rtFb");
+  if(ip===null){ fb.innerHTML=""; return; }
+  const r=ROUTES[best];
+  fb.innerHTML='Para <span class="mono">'+intToIp(ip)+'</span> vence <span class="mono">'+r.d+"/"+r.p+
+    '</span>. O pacote sai pela interface <span class="mono">'+r.i+'</span> com next hop <span class="mono">'+r.nh+'</span>.'+
+    (r.p===0?' Nenhuma rota específica casou, então valeu a rota default.':'');
+}
+document.getElementById("rtBtn").addEventListener("click",()=>{
+  const v=document.getElementById("rtIp").value;
+  const bad=ipToInt(v)===null;
+  document.getElementById("rtIp").classList.toggle("bad",bad);
+  if(bad){ document.getElementById("rtFb").innerHTML='<span class="no">Endereço inválido.</span>'; return; }
+  rtDraw(v);
+});
+rtDraw();
+
+/* ============ 7. OSPF ============ */
+const RPOS={R1:[55,170],R2:[195,70],R3:[195,272],R4:[380,70],R5:[380,272],R6:[555,170]};
+let LINKS=[
+  {a:"R1",b:"R2",c:10,up:true},
+  {a:"R1",b:"R3",c:5,up:true},
+  {a:"R2",b:"R3",c:4,up:true},
+  {a:"R2",b:"R4",c:10,up:true},
+  {a:"R3",b:"R5",c:10,up:true},
+  {a:"R4",b:"R5",c:8,up:true},
+  {a:"R4",b:"R6",c:5,up:true},
+  {a:"R5",b:"R6",c:20,up:true}
+];
+function dijkstra(src,dst){
+  const nodes=Object.keys(RPOS);
+  const dist={},prev={},vis={};
+  nodes.forEach(n=>dist[n]=Infinity);
+  dist[src]=0;
+  while(true){
+    let u=null,bd=Infinity;
+    nodes.forEach(n=>{ if(!vis[n]&&dist[n]<bd){bd=dist[n];u=n;} });
+    if(u===null) break;
+    vis[u]=true;
+    LINKS.forEach(l=>{
+      if(!l.up) return;
+      let v=null;
+      if(l.a===u) v=l.b; else if(l.b===u) v=l.a; else return;
+      if(dist[u]+l.c<dist[v]){ dist[v]=dist[u]+l.c; prev[v]=u; }
+    });
+  }
+  if(dist[dst]===Infinity) return null;
+  const path=[dst]; let c=dst;
+  while(prev[c]){ c=prev[c]; path.unshift(c); }
+  return {cost:dist[dst],path:path};
+}
+let ospfPath=[];
+function inPath(a,b){
+  for(let i=0;i<ospfPath.length-1;i++){
+    if((ospfPath[i]===a&&ospfPath[i+1]===b)||(ospfPath[i]===b&&ospfPath[i+1]===a)) return true;
+  }
+  return false;
+}
+function ospfDraw(){
+  let s="";
+  LINKS.forEach((l,i)=>{
+    const p1=RPOS[l.a],p2=RPOS[l.b];
+    const cls=!l.up?"down":(inPath(l.a,l.b)?"path":"up");
+    s+='<line class="link '+cls+'" data-i="'+i+'" x1="'+p1[0]+'" y1="'+p1[1]+'" x2="'+p2[0]+'" y2="'+p2[1]+'"/>';
+    const mx=(p1[0]+p2[0])/2, my=(p1[1]+p2[1])/2;
+    s+='<rect x="'+(mx-13)+'" y="'+(my-11)+'" width="26" height="18" fill="#fff" stroke="#C2CCD5"/>';
+    s+='<text class="svgtxt" x="'+(mx-6)+'" y="'+(my+2)+'">'+(l.up?l.c:"x")+'</text>';
+  });
+  Object.keys(RPOS).forEach(n=>{
+    const p=RPOS[n];
+    const on=ospfPath.indexOf(n)>=0;
+    s+='<circle class="rt'+(on?" on":"")+'" cx="'+p[0]+'" cy="'+p[1]+'" r="24"/>';
+    s+='<text class="svgtxt" x="'+(p[0]-11)+'" y="'+(p[1]+4)+'">'+n+'</text>';
+  });
+  const svg=document.getElementById("ospfSvg");
+  svg.innerHTML=s;
+  svg.querySelectorAll(".link").forEach(el=>{
+    el.addEventListener("click",()=>{
+      const i=+el.getAttribute("data-i");
+      LINKS[i].up=!LINKS[i].up;
+      ospfCalc();
+    });
+  });
+}
+function ospfCalc(){
+  const r=dijkstra("R1","R6");
+  const out=document.getElementById("ospfOut");
+  if(!r){ ospfPath=[]; ospfDraw(); out.innerHTML='<span class="no">R6 ficou inalcançável.</span> Com todos os enlaces necessários fora, o OSPF simplesmente retira a rota da tabela.'; return; }
+  ospfPath=r.path; ospfDraw();
+  out.innerHTML='Melhor caminho: <span class="mono">'+r.path.join(" para ")+'</span>, custo total <span class="mono">'+r.cost+
+    '</span>, com '+(r.path.length-1)+' saltos.';
+}
+document.getElementById("ospfCalc").addEventListener("click",ospfCalc);
+document.getElementById("ospfReset").addEventListener("click",()=>{ LINKS.forEach(l=>l.up=true); ospfCalc(); });
+ospfCalc();
+</script>
+</body>
+</html>
