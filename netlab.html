@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>netlab: fundamentos de redes na prática</title>
+<title>netlab: redes e segurança da informação na prática</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -72,6 +72,7 @@ code,.mono{font-family:var(--mono)}
 .wrap{max-width:1140px;margin:0 auto;padding:1.5rem 1.25rem 4rem;display:grid;gap:1.5rem}
 @media(min-width:900px){.wrap{grid-template-columns:212px 1fr;align-items:start}}
 
+nav{min-width:0}
 nav ol{list-style:none;margin:0;padding:0;display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.3rem}
 @media(min-width:900px){
   nav{position:sticky;top:1.2rem}
@@ -89,7 +90,7 @@ nav button[aria-current="true"] .n{color:var(--orange)}
 nav button.done .n::after{content:" ok";color:var(--green)}
 nav button:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
 
-.panel{background:var(--panel);border:1px solid var(--rule);padding:1.6rem}
+.panel{min-width:0;background:var(--panel);border:1px solid var(--rule);padding:1.6rem}
 @media(min-width:700px){.panel{padding:2rem 2.2rem}}
 .mod{display:none}
 .mod.on{display:block}
@@ -167,7 +168,76 @@ svg{max-width:100%;height:auto;display:block}
 .q .qt{font-size:.95rem;margin-bottom:.6rem}
 .fb{margin-top:.6rem;font-size:.9rem}
 .small{font-size:.85rem;color:var(--soft)}
+/* Conteúdo complementar e exercícios */
+.concepts{display:grid;gap:.8rem;margin:1.2rem 0}
+@media(min-width:700px){.concepts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.concept{border:1px solid var(--rule);padding:1rem}
+.concept h3{font-size:1rem;margin-bottom:.5rem}
+.concept p:last-child{margin-bottom:0}
+.reading h3{font-size:1.1rem;margin:1.5rem 0 .6rem}
+.reading li{margin-bottom:.45rem}
+.reading code{overflow-wrap:anywhere}
+.table-scroll{overflow-x:auto;margin:.8rem 0}
+.table-scroll table{min-width:480px;font-family:var(--sans)}
+.choices{display:grid;gap:.45rem}
+.choice{display:flex;align-items:baseline;gap:.55rem;border:1px solid var(--rule);padding:.55rem;color:var(--ink);cursor:pointer;font-size:.93rem}
+.choice input{flex-shrink:0;accent-color:var(--blue)}
+fieldset.q{min-width:0;margin:1rem 0;padding:1rem}
+fieldset.q legend{padding:0 .35rem;font-size:.95rem;font-weight:600}
+.q .btn{margin-top:.8rem}
+.lab-output{margin-top:.8rem;padding:.8rem;background:var(--blue-tint);overflow-wrap:anywhere}
+.source{border-top:1px solid var(--rule);padding-top:.8rem;margin-top:1.5rem;font-size:.82rem;color:var(--soft)}
+.flow{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.8rem 0}
+.flow span{padding:.35rem .55rem;background:var(--blue-tint);border:1px solid var(--rule)}
+.module-footer{display:flex;justify-content:space-between;gap:.6rem;margin-top:1.6rem;border-top:1px solid var(--rule);padding-top:1rem}
+.nav-hint{font-size:.78rem;color:var(--soft);margin:.5rem .6rem}
+@media(min-width:900px){
+  nav{max-height:calc(100vh - 2.4rem);overflow-y:auto}
+  nav button{white-space:normal}
+  nav button .n{white-space:nowrap}
+}
+@media(max-width:699px){
+  .panel{padding:1.1rem}
+  .row input[type=text],.row select{max-width:100%;min-width:0}
+  .mod table{overflow-wrap:anywhere;font-size:.75rem}
+  .mod th,.mod td{padding:.3rem}
+}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Trilha de leitura, exemplos e estruturas reais */
+.course-lead{margin:1rem 0 .6rem;font-size:1.1rem;max-width:70ch}
+.roadmap{display:flex;flex-wrap:wrap;gap:.5rem;list-style:none;margin:0 0 .8rem;padding:0}
+.roadmap li{padding:.35rem .65rem;border:1px solid var(--rule);font-size:.83rem;background:var(--blue-tint)}
+.nav-stage{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--soft);margin:.8rem .6rem .25rem}
+.reading-position{font-family:var(--mono);font-size:.8rem;color:var(--blue);border-bottom:1px solid var(--rule);padding-bottom:.7rem}
+.module-guide{border-left:3px solid var(--orange);padding:.3rem .8rem;margin:1rem 0 1.5rem;background:#FBFCFD}
+.module-guide p{margin:.3rem 0}
+.practice{margin:1.6rem 0}
+.practice>h3{font-size:1.2rem;margin:0 0 1rem}
+.code-example{border:1px solid var(--rule);padding:1rem;margin:1rem 0;min-width:0}
+.code-example h4{margin:0 0 .4rem;font-size:1rem;line-height:1.4}
+.code-kind{font-family:var(--mono);font-size:.76rem;color:var(--blue)}
+.code-example h5{font-size:.85rem;margin:.9rem 0 .4rem}
+pre{font-family:var(--mono);font-size:.8rem;line-height:1.65;max-width:100%;overflow-x:auto;tab-size:2;white-space:pre}
+.code-example pre,.packet-hex{padding:1rem;background:#14212E;color:#EDF2F6;border:1px solid #24384B}
+.code-example pre code{overflow-wrap:normal}
+.expected{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.87rem;color:var(--soft)}
+.packet-layer{border:1px solid var(--blue);padding:.8rem;margin:.5rem 0;background:#fff;min-width:0}
+.packet-layer .packet-layer{border-color:var(--green)}
+.packet-layer .packet-layer .packet-layer{border-color:var(--orange)}
+.packet-layer h4{font-size:.9rem;font-family:var(--sans);margin:0 0 .6rem}
+.packet-layer pre{margin:.2rem 0;padding:.4rem 0;color:var(--ink)}
+.field-guide{font-size:.86rem;margin:1rem 0}.field-guide dt{font-weight:600;margin-top:.65rem}.field-guide dd{margin:.2rem 0 .7rem;color:var(--soft)}
+.payload-label{border-top:1px dashed var(--rule);padding-top:.5rem;color:var(--soft);font-size:.8rem}
+.encap summary{cursor:pointer;font-family:var(--sans);font-size:.9rem;margin:1rem 0}
+.module-footer .btn{white-space:normal;max-width:75%}
+@media(max-width:699px){.packet-layer{padding:.4rem}.code-example{padding:.7rem}.packet-layer pre{font-size:.68rem}.nav-stage{display:none}}
+@media print{
+  .top,.wrap{display:block}.mod{display:block!important;break-before:page}
+  nav,.module-footer,.btn,.reading-position{display:none!important}
+  .panel{border:0;padding:0}.code-example{break-inside:avoid}
+  pre{white-space:pre-wrap;overflow-wrap:anywhere}
+}
 </style>
 </head>
 <body>
@@ -176,58 +246,179 @@ svg{max-width:100%;height:auto;display:block}
   <div class="top-in">
     <div class="brand">
       <h1>netlab</h1>
-      <span>fundamentos de redes, mexendo em vez de decorar</span>
+      <span>redes e segurança da informação, mexendo em vez de decorar</span>
     </div>
 
-    <div class="hero">
-      <div class="hero-lead">Um endereço IPv4 são 32 bits. Clique num bit para trocar 0 e 1, e arraste a barra para mover a fronteira entre a parte de rede (azul) e a parte de host (laranja).</div>
-      <div class="bitstrip" id="heroBits"></div>
-      <input type="range" id="heroPfx" min="0" max="32" value="24" style="margin-top:.7rem" aria-label="tamanho do prefixo">
-      <div class="hero-read">
-        <span><i>endereço</i> <b id="heroIp">192.168.10.37</b></span>
-        <span><i>prefixo</i> <b id="heroP">/24</b></span>
-        <span><i>máscara</i> <b id="heroMask">255.255.255.0</b></span>
-        <span><i>rede</i> <b id="heroNet">192.168.10.0</b></span>
-        <span><i>hosts</i> <b id="heroH">254</b></span>
-      </div>
-    </div>
+    <p class="course-lead">Uma trilha progressiva: entenda o objetivo, examine a estrutura real, execute o exemplo e confira o resultado.</p>
+    <ol class="roadmap"><li>1. Fundamentos e máquina</li><li>2. Endereços e entrega</li><li>3. Serviços e protocolos</li><li>4. Defesa e dados</li></ol>
+    <p class="small">Exemplos com Python 3, terminal Linux, PowerShell, configurações e registros. Cada bloco indica o ambiente, a ação e o resultado esperado. Diagramas e saídas ilustrativas são identificados.</p>
   </div>
 </header>
 
 <div class="wrap">
   <nav aria-label="módulos">
     <ol id="nav"></ol>
+    <p class="nav-hint">“ok” indica módulo visitado. Use os exercícios para conferir o aprendizado.</p>
   </nav>
 
   <main class="panel">
+  <p id="readingPosition" class="reading-position" role="status">Etapa 1 de 15 · Fundamentos e máquina</p>
 
-  <!-- 1 CAMADAS -->
-  <section class="mod on" id="m0">
-    <h2>Camadas TCP/IP</h2>
-    <div class="kicker">o que cada camada resolve</div>
-    <p>Rede é dividida em camadas para que cada parte resolva um problema só. A de baixo entrega o quadro para o vizinho no mesmo cabo. A de cima entrega o dado para o programa certo. Clique numa camada para ver o que ela faz.</p>
-
-    <div class="stack" id="stack"></div>
-
-    <div class="lab">
-      <h3>Encapsulamento: o que o seu texto vira na rede</h3>
-      <div class="row">
-        <input type="text" id="payload" value="GET /index.html" size="24" aria-label="dado da aplicação">
-        <button class="btn" id="encapBtn">Descer as camadas</button>
-        <button class="btn ghost" id="decapBtn">Subir de volta</button>
-      </div>
-      <div class="encap" id="encapOut"></div>
-      <p class="small" style="margin-top:.8rem">Cada camada embrulha o que veio de cima e coloca o próprio cabeçalho na frente. No destino acontece o contrário: cada camada tira o cabeçalho dela e entrega o miolo para a de cima.</p>
+  <section class="mod reading on" id="m10">
+    <h2>Fundamentos de segurança da informação</h2>
+    <div class="kicker">o que estamos tentando preservar</div>
+    <p>Segurança da informação protege dados e os processos que dependem deles, em sistemas, papel ou conversas. Confidencialidade, integridade e disponibilidade formam a tríade <strong>CID</strong>. Autenticidade e rastreabilidade complementam essa visão.</p>
+    <div class="concepts">
+      <article class="concept"><h3>Confidencialidade</h3><p>A informação só fica acessível a quem tem autorização. Exemplo: restringir a folha salarial ao RH, usando permissões e criptografia. Um envio ao destinatário errado pode violar esse princípio.</p></article>
+      <article class="concept"><h3>Integridade</h3><p>Preservar a exatidão e a completude da informação contra alterações indevidas. Exemplo: detectar mudanças em um arquivo por comparação com um hash de referência confiável e controlar quem pode editar.</p></article>
+      <article class="concept"><h3>Disponibilidade</h3><p>Informações e serviços acessíveis quando necessários, para usuários autorizados. Redundância, manutenção, backups e testes de restauração ajudam. Backup sem restauração testada pode falhar justamente na recuperação.</p></article>
+      <article class="concept"><h3>Autenticidade</h3><p>Ter confiança de que uma identidade ou origem é a alegada. MFA ajuda na autenticação do usuário; certificados e assinaturas digitais podem comprovar origem e integridade, quando verificados corretamente.</p></article>
+      <article class="concept"><h3>Rastreabilidade</h3><p>Conseguir reconstruir quem fez o quê, quando e em qual recurso. Depende de contas individuais, logs de eventos, horários sincronizados e proteção dos registros contra alteração e acesso indevido.</p></article>
     </div>
+    <h3>Termos próximos, funções diferentes</h3>
+    <p><strong>Identificação</strong> é declarar quem você é; <strong>autenticação</strong> verifica essa declaração; <strong>autorização</strong> define o que pode fazer. <strong>Auditoria</strong> examina evidências das ações. Uma conta compartilhada enfraquece a atribuição de autoria mesmo que tenha uma senha forte.</p>
+    <div class="note">Criptografia não substitui backup. Um hash isolado não comprova autoria: o atacante pode trocar o arquivo e seu hash. Logs apoiam a investigação, mas não garantem sozinhos o não repúdio. Um incidente pode afetar vários princípios ao mesmo tempo.</div>
+<div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>Permissão, integridade e restauração</h4><p class="code-kind">Python 3 · executável local</p><p>Cria apenas arquivos fictícios em um diretório temporário. A permissão 0600 demonstra confidencialidade no Unix; o hash detecta alteração em relação à referência guardada; restaurar a cópia demonstra recuperação.</p><pre tabindex="0" aria-label="Código: Permissão, integridade e restauração"><code>from pathlib import Path
+from tempfile import TemporaryDirectory
+from hashlib import sha256
+import shutil
 
-    <div class="note">O nome dos dados muda conforme a camada: dado na aplicação, segmento no transporte, pacote na rede, quadro no enlace. É a mesma informação com embrulhos diferentes.</div>
+with TemporaryDirectory() as pasta:
+    arquivo = Path(pasta) / &quot;folha-demo.txt&quot;
+    copia = Path(pasta) / &quot;backup-demo.txt&quot;
+    arquivo.write_text(&quot;total=100\n&quot;, encoding=&quot;utf-8&quot;)
+    arquivo.chmod(0o600)  # Unix: leitura/escrita para o dono
+    referencia = sha256(arquivo.read_bytes()).hexdigest()
+    shutil.copy2(arquivo, copia)
+    arquivo.write_text(&quot;total=900\n&quot;, encoding=&quot;utf-8&quot;)
+    print(&quot;integridade:&quot;, sha256(arquivo.read_bytes()).hexdigest() == referencia)
+    shutil.copy2(copia, arquivo)
+    print(&quot;restaurado:&quot;, sha256(arquivo.read_bytes()).hexdigest() == referencia)</code></pre><h5>Como conferir</h5><p class="expected">integridade: False
+restaurado: True
+A cópia ao lado do original é apenas uma demonstração. Produção exige backup separado e proteção da referência do hash. No Windows, use ACLs para controlar acesso; chmod não reproduz as permissões Unix.</p></article><article class="code-example"><h4>Identificação, autenticação, autorização e auditoria</h4><p class="code-kind">JSON · registro ilustrativo, não executável</p><p>Cada campo representa uma decisão diferente. O método MFA foi verificado pelo serviço de identidade; gravar a palavra “MFA” no log não autentica ninguém.</p><pre tabindex="0" aria-label="Código: Identificação, autenticação, autorização e auditoria"><code>{
+  &quot;timestamp&quot;: &quot;2026-09-25T14:00:00Z&quot;,
+  &quot;event_id&quot;: &quot;evt-demo-001&quot;,
+  &quot;subject&quot;: &quot;usuario-017&quot;,
+  &quot;authentication&quot;: {&quot;method&quot;: &quot;webauthn&quot;, &quot;verified&quot;: true},
+  &quot;authorization&quot;: {&quot;role&quot;: &quot;consulta&quot;, &quot;action&quot;: &quot;delete&quot;, &quot;allowed&quot;: false},
+  &quot;resource&quot;: &quot;relatorio-demo&quot;,
+  &quot;result&quot;: &quot;denied&quot;
+}</code></pre><h5>Como conferir</h5><p class="expected">subject identifica a conta; authentication registra a verificação; authorization recusa a exclusão; timestamp e event_id ajudam na rastreabilidade. Não registre senhas, tokens ou códigos MFA. Proteja os logs, sincronize horários e revise acessos.</p></article></div>
+    <div id="quizPrinciples"></div>
   </section>
 
-  <!-- 2 ENDERECAMENTO -->
+  <section class="mod reading" id="m11">
+    <h2>Ativos, ameaças, vulnerabilidades e riscos</h2>
+    <div class="kicker">do que tem valor à decisão de proteção</div>
+    <div class="table-scroll"><table><caption>Um cenário, cinco conceitos</caption><thead><tr><th>Conceito</th><th>Significado</th><th>Exemplo</th></tr></thead><tbody>
+      <tr><td>Ativo</td><td>Algo de valor para a organização: dados, sistemas, equipamentos, pessoas ou serviços.</td><td>Base de clientes e serviço de atendimento.</td></tr>
+      <tr><td>Ameaça</td><td>Causa potencial de um incidente, intencional ou acidental.</td><td>Um atacante; também podem existir incêndios ou erros humanos.</td></tr>
+      <tr><td>Vulnerabilidade</td><td>Fraqueza que pode ser explorada ou acionada por uma ameaça.</td><td>Servidor com falha conhecida sem correção.</td></tr>
+      <tr><td>Risco</td><td>Possibilidade de consequências negativas, considerando probabilidade e impacto.</td><td>Exploração da falha, vazamento de clientes e interrupção do atendimento.</td></tr>
+      <tr><td>Controle</td><td>Medida que modifica o risco, reduzindo probabilidade ou impacto.</td><td>Correção, restrição de acesso, monitoramento e recuperação testada.</td></tr>
+    </tbody></table></div>
+    <h3>Controles de diferentes tipos</h3>
+    <p><strong>Preventivos</strong> dificultam o incidente (MFA, atualizações, treinamento); <strong>detectivos</strong> revelam sinais (alertas, revisão de logs); <strong>corretivos ou de recuperação</strong> limitam efeitos e restauram operações (contenção, restauração). Também podem ser administrativos, técnicos ou físicos, como uma política, um firewall ou uma fechadura.</p>
+    <div class="lab">
+      <h3>Priorizar um risco</h3>
+      <p class="small">Cenário: ransomware no servidor de arquivos. Escala ilustrativa de 1 a 3, sem representar uma probabilidade medida ou uma norma obrigatória.</p>
+      <div class="row">
+        <label for="riskProbability">Probabilidade</label><select id="riskProbability"><option value="1">1 — baixa</option><option value="2">2 — média</option><option value="3" selected>3 — alta</option></select>
+        <label for="riskImpact">Impacto</label><select id="riskImpact"><option value="1">1 — baixo</option><option value="2">2 — médio</option><option value="3" selected>3 — alto</option></select>
+      </div>
+      <div class="lab-output" id="riskOut" role="status"></div>
+      <p class="small" style="margin-top:.7rem">Experimente reduzir a probabilidade após corrigir vulnerabilidades ou reduzir o impacto com recuperação testada. Na prática, a eficácia dos controles precisa de evidências; não basta marcar que eles existem.</p>
+    </div>
+    <p><strong>Risco inerente</strong> é avaliado antes dos controles considerados; <strong>residual</strong> é o que permanece depois. É possível evitar a atividade, mitigar o risco, compartilhar parte das consequências (por contrato ou seguro) ou aceitar o residual por decisão do responsável. Compartilhar não elimina todas as responsabilidades.</p>
+    <div class="note">Inventarie os ativos, identifique responsáveis, descreva cenários, estime probabilidade e impacto, escolha controles e revise o resultado. Ter uma vulnerabilidade não significa que um incidente já ocorreu; instalar um controle não significa zerar o risco.</div>
+<div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>Inventário e registro do risco</h4><p class="code-kind">JSON · documento ilustrativo</p><p>Um registro liga o ativo ao responsável, à ameaça, à fraqueza e à consequência. Os valores são avaliações fictícias, não medições nem uma fórmula obrigatória.</p><pre tabindex="0" aria-label="Código: Inventário e registro do risco"><code>{
+  &quot;ativo&quot;: &quot;servidor-arquivos-demo&quot;,
+  &quot;responsavel&quot;: &quot;equipe-infra&quot;,
+  &quot;ameaca&quot;: &quot;operador de ransomware&quot;,
+  &quot;vulnerabilidade&quot;: &quot;servico exposto com correcao pendente&quot;,
+  &quot;consequencia&quot;: &quot;interrupcao e divulgacao indevida&quot;,
+  &quot;inerente&quot;: {&quot;probabilidade&quot;: 3, &quot;impacto&quot;: 3},
+  &quot;controles&quot;: [
+    {&quot;funcao&quot;: &quot;preventivo&quot;, &quot;medida&quot;: &quot;aplicar correcao&quot;},
+    {&quot;funcao&quot;: &quot;detectivo&quot;, &quot;medida&quot;: &quot;alertar acesso anomalo&quot;},
+    {&quot;funcao&quot;: &quot;recuperacao&quot;, &quot;medida&quot;: &quot;restaurar backup testado&quot;},
+    {&quot;natureza&quot;: &quot;fisico&quot;, &quot;medida&quot;: &quot;controlar entrada na sala&quot;},
+    {&quot;natureza&quot;: &quot;administrativo&quot;, &quot;medida&quot;: &quot;revisar acessos&quot;}
+  ],
+  &quot;residual_estimado&quot;: {&quot;probabilidade&quot;: 2, &quot;impacto&quot;: 2},
+  &quot;tratamento&quot;: &quot;mitigar&quot;,
+  &quot;evidencia_pendente&quot;: &quot;teste de restauracao e validacao da correcao&quot;
+}</code></pre><h5>Como conferir</h5><p class="expected">A decisão de aceitar o residual pertence ao responsável autorizado. Evitar pode significar retirar a atividade; compartilhar pode envolver contrato/seguro. Nenhuma dessas escolhas dispensa avaliar consequências e responsabilidades.</p></article><article class="code-example"><h4>Reproduzir a matriz de prioridade</h4><p class="code-kind">Python 3 · executável local</p><p>O mesmo cálculo da simulação, com limiares declarados e comparação antes/depois dos controles.</p><pre tabindex="0" aria-label="Código: Reproduzir a matriz de prioridade"><code>def prioridade(probabilidade, impacto):
+    if probabilidade not in (1, 2, 3) or impacto not in (1, 2, 3):
+        raise ValueError(&quot;Use a escala de 1 a 3&quot;)
+    pontos = probabilidade * impacto
+    nivel = &quot;baixa&quot; if pontos &lt;= 2 else &quot;media&quot; if pontos &lt;= 4 else &quot;alta&quot;
+    return pontos, nivel
+
+print(&quot;inerente:&quot;, prioridade(3, 3))
+print(&quot;residual estimado:&quot;, prioridade(2, 2))</code></pre><h5>Como conferir</h5><p class="expected">inerente: (9, &#x27;alta&#x27;)
+residual estimado: (4, &#x27;media&#x27;)
+A redução precisa ser sustentada por evidências da eficácia dos controles.</p></article></div>
+    <div id="quizRisk"></div>
+  </section>
+
+  <section class="mod reading" id="m12">
+    <h2>Sistemas operacionais e endpoints</h2>
+    <div class="kicker">proteger a máquina que usa a rede</div>
+    <p>O <strong>sistema operacional</strong> gerencia processador, memória, arquivos, dispositivos e comunicação de rede. Windows, Linux, macOS, Android e iOS são exemplos. Seu núcleo (<em>kernel</em>) coordena recursos; drivers fazem a interface com dispositivos; aplicações usam os serviços do sistema.</p>
+    <p><strong>Endpoints</strong> são os dispositivos nas pontas da comunicação, como notebooks, desktops, celulares e servidores. Proteger a rede não basta se um desses dispositivos estiver comprometido.</p>
+    <div class="concepts">
+      <article class="concept"><h3>Processos e serviços</h3><p>Processo é um programa em execução. Serviços podem operar em segundo plano e alguns escutam portas de rede. Desative serviços desnecessários conforme a política: menos componentes expostos significam menos oportunidades de ataque.</p></article>
+      <article class="concept"><h3>Usuários e permissões</h3><p>Contas e grupos delimitam leitura, escrita e execução. Use uma conta comum no dia a dia e eleve privilégios apenas quando necessário. Ser administrador amplia o alcance de erros e de código malicioso.</p></article>
+      <article class="concept"><h3>Atualizações e configuração</h3><p>Correções devem alcançar sistema, navegador, aplicativos e firmware. Hardening é ajustar a configuração para reduzir exposição: remover software desnecessário, limitar acessos e aplicar padrões seguros.</p></article>
+      <article class="concept"><h3>Antimalware e EDR</h3><p>Antimalware procura e bloqueia código malicioso. EDR coleta sinais do endpoint para detectar, investigar e responder a comportamentos suspeitos. As funções podem se sobrepor; nenhum produto garante detectar tudo.</p></article>
+    </div>
+    <div class="lab">
+      <h3>Revisão de um notebook de trabalho</h3>
+      <p class="small">Marque as medidas presentes no cenário que você está estudando. Este checklist é didático e não inspeciona seu dispositivo.</p>
+      <div class="choices" id="endpointChecks">
+        <label class="choice"><input type="checkbox" value="updates">Sistema e aplicativos com suporte e atualizações aplicadas.</label>
+        <label class="choice"><input type="checkbox" value="access">Conta individual, menor privilégio, MFA e bloqueio de tela.</label>
+        <label class="choice"><input type="checkbox" value="disk">Disco cifrado e chave de recuperação guardada em local autorizado.</label>
+        <label class="choice"><input type="checkbox" value="defense">Firewall e proteção de endpoint ativos e monitorados.</label>
+        <label class="choice"><input type="checkbox" value="backup">Backup separado do dispositivo e restauração testada.</label>
+      </div>
+      <div class="lab-output" id="endpointOut" role="status"></div>
+    </div>
+    <h3>Observar antes de mudar</h3>
+    <p>Gerenciadores de tarefas ou monitores do sistema mostram processos e consumo de recursos. Configurações de rede mostram IP, gateway e DNS. Visualizadores de eventos mostram registros. Lentidão isolada não prova infecção: investigue os sinais em conjunto e acione o suporte.</p>
+    <div class="note">Criptografia de disco ajuda quando um equipamento bloqueado ou desligado é perdido. Não impede que malware executado na sessão desbloqueada leia arquivos acessíveis ao usuário. Backup e controle de acesso continuam necessários.</div>
+<div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>Inspecionar sistema, processos, contas e serviços</h4><p class="code-kind">Linux · comandos de consulta</p><p>Execute em um terminal Linux. ps e id são comuns; systemctl/journalctl exigem systemd; ss e ip pertencem ao iproute2. Processos e serviços disponíveis variam.</p><pre tabindex="0" aria-label="Código: Inspecionar sistema, processos, contas e serviços"><code>uname -sr                   # kernel e versão
+id                          # identidade, grupos e privilégios
+ps -eo pid,user,comm --sort=pid | head
+ls -ld &quot;$HOME&quot;              # permissões do diretório pessoal
+systemctl --type=service --state=running --no-pager
+ss -lnt                     # sockets TCP em escuta, sem consultar a rede
+ip -br address              # interfaces e endereços
+journalctl -b -p warning --no-pager -n 10</code></pre><h5>Como conferir</h5><p class="expected">Exemplo de linha de ss: LISTEN 0 128 127.0.0.1:8000 0.0.0.0:*
+127.0.0.1 limita a escuta ao loopback. 0.0.0.0 na coluna local indicaria todas as interfaces IPv4. Um processo pode existir sem abrir portas; portas e conexões serão detalhadas adiante.</p></article><article class="code-example"><h4>Conferir proteções de endpoint</h4><p class="code-kind">Windows · PowerShell, consultas</p><p>Alguns comandos dependem da edição do Windows, dos componentes instalados e de privilégios de leitura elevados. Os comandos não ativam nem desativam proteções.</p><pre tabindex="0" aria-label="Código: Conferir proteções de endpoint"><code>Get-Process | Select-Object -First 5 Name, Id
+Get-Service | Where-Object Status -eq Running | Select-Object -First 5
+Get-NetIPConfiguration
+Get-NetFirewallProfile | Select-Object Name, Enabled
+Get-MpComputerStatus | Select-Object AntivirusEnabled, RealTimeProtectionEnabled
+Get-BitLockerVolume | Select-Object MountPoint, ProtectionStatus
+Get-HotFix | Sort-Object InstalledOn -Descending | Select-Object -First 5</code></pre><h5>Como conferir</h5><p class="expected">Procure perfis de firewall ativos, estado da proteção e criptografia. Get-HotFix não é um inventário completo de atualizações: confira também Windows Update, aplicativos e firmware. EDR requer verificar alertas e saúde na ferramenta adotada; não há um comando universal.</p></article><article class="code-example"><h4>Evidência de hardening e recuperação</h4><p class="code-kind">JSON · checklist ilustrativo</p><p>Um estado “ativo” não demonstra que o controle foi testado. Registre também a verificação.</p><pre tabindex="0" aria-label="Código: Evidência de hardening e recuperação"><code>{
+  &quot;endpoint&quot;: &quot;notebook-demo&quot;,
+  &quot;conta_diaria&quot;: &quot;sem privilegio administrativo&quot;,
+  &quot;bloqueio_tela&quot;: &quot;configurado por politica&quot;,
+  &quot;software&quot;: &quot;inventariado; componentes sem uso removidos&quot;,
+  &quot;atualizacoes&quot;: &quot;SO, navegador, aplicativos e firmware revisados&quot;,
+  &quot;criptografia&quot;: &quot;ativa; chave de recuperacao no cofre autorizado&quot;,
+  &quot;edr&quot;: &quot;sensor comunicando; alertas revisados&quot;,
+  &quot;backup&quot;: &quot;copia separada; arquivo de teste restaurado e conferido&quot;
+}</code></pre><h5>Como conferir</h5><p class="expected">A criptografia do disco protege dados em repouso em condições específicas. A sessão desbloqueada, as permissões da conta e a recuperação continuam sendo pontos separados de controle.</p></article></div>
+    <div id="quizEndpoint"></div>
+  </section>
+
   <section class="mod" id="m1">
     <h2>Endereçamento IPv4 e IPv6</h2>
     <div class="kicker">o número que identifica a interface</div>
-    <p>O endereço IPv4 tem 32 bits escritos como quatro números de 0 a 255, um por octeto. Escrever em decimal é só conveniência: quem decide tudo é o binário. Mude os octetos e veja os bits.</p>
+    <p>O endereço IPv4 tem 32 bits escritos como quatro números de 0 a 255, um por octeto. A notação decimal representa quatro bytes. Operações como aplicar a máscara usam os 32 bits do endereço. Mude os octetos e confira a representação binária.</p>
 
     <div class="lab">
       <h3>Decimal e binário</h3>
@@ -242,7 +433,7 @@ svg{max-width:100%;height:auto;display:block}
         <tr><th>binário</th><td class="mono" colspan="8" id="binOut">10101100 00010000 11001000 00001001</td></tr>
         <tr><th>tipo</th><td colspan="8" id="typeOut">privado</td></tr>
       </table>
-      <p class="small">Faixas privadas: 10.0.0.0/8, 172.16.0.0/12 e 192.168.0.0/16. Elas não trafegam na internet pública, por isso aparecem dentro de VPC, de rede de pods e da sua casa.</p>
+      <p class="small">Faixas privadas: 10.0.0.0/8, 172.16.0.0/12 e 192.168.0.0/16. Não são globalmente roteáveis na internet. São usadas em redes internas; para alcançar outras redes, é preciso um caminho apropriado, frequentemente com NAT ou túnel.</p>
     </div>
 
     <div class="lab">
@@ -257,14 +448,47 @@ svg{max-width:100%;height:auto;display:block}
         <tr><th>encurtado</th><td class="mono" id="v6short"></td></tr>
       </table>
     </div>
-  </section>
+  <div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>Ler os valores binários e expandir IPv6</h4><p class="code-kind">Python 3 · executável local</p><p>ipaddress é parte da biblioteca padrão. Os exemplos de documentação não representam servidores a acessar.</p><pre tabindex="0" aria-label="Código: Ler os valores binários e expandir IPv6"><code>from ipaddress import ip_address
 
-  <!-- 3 CIDR -->
+v4 = ip_address(&quot;172.16.200.9&quot;)
+print(&quot;bits:&quot;, &quot; &quot;.join(f&quot;{byte:08b}&quot; for byte in v4.packed))
+print(&quot;bytes:&quot;, v4.packed.hex(&quot; &quot;))
+v6 = ip_address(&quot;2001:db8::ff00:42:8329&quot;)
+print(&quot;expandido:&quot;, v6.exploded)
+print(&quot;comprimido:&quot;, v6.compressed)
+print(&quot;tamanhos:&quot;, len(v4.packed), len(v6.packed))</code></pre><h5>Como conferir</h5><p class="expected">bits: 10101100 00010000 11001000 00001001
+bytes: ac 10 c8 09
+expandido: 2001:0db8:0000:0000:0000:ff00:0042:8329
+comprimido: 2001:db8::ff00:42:8329
+tamanhos: 4 16
+IPv6 permite :: uma vez e substitui ao menos um grupo; na forma canônica, comprime-se a maior sequência de dois ou mais grupos zero.</p></article><article class="code-example"><h4>Relacionar endereço, interface e escopo</h4><p class="code-kind">Linux / Windows · consultas</p><p>Compare a interface e o prefixo com o endereço. A mesma máquina pode ter vários endereços e interfaces.</p><pre tabindex="0" aria-label="Código: Relacionar endereço, interface e escopo"><code># Linux (iproute2)
+ip -br address
+
+# Windows (PowerShell)
+Get-NetIPAddress | Select-Object InterfaceAlias, IPAddress, PrefixLength</code></pre><h5>Como conferir</h5><p class="expected">Saída Linux ilustrativa:
+lo    UNKNOWN  127.0.0.1/8 ::1/128
+eth0  UP       192.168.10.37/24 fe80::1234/64
+127.0.0.1 e ::1 são loopback; 192.168.10.37 é privado; fe80::/10 é link-local IPv6. Público, privado, multicast e reservado são escopos diferentes, não permissões de acesso.</p></article></div>
+<p class="source">Referências técnicas: <a href="https://docs.python.org/3/library/ipaddress.html">Python — ipaddress</a>.</p>
+</section>
+
   <section class="mod" id="m2">
     <h2>Máscara de rede e CIDR</h2>
     <div class="kicker">onde termina a rede e começa o host</div>
     <p>A máscara diz quantos bits da esquerda identificam a rede. O resto identifica o host dentro dela. A notação CIDR é só o número desses bits: <span class="mono">/24</span> quer dizer 24 bits de rede e 8 de host.</p>
 
+    <div class="hero lab">
+      <div class="hero-lead">Um endereço IPv4 são 32 bits. Clique num bit para trocar 0 e 1, e arraste a barra para mover a fronteira entre a parte de rede (azul) e a parte de host (laranja).</div>
+      <div class="bitstrip" id="heroBits"></div>
+      <input type="range" id="heroPfx" min="0" max="32" value="24" style="margin-top:.7rem" aria-label="tamanho do prefixo">
+      <div class="hero-read">
+        <span><i>endereço</i> <b id="heroIp">192.168.10.37</b></span>
+        <span><i>prefixo</i> <b id="heroP">/24</b></span>
+        <span><i>máscara</i> <b id="heroMask">255.255.255.0</b></span>
+        <span><i>rede</i> <b id="heroNet">192.168.10.0</b></span>
+        <span><i>hosts</i> <b id="heroH">254</b></span>
+      </div>
+    </div>
     <div class="lab">
       <h3>Calculadora</h3>
       <div class="row">
@@ -280,17 +504,35 @@ svg{max-width:100%;height:auto;display:block}
         <tr><th>primeiro host</th><td class="mono" id="cF"></td><th>último host</th><td class="mono" id="cL"></td></tr>
         <tr><th>hosts úteis</th><td class="mono" id="cH"></td><th>total de endereços</th><td class="mono" id="cT"></td></tr>
       </table>
-      <p class="small">O endereço de rede é o que tem todos os bits de host em zero, e o broadcast é o que tem todos em um. Por isso sobram dois endereços a menos para as máquinas.</p>
+      <p class="small">O endereço de rede é o que tem todos os bits de host em zero, e o broadcast é o que tem todos em um. Em redes IPv4 usuais com prefixo até /30, esses dois endereços não são atribuídos a hosts. /31 pode representar dois extremos de um enlace ponto a ponto; /32 identifica um único endereço, sem broadcast da sub-rede.</p>
     </div>
 
-    <div class="note">Regra de bolso que resolve quase tudo: cada bit a mais no prefixo divide a quantidade de endereços pela metade. /24 tem 256, /25 tem 128, /26 tem 64.</div>
-  </section>
+    <div class="note">Cada bit acrescentado ao prefixo reduz pela metade o total de endereços do bloco. /24 tem 256, /25 tem 128, /26 tem 64.</div>
+  <div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>Calcular rede com AND e conferir os casos especiais</h4><p class="code-kind">Python 3 · executável local</p><p>A máscara faz parte da configuração da interface; não é um campo do cabeçalho IPv4 transmitido em cada pacote.</p><pre tabindex="0" aria-label="Código: Calcular rede com AND e conferir os casos especiais"><code>from ipaddress import IPv4Interface, IPv4Network
 
-  <!-- 4 SUBREDES -->
+interface = IPv4Interface(&quot;192.168.10.37/24&quot;)
+rede = interface.network
+print(&quot;AND:&quot;, int(interface.ip) &amp; int(rede.netmask))
+print(&quot;rede:&quot;, rede.network_address)
+print(&quot;mascara:&quot;, rede.netmask)
+print(&quot;broadcast:&quot;, rede.broadcast_address)
+print(&quot;hosts:&quot;, sum(1 for _ in rede.hosts()))
+for cidr in (&quot;192.0.2.0/31&quot;, &quot;192.0.2.9/32&quot;):
+    print(cidr, [str(ip) for ip in IPv4Network(cidr).hosts()])</code></pre><h5>Como conferir</h5><p class="expected">AND: 3232238080
+rede: 192.168.10.0
+mascara: 255.255.255.0
+broadcast: 192.168.10.255
+hosts: 254
+192.0.2.0/31 [&#x27;192.0.2.0&#x27;, &#x27;192.0.2.1&#x27;]
+192.0.2.9/32 [&#x27;192.0.2.9&#x27;]
+/31 considera um enlace ponto a ponto; /32 representa um endereço individual.</p></article></div>
+<p class="source">Referências técnicas: <a href="https://docs.python.org/3/library/ipaddress.html">Python — ipaddress</a>.</p>
+</section>
+
   <section class="mod" id="m3">
     <h2>Sub-redes</h2>
     <div class="kicker">dividir um bloco em blocos menores</div>
-    <p>Dividir uma rede é pegar bits emprestados da parte de host e transformar em parte de rede. Um <span class="mono">/24</span> vira dois <span class="mono">/25</span>, quatro <span class="mono">/26</span>, oito <span class="mono">/27</span>, e assim por diante.</p>
+    <p>Dividir um bloco aumenta o prefixo de rede, mantendo o total de 32 bits do endereço IPv4. Aumentar o prefixo em d bits produz 2 elevado a d sub-redes de mesmo tamanho. Um <span class="mono">/24</span> vira dois <span class="mono">/25</span>, quatro <span class="mono">/26</span>, oito <span class="mono">/27</span>, e assim por diante.</p>
 
     <div class="lab">
       <h3>Dividir um bloco</h3>
@@ -318,9 +560,17 @@ svg{max-width:100%;height:auto;display:block}
         <div class="fb" id="exFb"></div>
       </div>
     </div>
-  </section>
+  <div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>Dividir o /24 em quatro blocos /26</h4><p class="code-kind">Python 3 · executável local</p><p>O incremento é 64 endereços. Os intervalos gerados pertencem ao bloco original e não se sobrepõem.</p><pre tabindex="0" aria-label="Código: Dividir o /24 em quatro blocos /26"><code>from ipaddress import ip_network
 
-  <!-- 5 ARP -->
+for rede in ip_network(&quot;192.168.10.0/24&quot;).subnets(new_prefix=26):
+    hosts = list(rede.hosts())
+    print(rede, hosts[0], hosts[-1], rede.broadcast_address, len(hosts))</code></pre><h5>Como conferir</h5><p class="expected">192.168.10.0/26 192.168.10.1 192.168.10.62 192.168.10.63 62
+192.168.10.64/26 192.168.10.65 192.168.10.126 192.168.10.127 62
+192.168.10.128/26 192.168.10.129 192.168.10.190 192.168.10.191 62
+192.168.10.192/26 192.168.10.193 192.168.10.254 192.168.10.255 62</p></article></div>
+<p class="source">Referências técnicas: <a href="https://docs.python.org/3/library/ipaddress.html">Python — ipaddress</a>.</p>
+</section>
+
   <section class="mod" id="m4">
     <h2>ARP</h2>
     <div class="kicker">do endereço IP para o endereço MAC</div>
@@ -344,14 +594,32 @@ svg{max-width:100%;height:auto;display:block}
       </table>
     </div>
 
-    <div class="note">O detalhe que confunde quase todo mundo: quando o destino está fora da rede local, o ARP não pergunta pelo IP do destino. Ele pergunta pelo MAC do gateway. O IP de destino continua sendo o original dentro do pacote.</div>
-  </section>
+    <div class="note">Quando a rota usa um gateway, o ARP resolve o endereço IPv4 desse próximo salto no enlace local. Ele pergunta pelo MAC do gateway. O IP de destino continua sendo o original dentro do pacote.</div>
+  <div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>Ler uma solicitação ARP campo a campo</h4><p class="code-kind">Estrutura decodificada · ilustrativa</p><p>A precisa falar com um destino remoto e consulta o MAC do gateway. ARP fica diretamente no payload Ethernet; não contém um cabeçalho IP ou portas TCP/UDP.</p><pre tabindex="0" aria-label="Código: Ler uma solicitação ARP campo a campo"><code>Ethernet II — Header (14 bytes)
+  Destination MAC: ff:ff:ff:ff:ff:ff
+  Source MAC:      02:00:00:00:00:01
+  EtherType:      0x0806 (ARP)
+Payload — ARP (28 bytes para Ethernet/IPv4)
+  Hardware type:  1 (Ethernet)
+  Protocol type:  0x0800 (IPv4)
+  Hardware size:  6 bytes
+  Protocol size:  4 bytes
+  Opcode:         1 (request)
+  Sender MAC:     02:00:00:00:00:01
+  Sender IP:      192.168.1.10
+  Target MAC:     00:00:00:00:00:00 (ainda desconhecido)
+  Target IP:      192.168.1.1</code></pre><h5>Como conferir</h5><p class="expected">Na resposta usual, Opcode=2 e Sender MAC=02:00:00:00:00:fe, Sender IP=192.168.1.1. O quadro vai ao solicitante. Padding Ethernet e FCS não estão listados. Rótulos e indentação são didáticos; os campos são binários.</p></article><article class="code-example"><h4>Consultar a tabela de vizinhos</h4><p class="code-kind">Linux / Windows · consultas</p><p>Uma entrada pode faltar até que haja comunicação; entradas envelhecem e estados variam. IPv6 usa Neighbor Discovery via ICMPv6, não ARP.</p><pre tabindex="0" aria-label="Código: Consultar a tabela de vizinhos"><code># Linux
+ip neigh show
+# Windows PowerShell
+Get-NetNeighbor -AddressFamily IPv4</code></pre><h5>Como conferir</h5><p class="expected">Linha Linux ilustrativa:
+192.168.1.1 dev eth0 lladdr 02:00:00:00:00:fe REACHABLE
+IP do próximo salto → MAC local. O MAC remoto final não é resolvido através dos roteadores.</p></article></div>
+</section>
 
-  <!-- 6 ROTEAMENTO -->
   <section class="mod" id="m5">
     <h2>Tabela de roteamento, next hop e rota default</h2>
     <div class="kicker">como o roteador escolhe por onde mandar</div>
-    <p>O roteador olha o IP de destino e procura na tabela qual rota casa. Quando mais de uma casa, vence a de prefixo mais longo, ou seja, a mais específica. Se nenhuma casar, vale a rota default <span class="mono">0.0.0.0/0</span>, que casa com tudo por ser a menos específica de todas.</p>
+    <p>O roteador compara o IP de destino aos prefixos da tabela. Entre as rotas compatíveis, vence o prefixo mais longo, ou seja, o mais específico. Quando não há rota mais específica, uma rota default configurada <span class="mono">0.0.0.0/0</span> combina com qualquer destino IPv4. Sem uma rota compatível, o pacote não pode ser encaminhado por essa tabela.</p>
 
     <div class="lab">
       <h3>Consultar a tabela</h3>
@@ -368,17 +636,223 @@ svg{max-width:100%;height:auto;display:block}
     </div>
 
     <div class="note">Next hop é o endereço do próximo roteador, não do destino final. Um pacote atravessa a internet sendo repassado de vizinho em vizinho, e cada um só sabe o passo seguinte.</div>
+  <div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>Reproduzir a seleção de rota</h4><p class="code-kind">Python 3 · executável local</p><p>O maior prefixo vence entre rotas que contêm o destino. O exemplo inclui default; sem rota compatível o código retorna None.</p><pre tabindex="0" aria-label="Código: Reproduzir a seleção de rota"><code>from ipaddress import ip_address, ip_network
+rotas = [
+    (ip_network(&quot;0.0.0.0/0&quot;), &quot;192.168.1.1&quot;),
+    (ip_network(&quot;10.0.0.0/8&quot;), &quot;192.168.1.2&quot;),
+    (ip_network(&quot;10.20.0.0/16&quot;), &quot;192.168.1.3&quot;),
+    (ip_network(&quot;10.20.30.0/24&quot;), &quot;192.168.1.4&quot;),
+]
+destino = ip_address(&quot;10.20.30.7&quot;)
+candidatas = [r for r in rotas if destino in r[0]]
+vencedora = max(candidatas, key=lambda r: r[0].prefixlen, default=None)
+print(str(vencedora[0]), vencedora[1])</code></pre><h5>Como conferir</h5><p class="expected">10.20.30.0/24 192.168.1.4
+O próximo salto é outro roteador; o destino IP continua 10.20.30.7 quando não há tradução do endereço de destino.</p></article><article class="code-example"><h4>Consultar rota e acompanhar NAT/PAT</h4><p class="code-kind">Linux · consultas + tabela ilustrativa</p><p>ip route get consulta a decisão local sem enviar o pacote. NAT é tradução de endereços; PAT também traduz portas. Roteamento não implica NAT.</p><pre tabindex="0" aria-label="Código: Consultar rota e acompanhar NAT/PAT"><code>ip route show
+ip route get 192.0.2.80
+
+# Cenário de tradução que será detalhado no módulo Camadas:
+# ponto  source IP      source port  destination IP  destination port  TTL
+# LAN    10.12.1.124    45888        192.0.2.80       80                64
+# WAN    203.0.113.5    62001        192.0.2.80       80                63</code></pre><h5>Como conferir</h5><p class="expected">O roteador reduz o TTL ao encaminhar; o NAT/PAT deste cenário altera origem e porta. Os checksums correspondentes precisam ser atualizados e o enlace seguinte usa outro cabeçalho Ethernet. O estado da tradução permite encaminhar as respostas de volta ao cliente.</p></article></div>
+</section>
+
+  <section class="mod reading" id="m7">
+    <h2>DNS e DHCP</h2>
+    <div class="kicker">receber a configuração e encontrar o destino</div>
+    <p>O IP identifica uma interface de rede. O <strong>DHCP</strong> pode entregar sua configuração automaticamente. O <strong>DNS</strong> consulta registros associados a nomes, como o endereço de um site. São serviços diferentes: ter um IP válido não garante que a resolução de nomes funcione.</p>
+    <div class="concepts">
+      <article class="concept"><h3>DHCP: configuração por concessão</h3><p>No DHCPv4, o servidor oferece um IP disponível por um prazo (<em>lease</em>), além de opções como máscara, gateway e servidores DNS. O cliente precisa renovar a concessão. Uma reserva pode associar um cliente a um IP estável.</p></article>
+      <article class="concept"><h3>DNS: nomes e registros</h3><p>O resolvedor consulta seu cache e, se necessário, outros servidores. Em uma resolução completa, pode seguir referências da raiz, do domínio de topo e do servidor autoritativo. O TTL limita o tempo de cache de uma resposta.</p></article>
+    </div>
+    <div class="table-scroll"><table><caption>Registros DNS comuns</caption><thead><tr><th>Registro</th><th>O que informa</th><th>Exemplo didático</th></tr></thead><tbody>
+      <tr><td>A</td><td>Endereço IPv4</td><td>portal.example → 192.0.2.10</td></tr>
+      <tr><td>AAAA</td><td>Endereço IPv6</td><td>portal.example → 2001:db8::10</td></tr>
+      <tr><td>CNAME</td><td>Outro nome, um alias</td><td>www.example → portal.example</td></tr>
+      <tr><td>MX</td><td>Servidor de e-mail do domínio</td><td>example → mail.example</td></tr>
+      <tr><td>TXT</td><td>Texto, usado também em verificações de domínio</td><td>Políticas e metadados</td></tr>
+    </tbody></table></div>
+    <div class="lab">
+      <h3>Do notebook sem IP ao portal</h3>
+      <p class="small">Simulação local de DHCPv4 seguido por DNS, sem consultar a rede. Os endereços e nomes são apenas exemplos.</p>
+      <div class="row"><button class="btn" id="serviceNext">Próximo passo</button><button class="btn ghost" id="serviceReset">Reiniciar</button></div>
+      <div class="steps" id="serviceSteps" aria-live="polite"></div>
+      <div class="lab-output" id="serviceOut" role="status"></div>
+    </div>
+    <h3>Como separar os problemas</h3>
+    <ul><li><strong>Sem configuração:</strong> verifique conexão, concessão e alcance do DHCP. Um IPv4 link-local em <code>169.254.0.0/16</code> pode indicar que o cliente não conseguiu uma concessão.</li><li><strong>IP configurado, sem alcançar outras redes:</strong> examine máscara, gateway, rotas e firewall.</li><li><strong>Conexão por IP funciona, resolução por nome falha:</strong> investigue DNS. Abrir um site diretamente pelo IP nem sempre é um teste válido, pois hospedagem e certificados podem depender do nome.</li></ul>
+    <div class="note">DHCPv4 costuma usar UDP 67 no servidor e 68 no cliente; um relay permite atender outra sub-rede. DNS tradicional usa UDP e TCP 53. Em IPv6, a configuração também pode envolver SLAAC e DHCPv6.</div>
+<div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>Examinar DHCPv4 e DNS como mensagens</h4><p class="code-kind">Estruturas decodificadas · campos selecionados</p><p>Os campos abaixo são um recorte de uma troca inicial DHCPv4 com broadcast e de uma resposta DNS. Não são mensagens completas nem arquivos de configuração.</p><pre tabindex="0" aria-label="Código: Examinar DHCPv4 e DNS como mensagens"><code>DHCP Discover — UDP 68 → 67; IPv4 0.0.0.0 → 255.255.255.255
+  op: 1 (BOOTREQUEST)
+  xid: 0x3903f326 (identifica a transação)
+  ciaddr: 0.0.0.0 (cliente ainda sem endereço)
+  chaddr: 02:00:00:00:00:01
+  option 53: 1 (DHCPDISCOVER)
+DHCP Offer → Request → ACK — mesmo xid na transação
+  ACK: yiaddr=192.168.10.37
+  option 1: 255.255.255.0 (máscara)
+  option 3: 192.168.10.1 (gateway)
+  option 6: 192.168.10.53 (DNS)
+  option 51: 3600 (lease em segundos)
+
+DNS response — UDP 53 → porta temporária do cliente
+  ID: 0x1234; QR: 1 (resposta); RCODE: 0 (sem erro)
+  QDCOUNT: 1; ANCOUNT: 1
+  Question: portal.example, type A, class IN
+  Answer: portal.example, type A, class IN, TTL 300
+  RDATA: 192.0.2.10</code></pre><h5>Como conferir</h5><p class="expected">O DHCP entrega o endereço do resolvedor, não resolve todos os nomes. O DNS associa registros ao nome. Lease DHCP e TTL DNS são tempos de objetos diferentes. O relay encaminha mensagens entre segmentos; renovações DHCP podem usar unicast, sem repetir toda a descoberta.</p></article><article class="code-example"><h4>Consultar registros e separar falhas</h4><p class="code-kind">Linux com dig / Windows PowerShell · consultas de rede</p><p>Estes comandos consultam DNS de verdade. example.com é um domínio reservado para exemplos; os resultados e TTLs podem mudar. Nomes .example dos diagramas são fictícios e não devem resolver na internet.</p><pre tabindex="0" aria-label="Código: Consultar registros e separar falhas"><code># Linux, ferramenta dig (BIND)
+dig example.com A +noall +answer
+dig example.com AAAA +noall +answer
+dig example.com MX +noall +answer
+dig example.com TXT +noall +answer
+dig www.example.com CNAME +noall +answer
+dig +tcp example.com A +noall +answer
+
+# Windows PowerShell
+Resolve-DnsName example.com -Type A
+ipconfig /all</code></pre><h5>Como conferir</h5><p class="expected">As colunas de uma resposta dig são nome, TTL, classe, tipo e valor. Uma resposta sem registros do tipo consultado não significa automaticamente falha. Compare servidor DNS, resposta/erro e configuração da interface; sucesso de ping não comprova que HTTP funciona.</p></article></div>
+    <div id="quizServices"></div>
+    <p class="source">Referências: <a href="https://www.rfc-editor.org/rfc/rfc2131">IETF — DHCP</a> e <a href="https://www.rfc-editor.org/rfc/rfc1034">IETF — conceitos de DNS</a>.</p>
   </section>
 
-  <!-- 7 OSPF -->
+  <section class="mod reading" id="m8">
+    <h2>Portas, HTTP e HTTPS</h2>
+    <div class="kicker">do endereço da máquina ao serviço certo</div>
+    <p><strong>Portas TCP e UDP</strong> são números de 0 a 65535 usados para identificar os pontos de comunicação dos programas. Não são conectores físicos. TCP 53 e UDP 53 são combinações distintas. O cliente geralmente usa uma porta temporária e se conecta à porta do serviço.</p>
+    <div class="flow" aria-label="Exemplo de conexão HTTPS"><span>Cliente 192.168.1.10:49152</span> → <span>TCP</span> → <span>Servidor 192.0.2.10:443</span></div>
+    <p>TCP oferece entrega ordenada e retransmissão; UDP transporta datagramas sem essas garantias por si só. O programa pode acrescentar mecanismos próprios. Uma porta aberta indica um serviço acessível, não que ele seja seguro.</p>
+    <div class="table-scroll"><table><caption>Portas convencionais: a configuração pode usar outras</caption><thead><tr><th>Serviço</th><th>Transporte / porta</th><th>Uso</th></tr></thead><tbody>
+      <tr><td>DNS</td><td>UDP e TCP / 53</td><td>Resolução de nomes</td></tr>
+      <tr><td>DHCPv4</td><td>UDP / 67 e 68</td><td>Configuração de rede</td></tr>
+      <tr><td>HTTP</td><td>TCP / 80</td><td>Web sem TLS</td></tr>
+      <tr><td>HTTPS</td><td>TCP / 443; UDP / 443 no HTTP/3</td><td>Web protegida por TLS</td></tr>
+      <tr><td>SSH</td><td>TCP / 22</td><td>Administração remota cifrada</td></tr>
+      <tr><td>RDP</td><td>TCP e UDP / 3389</td><td>Área de trabalho remota</td></tr>
+    </tbody></table></div>
+    <h3>HTTP: pedido e resposta</h3>
+    <p>O navegador envia um método, um caminho e cabeçalhos, podendo incluir um corpo. <code>GET /aulas</code> pede um recurso; <code>POST /inscricoes</code> envia dados para processamento. A resposta traz um status, cabeçalhos e, quando aplicável, um corpo: <code>200</code> indica sucesso, <code>301</code> redirecionamento permanente, <code>403</code> recusa de acesso, <code>404</code> recurso não encontrado e <code>500</code> erro interno.</p>
+    <h3>HTTPS: HTTP protegido por TLS</h3>
+    <p>TLS cifra o conteúdo em trânsito, detecta alterações e permite ao cliente verificar a identidade do servidor por seu certificado e nome de domínio. Isso protege a conexão até o ponto em que TLS termina. Não protege automaticamente os dados armazenados nem um dispositivo já comprometido.</p>
+    <div class="lab">
+      <h3>O que alguém no caminho consegue observar?</h3>
+      <label for="webMode">Protocolo da conexão simulada</label>
+      <select id="webMode"><option value="https">HTTPS</option><option value="http">HTTP</option></select>
+      <div class="lab-output" id="webOut" role="status"></div>
+    </div>
+    <div class="note">HTTPS não comprova a honestidade do site: uma página de phishing também pode ter certificado válido. Confira o domínio e não ignore alertas de certificado. IP, volume e horários do tráfego continuam observáveis; o domínio também pode ficar exposto, conforme DNS e negociação TLS.</div>
+<div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>Portas e fluxo TCP antes da requisição</h4><p class="code-kind">Transcrição ilustrativa · campos selecionados</p><p>Conexão do cliente 10.12.1.124:45888 com 192.0.2.80:80. Números absolutos, sem opções TCP. O exemplo do próximo módulo começa após este handshake.</p><pre tabindex="0" aria-label="Código: Portas e fluxo TCP antes da requisição"><code>Cliente → Servidor: SYN      Seq=4999          Len=0
+Servidor → Cliente: SYN,ACK  Seq=9000 Ack=5000 Len=0
+Cliente → Servidor: ACK      Seq=5000 Ack=9001 Len=0
+Cliente → Servidor: PSH,ACK  Seq=5000 Ack=9001 Len=N
+Servidor → Cliente: ACK      Seq=9001 Ack=5000+N Len=0
+
+UDP — cabeçalho diferente (8 bytes)
+  Source Port:      53000
+  Destination Port: 53
+  Length:           8 + tamanho da mensagem DNS
+  Checksum:         valor calculado (não mostrado neste recorte)</code></pre><h5>Como conferir</h5><p class="expected">SYN consome um número de sequência. Len é a quantidade de bytes de dados, não o comprimento de todos os cabeçalhos. ACK indica o próximo byte esperado. UDP não tem Seq/Ack. Retransmissão, janelas e congestionamento afetam TCP; um PSH não define a fronteira de uma mensagem HTTP.</p></article><article class="code-example"><h4>Servidor HTTP e requisições reproduzíveis</h4><p class="code-kind">Python 3 + curl · laboratório local</p><p>Salve o código Python como servidor_demo.py e execute python3 servidor_demo.py. Em outro terminal, rode os comandos curl abaixo. Só escuta no loopback; encerre com Ctrl+C.</p><pre tabindex="0" aria-label="Código: Servidor HTTP e requisições reproduzíveis"><code>from http.server import BaseHTTPRequestHandler, HTTPServer
+
+class Demo(BaseHTTPRequestHandler):
+    def responder(self, status, corpo):
+        self.send_response(status)
+        self.send_header(&quot;Content-Type&quot;, &quot;text/plain; charset=utf-8&quot;)
+        self.send_header(&quot;Content-Length&quot;, str(len(corpo)))
+        self.end_headers()
+        self.wfile.write(corpo)
+
+    def do_GET(self):
+        if self.path == &quot;/antigo&quot;:
+            self.send_response(301)
+            self.send_header(&quot;Location&quot;, &quot;/aulas&quot;)
+            self.send_header(&quot;Content-Length&quot;, &quot;0&quot;)
+            self.end_headers()
+        elif self.path == &quot;/privado&quot;:
+            self.responder(403, b&quot;acesso recusado\n&quot;)
+        elif self.path == &quot;/erro&quot;:
+            self.responder(500, b&quot;erro simulado\n&quot;)
+        elif self.path == &quot;/aulas&quot;:
+            self.responder(200, b&quot;aula=redes\n&quot;)
+        else:
+            self.responder(404, b&quot;nao encontrado\n&quot;)
+
+    def do_POST(self):
+        tamanho = min(int(self.headers.get(&quot;Content-Length&quot;, &quot;0&quot;)), 1024)
+        corpo = self.rfile.read(tamanho)
+        self.responder(200, b&quot;recebido: &quot; + corpo)
+
+HTTPServer((&quot;127.0.0.1&quot;, 8000), Demo).serve_forever()</code></pre><h5>Como conferir</h5><p class="expected">Este servidor demonstra métodos, cabeçalhos, corpo e status; não implementa autenticação nem é um servidor de produção. As respostas usam HTTP/1.0 por padrão do BaseHTTPRequestHandler, embora o cliente abaixo envie HTTP/1.1.</p></article><article class="code-example"><h4>Inspecionar pedidos, respostas e TLS</h4><p class="code-kind">Shell com curl e OpenSSL · consultas</p><p>Os primeiros comandos falam com o servidor local acima; os últimos acessam example.com na internet. No PowerShell, use curl.exe para evitar aliases.</p><pre tabindex="0" aria-label="Código: Inspecionar pedidos, respostas e TLS"><code>curl --http1.1 -i http://127.0.0.1:8000/aulas
+curl --http1.1 -i http://127.0.0.1:8000/antigo
+curl --http1.1 -i http://127.0.0.1:8000/privado
+curl --http1.1 -i http://127.0.0.1:8000/ausente
+curl --http1.1 -i http://127.0.0.1:8000/erro
+curl --http1.1 -v --data &#x27;curso=redes&#x27; http://127.0.0.1:8000/inscricoes
+curl --http1.1 -I https://example.com
+openssl s_client -connect example.com:443 -servername example.com \
+  -verify_hostname example.com -verify_return_error &lt;/dev/null</code></pre><h5>Como conferir</h5><p class="expected">Espere 200, 301, 403, 404 e 500 conforme o caminho. -v mostra a conversa HTTP; -i inclui cabeçalhos da resposta. No teste TLS, confira a validação da cadeia e do hostname; falhas de confiança dependem também do repositório de CAs local. Não use -k para “resolver” falhas de certificado.</p></article></div>
+    <div id="quizWeb"></div>
+    <p class="source">Referência: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview">MDN — visão geral de HTTP</a>.</p>
+  <p class="source">Referências técnicas: <a href="https://docs.python.org/3/library/http.server.html">Python — servidor HTTP de demonstração</a>.</p>
+</section>
+
+  <section class="mod" id="m0">
+    <h2>Camadas TCP/IP</h2>
+    <div class="kicker">o que cada camada resolve</div>
+    <p>Uma comunicação combina protocolos com responsabilidades diferentes. Ethernet transporta quadros no enlace; IP endereça e encaminha pacotes entre redes; TCP entrega um fluxo de bytes ordenado entre portas; HTTP interpreta as mensagens da aplicação. Agora que você estudou endereços, rotas e portas, examine como essas estruturas se encaixam.</p>
+
+    <div class="stack" id="stack"></div>
+
+    <div class="lab">
+      <h3>Requisição HTTP dentro de TCP, IPv4 e Ethernet</h3>
+      <div class="row">
+        <label for="payload">Caminho HTTP</label><input type="text" id="payload" value="/index.html" maxlength="128" size="24" aria-describedby="packetContext">
+        <label for="packetHop">Ponto da captura</label><select id="packetHop"><option value="before">LAN — antes do NAT</option><option value="after">WAN — depois do NAT/PAT</option></select>
+        <button class="btn" id="encapBtn">Montar quadro</button>
+        <button class="btn ghost" id="decapBtn">Entregar ao HTTP</button>
+      </div>
+      <p class="small" id="packetContext">Conexão TCP já estabelecida, HTTP/1.1 sem TLS, sem opções IP/TCP e sem VLAN. Cliente 10.12.1.124/24; gateway 10.12.1.1; servidor de documentação 192.0.2.80. A tradução NAT/PAT é um cenário configurado, não uma regra universal.</p>
+      <div class="fb" id="packetError" role="status"></div>
+      <div class="encap" id="encapOut" aria-live="polite"></div>
+      <div class="row"><button class="btn ghost" id="packetDownload">Baixar captura .pcap</button></div>
+      <p class="small">A captura é gerada localmente com os bytes exibidos; nenhum pacote é enviado. Abra o arquivo no Wireshark para conferir os campos.</p><dl class="field-guide">
+<dt>Comprimentos e tipo</dt><dd>IHL e Data Offset são contados em palavras de 32 bits. Total Length conta o pacote IPv4 inteiro. EtherType 0x0800 identifica IPv4; Protocol 6 identifica TCP. Nenhum desses campos é a porta da aplicação.</dd>
+<dt>Entrega e fragmentação</dt><dd>TTL limita encaminhamentos e é reduzido pelos roteadores. DF=1 pede que este pacote não seja fragmentado; MF=0 e Fragment Offset=0 indicam que não é um fragmento parcial. Identification participa da identificação de fragmentos quando aplicável.</dd>
+<dt>Sequência, confirmação e janela</dt><dd>Sequence Number identifica o primeiro byte de dados deste segmento. Acknowledgment indica o próximo byte esperado da outra ponta. Window é o campo anunciado pelo receptor; sua interpretação pode depender da escala negociada no handshake, não modelada aqui. PSH/ACK não delimita a mensagem HTTP.</dd>
+<dt>Antes e depois do NAT/PAT</dt><dd>Neste cenário, o roteador troca IP e porta de origem, reduz TTL e recalcula checksums. O endereço do servidor, Seq/Ack e os bytes HTTP permanecem iguais. O cabeçalho Ethernet muda para o próximo enlace.</dd>
+</dl>
+      <p class="small" style="margin-top:.8rem">Os títulos “Header” e “Payload”, as bordas e as quebras entre campos são separadores didáticos: não são transmitidos. Os cabeçalhos Ethernet, IPv4 e TCP são binários. No HTTP/1.1 deste exemplo, a mensagem é textual e cada linha termina com CRLF (\r\n). Preamble, SFD e FCS do Ethernet foram omitidos da captura, como ocorre em muitas capturas de host.</p>
+    </div>
+
+    <div class="note">A mensagem HTTP é transportada no payload TCP; o segmento TCP é o payload IPv4; o pacote IPv4 é o payload Ethernet. Aqui a requisição cabe em um segmento. Na prática, TCP é um fluxo: uma mensagem pode atravessar vários segmentos e um segmento pode conter partes de mensagens. UDP usa datagramas; IPv6 usa outro formato de cabeçalho.</div>
+  <div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>Conferir a captura do laboratório</h4><p class="code-kind">Python 3 · executável sobre a captura baixada</p><p>Baixe netlab-http.pcap pelo botão do laboratório, salve este código como ler_captura.py no mesmo diretório e execute-o. Ele lê o formato específico exportado aqui: PCAP little-endian, Ethernet, IPv4 e TCP sem opções.</p><pre tabindex="0" aria-label="Código: Conferir a captura do laboratório"><code>from pathlib import Path
+import struct
+from ipaddress import IPv4Address
+
+pcap = Path(&quot;netlab-http.pcap&quot;).read_bytes()
+assert pcap[:4] == bytes.fromhex(&quot;d4 c3 b2 a1&quot;)
+assert struct.unpack_from(&quot;&lt;I&quot;, pcap, 20)[0] == 1  # LINKTYPE_ETHERNET
+capturado = struct.unpack_from(&quot;&lt;I&quot;, pcap, 32)[0]
+quadro = pcap[40:40 + capturado]  # 24 do PCAP + 16 do registro
+assert quadro[12:14] == bytes.fromhex(&quot;08 00&quot;)  # EtherType IPv4
+ip = quadro[14:]
+ihl = (ip[0] &amp; 15) * 4
+total = struct.unpack_from(&quot;!H&quot;, ip, 2)[0]
+print(&quot;IP:&quot;, IPv4Address(ip[12:16]), &quot;→&quot;, IPv4Address(ip[16:20]))
+print(&quot;TTL:&quot;, ip[8], &quot;protocolo:&quot;, ip[9], &quot;total IPv4:&quot;, total)
+tcp = ip[ihl:total]
+origem, destino, seq, ack = struct.unpack_from(&quot;!HHII&quot;, tcp)
+offset = (tcp[12] &gt;&gt; 4) * 4
+print(&quot;TCP:&quot;, origem, &quot;→&quot;, destino, &quot;seq:&quot;, seq, &quot;ack:&quot;, ack)
+print(repr(tcp[offset:].decode(&quot;ascii&quot;)))</code></pre><h5>Como conferir</h5><p class="expected">Antes do NAT: IP 10.12.1.124 → 192.0.2.80; TTL 64; protocolo 6; TCP 45888 → 80, seq 5000, ack 9001. Depois: origem 203.0.113.5:62001, TTL 63. repr revela os delimitadores reais \r\n do HTTP; os títulos do diagrama não aparecem na captura.</p></article></div>
+<p class="source">Referências técnicas: <a href="https://www.rfc-editor.org/rfc/rfc791.html">IETF — IPv4</a>, <a href="https://www.rfc-editor.org/rfc/rfc9293.html">IETF — TCP</a>, <a href="https://www.rfc-editor.org/rfc/rfc9112.html">IETF — HTTP/1.1</a>.</p>
+</section>
+
   <section class="mod" id="m6">
     <h2>Roteamento estático, dinâmico e OSPF</h2>
     <div class="kicker">métrica, vizinhança e convergência</div>
     <p>Rota estática é escrita à mão e não muda sozinha. Roteamento dinâmico faz os roteadores trocarem informação e recalcularem o caminho quando a rede muda. O OSPF é o exemplo clássico dentro de uma organização.</p>
-    <p>Antes de trocar rotas, dois roteadores viram vizinhos: mandam pacotes hello no enlace, se reconhecem e formam adjacência. Depois cada um monta o mapa completo da rede e roda Dijkstra para achar o caminho de menor custo. Custo é a métrica, e por padrão vem da banda do enlace, não da quantidade de saltos.</p>
+    <p>Roteadores descobrem vizinhos por mensagens Hello com parâmetros compatíveis. Conforme o tipo de rede e os papéis de DR/BDR, formam as adjacências necessárias para sincronizar a base de estado de enlace. Após sincronizar os anúncios de estado de enlace, cada roteador calcula rotas com Dijkstra a partir da topologia de sua área. O exemplo abaixo usa uma única área. Custo é a métrica, e por padrão vem da banda do enlace, não da quantidade de saltos.</p>
 
     <div class="lab">
-      <h3>Calcular o caminho de R1 até R6</h3>
+      <h3>Calcular o caminho de R1 até R6 (área única, enlaces bidirecionais)</h3>
       <p class="small">Clique num enlace para derrubá-lo e veja o OSPF convergir para outro caminho. O número em cada enlace é o custo.</p>
       <svg viewBox="0 0 620 340" id="ospfSvg" role="img" aria-label="topologia com seis roteadores"></svg>
       <div class="row" style="margin-top:.8rem">
@@ -388,7 +862,240 @@ svg{max-width:100%;height:auto;display:block}
       <div class="fb" id="ospfOut"></div>
     </div>
 
-    <div class="note">Repare que o melhor caminho nem sempre é o de menos saltos. Somar custos baixos por um trajeto mais longo pode sair melhor que dois enlaces caros. É exatamente isso que separa métrica de contagem de saltos.</div>
+    <div class="note">Repare que o melhor caminho nem sempre é o de menos saltos. Somar custos baixos por um trajeto mais longo pode sair melhor que dois enlaces caros. A simulação usa custos configurados; não representa tempo de resposta nem uma medição de latência.</div>
+  <div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>Entender Hello, área e anúncios</h4><p class="code-kind">Estrutura OSPFv2 decodificada · campos selecionados</p><p>OSPFv2 roda diretamente sobre IPv4, protocolo 89, sem porta TCP/UDP. O exemplo usa área única 0; Router ID é um identificador de 32 bits.</p><pre tabindex="0" aria-label="Código: Entender Hello, área e anúncios"><code>IPv4: Source=10.0.12.1, Destination=224.0.0.5, Protocol=89, TTL=1
+OSPF Header:
+  Version: 2
+  Type: 1 (Hello)
+  Router ID: 1.1.1.1
+  Area ID: 0.0.0.0
+Hello — recorte:
+  Network Mask: 255.255.255.252
+  Hello Interval: 10 segundos
+  Router Dead Interval: 40 segundos
+  Neighbor: 2.2.2.2
+
+Após formar a adjacência apropriada:
+  Database Description → Link State Request → Link State Update
+  Link State Acknowledgment confirma o recebimento dos anúncios.</code></pre><h5>Como conferir</h5><p class="expected">Os intervalos são valores deste cenário, não universais. Em redes broadcast há eleição de DR/BDR e nem todo par precisa ficar Full. Os roteadores sincronizam LSAs na área e recalculam caminhos; a convergência real tem temporizadores, ao contrário da simulação instantânea.</p></article><article class="code-example"><h4>Configurar dois vizinhos com custo explícito</h4><p class="code-kind">FRRouting · trecho de configuração para laboratório isolado</p><p>Requer FRR com ospfd habilitado e interfaces previamente endereçadas: R1 eth1=10.0.12.1/30; R2 eth1=10.0.12.2/30. Aplique cada bloco no roteador indicado, no modo de configuração de vtysh.</p><pre tabindex="0" aria-label="Código: Configurar dois vizinhos com custo explícito"><code>! R1
+interface eth1
+ ip ospf area 0.0.0.0
+ ip ospf network point-to-point
+ ip ospf cost 10
+exit
+router ospf
+ ospf router-id 1.1.1.1
+exit
+
+! R2 — em outra instância FRR
+interface eth1
+ ip ospf area 0.0.0.0
+ ip ospf network point-to-point
+ ip ospf cost 10
+exit
+router ospf
+ ospf router-id 2.2.2.2
+exit
+
+! Consultas no modo executivo de cada roteador
+show ip ospf neighbor
+show ip ospf interface eth1
+show ip route ospf</code></pre><h5>Como conferir</h5><p class="expected">Com comunicação e parâmetros compatíveis, a vizinhança ponto a ponto deve chegar a Full. Somente o enlace compartilhado não cria uma nova rota remota OSPF: anuncie também uma rede de teste para vê-la na tabela. O custo explícito evita depender da banda de referência; o custo do caminho é a soma dos enlaces de saída.</p></article></div>
+<p class="source">Referências técnicas: <a href="https://docs.frrouting.org/en/latest/ospfd.html">FRRouting — OSPFv2</a>.</p>
+</section>
+
+  <section class="mod reading" id="m9">
+    <h2>VPN, VLAN e firewall</h2>
+    <div class="kicker">conectar, separar e controlar o tráfego</div>
+    <div class="concepts">
+      <article class="concept"><h3>VPN: túnel sobre outra rede</h3><p>Uma VPN de segurança, como IPsec ou uma VPN baseada em TLS, autentica as pontas e cifra o tráfego do túnel. Pode ligar um usuário à organização ou conectar duas redes. No <em>split tunnel</em>, só parte do tráfego usa a VPN.</p><p class="small">A proteção termina na saída do túnel. A VPN não torna o usuário anônimo nem remove malware do endpoint.</p></article>
+      <article class="concept"><h3>VLAN: separação lógica no enlace</h3><p>Divide uma infraestrutura de switches em domínios de broadcast distintos. Uma porta de acesso normalmente atende uma VLAN; um trunk transporta várias, com identificação 802.1Q. A comunicação entre VLANs precisa de roteamento.</p><p class="small">VLAN não cifra dados. A separação precisa ser acompanhada por regras de acesso entre os segmentos.</p></article>
+      <article class="concept"><h3>Firewall: política de tráfego</h3><p>Permite ou bloqueia comunicações conforme regras: origem, destino, protocolo, porta, direção e, em alguns produtos, aplicação. Pode funcionar no endpoint ou entre redes. Um firewall stateful acompanha o estado das conexões.</p><p class="small">Permitir HTTPS não garante que todo conteúdo nessa conexão seja benigno.</p></article>
+      <article class="concept"><h3>Defesa em camadas</h3><p>Uma pessoa remota entra pela VPN com MFA, recebe apenas os acessos necessários e alcança uma VLAN específica por regras do firewall. Cada controle cobre uma parte do problema.</p><p class="small">Menor privilégio: autorize apenas o acesso necessário à função e revise-o periodicamente.</p></article>
+    </div>
+    <div class="lab">
+      <h3>Um pacote passa pelo firewall?</h3>
+      <p class="small">Modelo didático de novas conexões entre VLANs, avaliando a primeira regra que combina. Há roteamento entre os segmentos. A VPN já terminou antes deste ponto.</p>
+      <ol><li>VLAN 10 (equipe) → servidor na VLAN 20, TCP 443: <strong>permitir</strong>.</li><li>VLAN 99 (administração) → servidor na VLAN 20, TCP 22: <strong>permitir</strong>.</li><li>Demais combinações: <strong>bloquear</strong>.</li></ol>
+      <div class="row">
+        <label for="fwSource">Origem</label><select id="fwSource"><option value="10">VLAN 10 — equipe</option><option value="30">VLAN 30 — visitantes</option><option value="99">VLAN 99 — administração</option></select>
+        <label for="fwProtocol">Protocolo</label><select id="fwProtocol"><option>TCP</option><option>UDP</option></select>
+        <label for="fwPort">Porta de destino</label><input type="number" id="fwPort" min="0" max="65535" step="1" value="443" style="width:6rem">
+        <button class="btn" id="fwCheck">Avaliar pacote</button>
+      </div>
+      <div class="lab-output" id="fwOut" role="status"></div>
+    </div>
+<div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>VLAN no quadro e VPN sobre IP</h4><p class="code-kind">Estruturas decodificadas · não executáveis</p><p>Compare os limites das duas técnicas. A tag 802.1Q não cifra o quadro; no túnel IPsec com ESP, o pacote interno é protegido até a outra ponta.</p><pre tabindex="0" aria-label="Código: VLAN no quadro e VPN sobre IP"><code>Ethernet com VLAN 10 (802.1Q)
+  Destination MAC: 02:00:00:00:00:fe
+  Source MAC:      02:00:00:00:00:01
+  TPID:            0x8100
+  TCI:             PCP=0, DEI=0, VLAN ID=10
+  EtherType:       0x0800
+  Payload:         pacote IPv4
+
+IPsec ESP em modo túnel — estrutura conceitual
+  IP externo: origem pública do gateway A → gateway B
+  ESP: SPI + número de sequência
+  Conteúdo cifrado: IP interno + TCP/UDP + dados + trailer ESP
+  Tag de autenticação: conforme o algoritmo negociado</code></pre><h5>Como conferir</h5><p class="expected">No acesso, o host frequentemente envia quadros sem tag e o switch os associa à VLAN. No trunk, as tags distinguem VLANs; a configuração pode prever VLAN nativa. ESP usa protocolo IP 50, ou encapsulamento UDP 4500 com NAT-T. SPI identifica uma associação de segurança, não uma porta da aplicação.</p></article><article class="code-example"><h4>Criar uma interface VLAN de teste</h4><p class="code-kind">Linux iproute2 · configuração de laboratório</p><p>Em uma VM com interface eth0 e trunk que aceite VLAN 10. Altera a rede da VM; use apenas o ambiente de laboratório. Não instala uma política de firewall.</p><pre tabindex="0" aria-label="Código: Criar uma interface VLAN de teste"><code>sudo ip link add link eth0 name eth0.10 type vlan id 10
+sudo ip address add 192.168.10.2/24 dev eth0.10
+sudo ip link set eth0.10 up
+ip -d link show eth0.10
+ip address show dev eth0.10
+# Ao terminar o laboratório, remova somente a interface criada:
+sudo ip link delete eth0.10</code></pre><h5>Como conferir</h5><p class="expected">ip -d link deve indicar vlan protocol 802.1Q id 10. Criar a subinterface não configura o switch e não autoriza comunicação entre VLANs; isso depende de roteamento e política.</p></article><article class="code-example"><h4>Traduzir a política em regras de firewall</h4><p class="code-kind">nftables · configuração para roteador de laboratório</p><p>Trecho de um roteador Linux dedicado ao laboratório, com roteamento já habilitado e nomes de interfaces correspondentes às VLANs. A política se aplica ao encaminhamento, não ao login local do roteador. Não aplique em uma máquina de uso diário.</p><pre tabindex="0" aria-label="Código: Traduzir a política em regras de firewall"><code># Salve como netlab.nft; verifique sem aplicar:
+# sudo nft -c -f netlab.nft
+# Em um laboratório preparado, aplique: sudo nft -f netlab.nft
+
+table inet netlab_demo {
+  chain forward {
+    type filter hook forward priority 0; policy drop;
+    ct state invalid drop
+    ct state established,related accept
+    iifname &quot;vlan10&quot; oifname &quot;vlan20&quot; ip daddr 192.168.20.10 tcp dport 443 accept
+    iifname &quot;vlan99&quot; oifname &quot;vlan20&quot; ip daddr 192.168.20.10 tcp dport 22 accept
+    counter drop
+  }
+}</code></pre><h5>Como conferir</h5><p class="expected">Novas conexões só passam pelas duas permissões; respostas de conexões acompanhadas são aceitas pelo estado. UDP 443 continua bloqueado. Regras de outras tabelas/chains também podem afetar o resultado; o simulador representa uma política simplificada.</p></article><article class="code-example"><h4>Verificar o escopo da VPN</h4><p class="code-kind">Linux · comandos de consulta</p><p>Compare a mesma consulta antes e depois de conectar a VPN aprovada. Este exemplo supõe que a rede interna de laboratório seja 10.20.0.0/16.</p><pre tabindex="0" aria-label="Código: Verificar o escopo da VPN"><code>ip route get 10.20.0.10
+ip route get 192.0.2.80
+ip -br address
+# Se a VPN adotada for WireGuard e você administrar o laboratório:
+sudo wg show</code></pre><h5>Como conferir</h5><p class="expected">Em split tunnel, o destino interno pode usar uma interface de túnel e o externo continuar pelo gateway comum. Os nomes variam. Rotas mostram por onde o tráfego passa; não comprovam sozinhas criptografia, autenticação, MFA nem autorização para o serviço.</p></article></div>
+    <div id="quizNetworkSecurity"></div>
+  <p class="source">Referências técnicas: <a href="https://wiki.nftables.org/wiki-nftables/index.php/Matching_connection_tracking_stateful_metainformation">nftables — estado de conexões</a>, <a href="https://www.wireguard.com/quickstart/">WireGuard — consultas e configuração</a>.</p>
+</section>
+
+  <section class="mod reading" id="m13">
+    <h2>Phishing, malware e boas práticas</h2>
+    <div class="kicker">reconhecer a tentativa e interromper o ataque</div>
+    <p><strong>Engenharia social</strong> explora confiança, urgência, curiosidade ou medo para induzir uma ação. <strong>Phishing</strong> usa mensagens e páginas fraudulentas para obter dados, dinheiro ou execução de código. Pode chegar por e-mail, SMS (<em>smishing</em>), voz (<em>vishing</em>) e QR codes; campanhas direcionadas são chamadas de <em>spear phishing</em>.</p>
+    <div class="lab">
+      <h3>Analise a mensagem fictícia</h3>
+      <div class="lab-output"><strong>De:</strong> Suporte &lt;suporte@acesso-empresa.example&gt;<br><strong>Assunto:</strong> Sua conta será bloqueada em 10 minutos<br>“Confirme sua senha e o código MFA em <code>https://empresa.example.validacao.example/login</code>. Se o navegador alertar, ignore para continuar.”</div>
+      <p class="small" style="margin-top:.7rem">O endereço acima é texto, não um link. Observe urgência, pedido de segredo, domínio e instrução para ignorar o navegador.</p>
+      <div id="quizPhishingMessage"></div>
+    </div>
+    <h3>Malware: código com finalidade maliciosa</h3>
+    <div class="table-scroll"><table><caption>Comportamentos comuns; um malware pode combinar vários</caption><thead><tr><th>Tipo</th><th>Característica</th></tr></thead><tbody>
+      <tr><td>Vírus</td><td>Infecta arquivos ou outros hospedeiros e se replica quando são executados.</td></tr>
+      <tr><td>Worm</td><td>Propaga-se automaticamente, frequentemente explorando redes e vulnerabilidades.</td></tr>
+      <tr><td>Trojan (cavalo de Troia)</td><td>Apresenta-se como legítimo ou útil para induzir a execução de funções maliciosas.</td></tr>
+      <tr><td>Ransomware</td><td>Extorque a vítima; pode cifrar arquivos e também furtar dados para ameaçar divulgá-los.</td></tr>
+      <tr><td>Spyware / keylogger</td><td>Espiona atividades ou registra digitação para capturar informações.</td></tr>
+      <tr><td>Bot</td><td>Permite controle remoto malicioso; vários dispositivos podem formar uma botnet.</td></tr>
+    </tbody></table></div>
+    <h3>Hábitos que reduzem a exposição</h3>
+    <ul><li>Use senhas longas e únicas, um gerenciador confiável e MFA. Prefira passkeys ou chaves resistentes a phishing quando disponíveis. Nunca compartilhe códigos nem aprove solicitações inesperadas.</li><li>Entre pelo aplicativo ou endereço oficial conhecido. Confirme pedidos incomuns por outro canal já conhecido, inclusive quando a mensagem parece vir de um colega.</li><li>Instale programas de fontes autorizadas; evite software pirata, anexos inesperados, macros e dispositivos USB desconhecidos.</li><li>Mantenha atualizações e proteção ativas, bloqueie a tela e use os canais aprovados para compartilhar arquivos. Restrinja as permissões dos links.</li><li>Mantenha cópias de segurança separadas, com proteção contra alteração e testes de recuperação. Sincronização sozinha pode replicar exclusões ou arquivos cifrados.</li></ul>
+    <h3>Se você interagiu com a tentativa</h3>
+    <p>Interrompa a interação e reporte imediatamente pelo canal de segurança da organização. Se forneceu credenciais, use um dispositivo confiável para trocar a senha e solicitar revogação das sessões. Se executou um anexo ou suspeita de infecção, siga o procedimento de isolamento da rede e acione o suporte. Preserve a mensagem e os horários; evite apagar evidências ou tentar corrigir tudo por conta própria.</p>
+<div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>Inspecionar o hostname sem abrir o link</h4><p class="code-kind">Python 3 · executável local</p><p>urlsplit apenas analisa a string. Não faz consulta DNS nem acessa o site. A comparação demonstra este caso, não substitui validação completa de URLs e domínios internacionalizados.</p><pre tabindex="0" aria-label="Código: Inspecionar o hostname sem abrir o link"><code>from urllib.parse import urlsplit
+
+url = &quot;https://empresa.example.validacao.example/login&quot;
+host = (urlsplit(url).hostname or &quot;&quot;).lower().rstrip(&quot;.&quot;)
+conhecido = &quot;empresa.example&quot;
+corresponde = host == conhecido or host.endswith(&quot;.&quot; + conhecido)
+print(&quot;hostname:&quot;, host)
+print(&quot;dominio esperado:&quot;, corresponde)
+print(&quot;usa HTTPS:&quot;, urlsplit(url).scheme == &quot;https&quot;)</code></pre><h5>Como conferir</h5><p class="expected">hostname: empresa.example.validacao.example
+dominio esperado: False
+usa HTTPS: True
+O certificado HTTPS desse endereço não o torna parte de empresa.example. Urgência, origem e pedido de segredos precisam ser examinados em conjunto; domínios legítimos também podem ser comprometidos.</p></article><article class="code-example"><h4>Ler sinais e registrar a resposta</h4><p class="code-kind">JSON · eventos fictícios de proteção, não malware</p><p>São registros para análise; não executam nem reproduzem malware. Um indício isolado não fecha um diagnóstico.</p><pre tabindex="0" aria-label="Código: Ler sinais e registrar a resposta"><code>{
+  &quot;alertas&quot;: [
+    {&quot;tipo&quot;: &quot;virus&quot;, &quot;sinal&quot;: &quot;codigo detectado em arquivo hospedeiro&quot;},
+    {&quot;tipo&quot;: &quot;worm&quot;, &quot;sinal&quot;: &quot;propagacao automatica entre hosts&quot;},
+    {&quot;tipo&quot;: &quot;trojan&quot;, &quot;sinal&quot;: &quot;instalador falso executou processo inesperado&quot;},
+    {&quot;tipo&quot;: &quot;ransomware&quot;, &quot;sinal&quot;: &quot;alteracao massiva e cifragem de arquivos&quot;},
+    {&quot;tipo&quot;: &quot;spyware_keylogger&quot;, &quot;sinal&quot;: &quot;captura de dados/teclas detectada&quot;},
+    {&quot;tipo&quot;: &quot;bot&quot;, &quot;sinal&quot;: &quot;comunicacao com infraestrutura de comando&quot;}
+  ],
+  &quot;incidente&quot;: {
+    &quot;hora_utc&quot;: &quot;2026-09-25T14:30:00Z&quot;,
+    &quot;host&quot;: &quot;notebook-demo&quot;,
+    &quot;acao_usuario&quot;: &quot;abriu anexo inesperado&quot;,
+    &quot;resposta&quot;: &quot;reportou; seguiu orientacao de isolamento&quot;,
+    &quot;evidencias&quot;: &quot;mensagem original e horarios preservados&quot;,
+    &quot;credenciais&quot;: &quot;avaliar troca e revogacao de sessoes em dispositivo confiavel&quot;
+  }
+}</code></pre><h5>Como conferir</h5><p class="expected">Para phishing por SMS, voz, QR code ou mensagem direcionada, muda o canal; a confirmação independente continua importante. Gere senhas únicas no gerenciador, use MFA/passkeys, não aprove desafios inesperados e teste backups. Não abra um anexo suspeito para produzir evidência.</p></article></div>
+    <div id="quizMalware"></div>
+    <p class="source">Para aprofundar: <a href="https://cartilha.cert.br/fasciculos/">CERT.br — fascículos sobre autenticação, golpes, backup e códigos maliciosos</a>.</p>
+  </section>
+
+  <section class="mod reading" id="m14">
+    <h2>LGPD e classificação da informação</h2>
+    <div class="kicker">noções básicas • introdução (1 de 3)</div>
+    <p>A <strong>Lei Geral de Proteção de Dados Pessoais (LGPD)</strong> trata da proteção de dados de pessoas naturais. Alcança operações como coletar, consultar, compartilhar, armazenar e eliminar, inclusive em papel, nas hipóteses de aplicação da lei. Segurança da informação é parte dessa proteção; privacidade também exige justificar a finalidade e a necessidade do tratamento.</p>
+    <div class="concepts">
+      <article class="concept"><h3>Pessoal e sensível</h3><p>Nome e CPF são dados pessoais. Saúde, biometria vinculada a uma pessoa, origem racial e convicção religiosa são exemplos de dados pessoais sensíveis. Dados financeiros merecem proteção, mas não são automaticamente “sensíveis” na definição legal.</p></article>
+      <article class="concept"><h3>Anonimização</h3><p>Remover o nome nem sempre impede identificar alguém. Na pseudonimização, informações adicionais podem restabelecer a ligação. A anonimização depende da impossibilidade de associação considerando meios técnicos razoáveis e disponíveis.</p></article>
+    </div>
+    <h3>Quem participa</h3>
+    <p>O <strong>titular</strong> é a pessoa a quem os dados se referem. O <strong>controlador</strong> decide sobre o tratamento; o <strong>operador</strong> atua em seu nome. O <strong>encarregado</strong> funciona como canal de comunicação. A <strong>ANPD</strong> orienta, regulamenta e fiscaliza a aplicação da lei.</p>
+    <h3>Princípios e bases legais</h3>
+    <p>Antes de coletar, defina uma finalidade legítima e uma base legal aplicável. Consentimento é uma das hipóteses; também existem, por exemplo, obrigação legal e execução de contrato. Dados sensíveis têm hipóteses próprias. Consentimento não autoriza qualquer uso posterior.</p>
+    <p>Na rotina, colete somente o necessário, explique o uso, mantenha dados corretos, limite acessos e documente decisões. Isso concretiza os princípios de finalidade, adequação, necessidade, livre acesso, qualidade dos dados, transparência, segurança, prevenção, não discriminação e responsabilização e prestação de contas.</p>
+    <h3>Direitos e ciclo de vida</h3>
+    <p>O titular pode pedir confirmação de tratamento, acesso e correção, além de exercer outros direitos previstos na lei, como revogar consentimento. Eliminação e portabilidade têm condições e limites; a exclusão não é automática para todo pedido. Encaminhe solicitações ao canal responsável, com verificação adequada da identidade.</p>
+    <div class="flow" aria-label="Ciclo de vida dos dados"><span>Coletar o necessário</span> → <span>Usar com finalidade</span> → <span>Guardar e compartilhar com controle</span> → <span>Eliminar ou anonimizar quando aplicável</span></div>
+    <p>Defina retenção conforme finalidade e obrigações aplicáveis. Se houver incidente com dados pessoais, reporte internamente sem demora. A organização avalia o risco e as obrigações de comunicação à ANPD e aos titulares conforme as regras aplicáveis.</p>
+    <p class="source">Base desta introdução: <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.htm">LGPD — texto compilado, arts. 5º, 6º, 7º, 11, 16, 18 e 48</a> e <a href="https://www.gov.br/anpd/pt-br/acesso-a-informacao/perguntas-frequentes">ANPD — perguntas frequentes</a>.</p>
+    <h3>Classificar para saber como tratar</h3>
+    <p>A classificação define proteção e manuseio conforme impacto e público autorizado. O esquema abaixo é um <strong>exemplo de política organizacional</strong>, não uma lista de níveis imposta pela LGPD. Classificar depende do conteúdo, contexto e responsável pelo ativo.</p>
+    <div class="table-scroll"><table><caption>Política didática usada no exercício</caption><thead><tr><th>Nível</th><th>Exemplo</th><th>Manuseio</th></tr></thead><tbody>
+      <tr><td>Pública</td><td>Comunicado aprovado para divulgação.</td><td>Publicação autorizada; preservar integridade e versão.</td></tr>
+      <tr><td>Interna</td><td>Manual de rotina destinado aos empregados.</td><td>Canais internos; não publicar sem autorização.</td></tr>
+      <tr><td>Confidencial</td><td>Contrato comercial não público.</td><td>Acesso por necessidade, compartilhamento autorizado e proteção no envio.</td></tr>
+      <tr><td>Restrita</td><td>Prontuários e segredos de acesso.</td><td>Grupo mínimo autorizado, proteção reforçada e registros de acesso.</td></tr>
+    </tbody></table></div>
+    <div class="note">“Pessoal”, “sensível” e “confidencial” não são sinônimos. Uma senha técnica pode ser restrita sem ser um dado de saúde; um dado pessoal publicado continua sujeito às regras aplicáveis da LGPD. Rotular não substitui aplicar permissões, retenção e descarte seguro.</div>
+<div class="practice"><h3>Da teoria à prática</h3><article class="code-example"><h4>Documentar finalidade, minimização e classificação</h4><p class="code-kind">JSON · registro fictício de tratamento</p><p>Demonstra como transformar conceitos em perguntas verificáveis. A hipótese contratual é uma ilustração e exige análise do tratamento concreto; o código não decide a base legal.</p><pre tabindex="0" aria-label="Código: Documentar finalidade, minimização e classificação"><code>{
+  &quot;atividade&quot;: &quot;matricula em curso contratado&quot;,
+  &quot;titular&quot;: &quot;aluno ficticio&quot;,
+  &quot;controlador&quot;: &quot;organizacao que decide sobre a matricula&quot;,
+  &quot;operador&quot;: &quot;prestador que processa dados sob instrucoes&quot;,
+  &quot;canal_encarregado&quot;: &quot;canal interno publicado pela organizacao&quot;,
+  &quot;finalidade&quot;: &quot;administrar a matricula e o acesso ao curso&quot;,
+  &quot;base_legal_em_analise&quot;: &quot;execucao de contrato, quando aplicavel&quot;,
+  &quot;dados_necessarios&quot;: [&quot;identificador&quot;, &quot;email&quot;, &quot;curso&quot;],
+  &quot;dados_excluidos_por_excesso&quot;: [&quot;religiao&quot;, &quot;diagnostico de saude&quot;],
+  &quot;classificacao_interna&quot;: &quot;confidencial&quot;,
+  &quot;acesso&quot;: [&quot;equipe de matriculas&quot;],
+  &quot;retencao&quot;: &quot;prazo definido pela finalidade e obrigacoes aplicaveis&quot;,
+  &quot;direitos&quot;: &quot;receber pedido, verificar identidade, analisar e responder&quot;,
+  &quot;descarte&quot;: &quot;eliminar ou anonimizar quando cabivel, com registro&quot;
+}</code></pre><h5>Como conferir</h5><p class="expected">Finalidade/adequação/necessidade orientam a coleta; qualidade e transparência exigem informação correta e clara; livre acesso permite consultar o tratamento. Segurança e prevenção pedem controles; não discriminação limita usos abusivos; prestação de contas exige evidência. Classificação orienta manuseio, mas não define a base legal.</p></article><article class="code-example"><h4>Separar minimização, pseudonimização e divulgação</h4><p class="code-kind">Python 3 · executável local sobre dados fictícios</p><p>Uma lista de campos permitidos reduz dados compartilhados. O token aleatório demonstra pseudonimização porque permanece uma tabela de correspondência.</p><pre tabindex="0" aria-label="Código: Separar minimização, pseudonimização e divulgação"><code>from secrets import token_hex
+
+cadastro = {&quot;nome&quot;: &quot;Pessoa Ficticia&quot;, &quot;email&quot;: &quot;pessoa@example.com&quot;,
+            &quot;curso&quot;: &quot;redes&quot;, &quot;religiao&quot;: &quot;nao necessaria&quot;}
+permitidos = {&quot;email&quot;, &quot;curso&quot;}
+minimizado = {k: v for k, v in cadastro.items() if k in permitidos}
+print(&quot;campos:&quot;, sorted(minimizado))
+token = token_hex(16)
+correspondencia = {token: cadastro[&quot;email&quot;]}  # proteger separadamente
+pseudonimo = {&quot;aluno_id&quot;: token, &quot;curso&quot;: cadastro[&quot;curso&quot;]}
+print(&quot;reidentificavel:&quot;, pseudonimo[&quot;aluno_id&quot;] in correspondencia)
+
+niveis = {&quot;comunicado_aprovado&quot;: &quot;publica&quot;, &quot;manual_rotina&quot;: &quot;interna&quot;,
+          &quot;contrato_nao_publico&quot;: &quot;confidencial&quot;, &quot;prontuario&quot;: &quot;restrita&quot;}
+for documento, nivel in niveis.items():
+    print(documento, &quot;→&quot;, nivel)</code></pre><h5>Como conferir</h5><p class="expected">campos: [&#x27;curso&#x27;, &#x27;email&#x27;]
+reidentificavel: True
+Remover o nome ou usar um hash/token não garante anonimização. A tabela de correspondência e outros atributos podem reidentificar. Os níveis são da política didática; não são categorias de classificação impostas pela LGPD.</p></article><article class="code-example"><h4>Registrar exercício de direitos e incidente</h4><p class="code-kind">JSON · fluxo administrativo ilustrativo</p><p>O atendimento depende da análise de identidade, escopo, bases legais, retenção e exceções. Não existe um comando que, sozinho, garanta conformidade com a LGPD.</p><pre tabindex="0" aria-label="Código: Registrar exercício de direitos e incidente"><code>{
+  &quot;pedido&quot;: {&quot;tipo&quot;: &quot;acesso e correcao&quot;, &quot;protocolo&quot;: &quot;demo-001&quot;},
+  &quot;etapas&quot;: [
+    &quot;verificar identidade sem coletar dados excessivos&quot;,
+    &quot;localizar tratamentos e avaliar o pedido&quot;,
+    &quot;responder pelo canal autorizado e registrar a decisao&quot;
+  ],
+  &quot;se_incidente&quot;: [
+    &quot;conter e reportar internamente&quot;,
+    &quot;preservar evidencias e avaliar dados/pessoas afetados&quot;,
+    &quot;responsaveis avaliam comunicacao a ANPD e titulares&quot;
+  ],
+  &quot;se_eliminacao&quot;: &quot;verificar hipoteses de conservacao e executar descarte cabivel&quot;
+}</code></pre><h5>Como conferir</h5><p class="expected">Revogação do consentimento, eliminação e portabilidade têm requisitos próprios. Dados publicados continuam sujeitos às regras aplicáveis. O registro deve documentar a decisão, sem copiar senhas, documentos ou dados sensíveis desnecessariamente.</p></article></div>
+    <div id="quizPrivacy"></div>
+    <div id="quizClassification"></div>
   </section>
 
   </main>
@@ -444,7 +1151,7 @@ function heroDraw(){
   renderBits(document.getElementById("heroBits"),heroIp,heroPfx,idx=>{
     heroIp=(heroIp ^ (1<<(31-idx)))>>>0; heroDraw();
   });
-  const hosts=heroPfx>=31?0:Math.pow(2,32-heroPfx)-2;
+  const hosts=heroPfx>=31?Math.pow(2,32-heroPfx):Math.pow(2,32-heroPfx)-2;
   document.getElementById("heroIp").textContent=intToIp(heroIp);
   document.getElementById("heroP").textContent="/"+heroPfx;
   document.getElementById("heroMask").textContent=intToIp(maskInt(heroPfx));
@@ -455,31 +1162,41 @@ document.getElementById("heroPfx").addEventListener("input",e=>{heroPfx=+e.targe
 heroDraw();
 
 /* ============ navegação ============ */
-const MODS=["Camadas","Endereçamento","Máscara e CIDR","Sub-redes","ARP","Tabela de rotas","OSPF"];
+const MODULES=[{"id": "m10", "name": "Fundamentos de SI", "stage": "Fundamentos e máquina", "goal": "Distinguir confidencialidade, integridade, disponibilidade, autenticidade e rastreabilidade."}, {"id": "m11", "name": "Ativos e riscos", "stage": "Fundamentos e máquina", "goal": "Descrever um cenário de risco, escolher controles e avaliar o que permanece."}, {"id": "m12", "name": "Sistemas e endpoints", "stage": "Fundamentos e máquina", "goal": "Relacionar processos, contas, arquivos e serviços à proteção do dispositivo."}, {"id": "m1", "name": "Endereçamento", "stage": "Endereços e entrega", "goal": "Ler IPv4 e IPv6 e distinguir interface, endereço e escopo."}, {"id": "m2", "name": "Máscara e CIDR", "stage": "Endereços e entrega", "goal": "Calcular rede, intervalo e capacidade a partir do endereço e do prefixo."}, {"id": "m3", "name": "Sub-redes", "stage": "Endereços e entrega", "goal": "Dividir um bloco sem sobrepor intervalos e conferir os limites."}, {"id": "m4", "name": "ARP", "stage": "Endereços e entrega", "goal": "Identificar o próximo salto IPv4 e resolver o MAC que receberá o quadro."}, {"id": "m5", "name": "Tabela de rotas", "stage": "Endereços e entrega", "goal": "Aplicar o prefixo mais específico e diferenciar destino final, próximo salto e NAT."}, {"id": "m7", "name": "DNS e DHCP", "stage": "Serviços e protocolos", "goal": "Separar configuração automática de rede da resolução de nomes."}, {"id": "m8", "name": "Portas, HTTP e HTTPS", "stage": "Serviços e protocolos", "goal": "Interpretar portas, fluxo TCP, mensagens HTTP e o limite da proteção TLS."}, {"id": "m0", "name": "Camadas e pacote", "stage": "Serviços e protocolos", "goal": "Ler campos e bytes de uma requisição encapsulada e comparar capturas antes/depois do NAT."}, {"id": "m6", "name": "OSPF", "stage": "Serviços e protocolos", "goal": "Relacionar vizinhança, anúncios, custo e convergência ao cálculo das rotas."}, {"id": "m9", "name": "VPN, VLAN e firewall", "stage": "Defesa e dados", "goal": "Conectar segmentos e permitir somente os fluxos previstos na política."}, {"id": "m13", "name": "Phishing e malware", "stage": "Defesa e dados", "goal": "Inspecionar indícios, evitar ações perigosas e registrar a resposta a incidentes."}, {"id": "m14", "name": "LGPD e classificação", "stage": "Defesa e dados", "goal": "Traduzir finalidade, necessidade e classificação em decisões e controles verificáveis."}];
+const MODS=MODULES.map(module=>module.name);
 const navEl=document.getElementById("nav");
 MODS.forEach((name,i)=>{
   const li=document.createElement("li");
   const b=document.createElement("button");
   b.innerHTML='<span class="n">'+(i+1)+'</span><span>'+name+'</span>';
   b.setAttribute("aria-current",i===0?"true":"false");
+  b.setAttribute("aria-controls",MODULES[i].id);
+  if(i===0||MODULES[i].stage!==MODULES[i-1].stage){
+    const label=document.createElement('div');label.className='nav-stage';label.textContent=MODULES[i].stage;li.appendChild(label);
+  }
   b.addEventListener("click",()=>show(i));
   li.appendChild(b); navEl.appendChild(li);
 });
-function show(i){
+function show(i,focusHeading=false){
   document.querySelectorAll(".mod").forEach((s,k)=>s.classList.toggle("on",k===i));
   navEl.querySelectorAll("button").forEach((b,k)=>{
     b.setAttribute("aria-current",k===i?"true":"false");
     if(k===i) b.classList.add("done");
   });
-  window.scrollTo({top:document.querySelector(".wrap").offsetTop-16,behavior:"smooth"});
+  document.getElementById("readingPosition").textContent="Etapa "+(i+1)+" de "+MODS.length+" · "+MODULES[i].stage;
+  if(focusHeading){
+    const heading=document.querySelector("#"+MODULES[i].id+" h2");
+    heading.tabIndex=-1; heading.focus({preventScroll:true});
+  }
+  window.scrollTo({top:document.querySelector(".wrap").offsetTop-16,behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
 }
 
 /* ============ 1. camadas ============ */
 const LAYERS=[
-  {t:"Aplicação",p:"HTTP, DNS, SSH",d:"Onde o programa vive. Define o formato da conversa: um GET, uma consulta de nome, uma sessão remota."},
-  {t:"Transporte",p:"TCP, UDP",d:"Entrega para o processo certo através da porta, e no caso do TCP garante ordem e retransmissão do que se perdeu."},
+  {t:"Aplicação",p:"HTTP, DNS, SSH",d:"Define sintaxe e semântica das mensagens. HTTP tem métodos e status; DNS tem perguntas e registros; SSH estabelece uma sessão remota protegida."},
+  {t:"Transporte",p:"TCP, UDP",d:"As portas identificam pontos de comunicação. TCP usa números de sequência, confirmações e retransmissões para oferecer um fluxo ordenado; pode reportar falha. UDP não oferece essas garantias por si só."},
   {t:"Rede",p:"IP, ICMP",d:"Endereça e roteia entre redes diferentes. É aqui que existe IP, máscara, rota e next hop."},
-  {t:"Enlace",p:"Ethernet, Wi-Fi, ARP",d:"Entrega o quadro para o vizinho no mesmo meio físico, usando endereço MAC. Não sabe nada além do próprio segmento."}
+  {t:"Enlace",p:"Ethernet, Wi-Fi, ARP",d:"Ethernet entrega quadros por endereços MAC no enlace. Switches encaminham dentro da VLAN. ARP resolve o endereço IPv4 do próximo salto para seu MAC; IPv6 usa Neighbor Discovery."}
 ];
 const stack=document.getElementById("stack");
 LAYERS.forEach((l,i)=>{
@@ -493,24 +1210,111 @@ LAYERS.forEach((l,i)=>{
   stack.appendChild(d);
 });
 
-const encOut=document.getElementById("encapOut");
-function encap(){
-  const p=document.getElementById("payload").value||"(vazio)";
-  encOut.innerHTML=
-   '<div class="box e1"><span class="hdr">quadro Ethernet: MAC orig aa:bb:cc:00:01 / MAC dest aa:bb:cc:00:02</span>'+
-    '<div class="box e2"><span class="hdr">cabeçalho IP: 192.168.1.10 para 192.168.1.20, TTL 64</span>'+
-      '<div class="box e3"><span class="hdr">cabeçalho TCP: porta 49152 para porta 80</span>'+
-        '<div class="pay">'+p.replace(/[<>&]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]))+'</div>'+
-      '</div></div></div>';
+const encOut=document.getElementById('encapOut');
+let packetMode='frame';
+function internetChecksum(bytes){
+  let sum=0;
+  for(let i=0;i<bytes.length;i+=2) sum+=(bytes[i]<<8)+(bytes[i+1]||0);
+  while(sum>>>16) sum=(sum&0xffff)+(sum>>>16);
+  return (~sum)&0xffff;
 }
-function decap(){
-  const p=document.getElementById("payload").value||"(vazio)";
-  encOut.innerHTML='<div class="pay">'+p.replace(/[<>&]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]))+
-   '</div><p class="small">Os três cabeçalhos foram removidos, um por camada, e o dado original chegou ao programa.</p>';
+function hex16(value){return '0x'+value.toString(16).padStart(4,'0');}
+function joinBytes(...arrays){
+  const result=new Uint8Array(arrays.reduce((sum,a)=>sum+a.length,0));
+  let offset=0;arrays.forEach(a=>{result.set(a,offset);offset+=a.length;});return result;
 }
-document.getElementById("encapBtn").addEventListener("click",encap);
-document.getElementById("decapBtn").addEventListener("click",decap);
+function buildPacket(path,after){
+  const request='GET '+path+' HTTP/1.1\r\nHost: portal.example\r\nUser-Agent: netlab/1.0\r\nAccept: text/html\r\nConnection: close\r\n\r\n';
+  // Inputs are restricted to ASCII, so one character equals one transmitted byte.
+  const payload=Uint8Array.from(request,c=>c.charCodeAt(0));
+  const source=after?[203,0,113,5]:[10,12,1,124],destination=[192,0,2,80];
+  const sport=after?62001:45888,ttl=after?63:64;
+  const tcp=new Uint8Array(20),t=new DataView(tcp.buffer);
+  t.setUint16(0,sport);t.setUint16(2,80);t.setUint32(4,5000);t.setUint32(8,9001);
+  tcp[12]=0x50;tcp[13]=0x18;t.setUint16(14,64240);
+  const pseudo=new Uint8Array(12);pseudo.set(source);pseudo.set(destination,4);pseudo[9]=6;
+  new DataView(pseudo.buffer).setUint16(10,tcp.length+payload.length);
+  const tcpChecksum=internetChecksum(joinBytes(pseudo,tcp,payload));t.setUint16(16,tcpChecksum);
+  const ip=new Uint8Array(20),v=new DataView(ip.buffer);
+  ip[0]=0x45;v.setUint16(2,40+payload.length);v.setUint16(4,0x1234);v.setUint16(6,0x4000);
+  ip[8]=ttl;ip[9]=6;ip.set(source,12);ip.set(destination,16);
+  const ipChecksum=internetChecksum(ip);v.setUint16(10,ipChecksum);
+  const ethernet=new Uint8Array(14);
+  const srcMac=after?[2,0,0,0,0,16]:[2,0,0,0,0,1];
+  const dstMac=after?[2,0,0,0,0,32]:[2,0,0,0,0,254];
+  ethernet.set(dstMac);ethernet.set(srcMac,6);ethernet[12]=8;ethernet[13]=0;
+  const mac=arr=>arr.map(n=>n.toString(16).padStart(2,'0')).join(':');
+  return {request,payload,source:source.join('.'),destination:destination.join('.'),sport,ttl,ipChecksum,tcpChecksum,
+    srcMac:mac(srcMac),dstMac:mac(dstMac),frame:joinBytes(ethernet,ip,tcp,payload),pseudo};
+}
+function currentPacket(){
+  const input=document.getElementById('payload'),path=input.value;
+  const valid=/^\/(?:[A-Za-z0-9._~!$&'()*+,;=:@/?-]|%[0-9a-fA-F]{2})*$/.test(path)&&path.length<=128;
+  input.classList.toggle('bad',!valid);input.setAttribute('aria-invalid',String(!valid));
+  document.getElementById('packetError').textContent=valid?'':'Use um caminho começando com /, com até 128 caracteres ASCII, sem fragmento # ou quebras de linha. Codifique espaços e caracteres especiais com % seguido de dois dígitos hexadecimais (ex.: %20).';
+  document.getElementById('packetDownload').disabled=!valid;
+  return valid?buildPacket(path,document.getElementById('packetHop').value==='after'):null;
+}
+function packetBlock(title,header,payload){
+  const section=document.createElement('div');section.className='packet-layer';
+  const heading=document.createElement('h4');heading.textContent=title;section.appendChild(heading);
+  if(header){const pre=document.createElement('pre');pre.textContent=header;pre.tabIndex=0;section.appendChild(pre);}
+  if(payload){const label=document.createElement('div');label.className='payload-label';label.textContent='Payload';section.append(label,payload);}
+  return section;
+}
+function drawPacket(){
+  const p=currentPacket();encOut.replaceChildren();if(!p)return;
+  const http=packetBlock('HTTP/1.1 — linha inicial e headers; corpo de 0 bytes',p.request.replace(/\r\n/g,'\\r\\n\n'),null);
+  const length=p.payload.length;
+  if(packetMode==='application'){
+    const explanation=document.createElement('p');explanation.className='note';
+    explanation.textContent='No destino: Ethernet identifica IPv4 pelo EtherType; IPv4 identifica TCP pelo Protocol; TCP valida, reordena e entrega os bytes à conexão da porta 80. HTTP interpreta a linha de requisição e os cabeçalhos. Este recorte não simula retransmissões nem a resposta do servidor.';
+    encOut.append(explanation,http);return;
+  }
+  const tcp=packetBlock('TCP — segmento de '+(20+length)+' bytes',
+    'Header — 20 bytes, sem opções\n'+
+    'Source Port:        '+p.sport+'\nDestination Port:   80\n'+
+    'Sequence Number:    5000 (absoluto)\nAcknowledgment:     9001 (absoluto)\n'+
+    'Data Offset:        5 × 4 = 20 bytes\nReserved:           0\nFlags:              0x18 (PSH, ACK)\n'+
+    'Window:             64240 (campo de 16 bits)\nChecksum:           '+hex16(p.tcpChecksum)+'\nUrgent Pointer:     0',http);
+  const ip=packetBlock('IPv4 — pacote de '+(40+length)+' bytes',
+    'Header — 20 bytes, sem opções\nVersion:            4\nIHL:                5 × 4 = 20 bytes\n'+
+    'DSCP / ECN:         0 / 0\nTotal Length:       '+(40+length)+' bytes (IP + TCP + HTTP)\n'+
+    'Identification:     0x1234\nFlags:              DF=1, MF=0, reservado=0\nFragment Offset:    0\n'+
+    'Time To Live:       '+p.ttl+'\nProtocol:           6 (TCP)\nHeader Checksum:    '+hex16(p.ipChecksum)+'\n'+
+    'Source Address:     '+p.source+'\nDestination Address: '+p.destination,tcp);
+  const ethernet=packetBlock('Ethernet II — '+p.frame.length+' bytes capturados (sem FCS)',
+    'Header — 14 bytes, sem tag VLAN\nDestination MAC:    '+p.dstMac+'\nSource MAC:         '+p.srcMac+'\nEtherType:          0x0800 (IPv4)',ip);
+  const summary=document.createElement('p');summary.className='note';
+  summary.textContent='Comprimentos: Ethernet 14 + IPv4 20 + TCP 20 + HTTP '+length+' = '+p.frame.length+' bytes capturados. Checksum IPv4 cobre só o cabeçalho IP; checksum TCP inclui pseudo-header IPv4, cabeçalho TCP e dados. O pseudo-header não é transmitido como um cabeçalho adicional.';
+  const details=document.createElement('details');const title=document.createElement('summary');title.textContent='Bytes reais em hexadecimal — offsets a partir do quadro';
+  const pre=document.createElement('pre');pre.tabIndex=0;pre.className='packet-hex';
+  const lines=[];for(let i=0;i<p.frame.length;i+=16){lines.push(i.toString(16).padStart(4,'0')+'  '+[...p.frame.slice(i,i+16)].map(n=>n.toString(16).padStart(2,'0')).join(' '));}
+  pre.textContent=lines.join('\n');details.append(title,pre);
+  const boundaries=document.createElement('p');boundaries.className='small';boundaries.textContent='Offsets: Ethernet 0–13; IPv4 14–33; TCP 34–53; HTTP 54–'+(p.frame.length-1)+'. Endereços multibyte e números dos protocolos usam ordem de rede (big-endian). Seq/Ack são absolutos; o Wireshark pode exibir números relativos por padrão.';
+  encOut.append(ethernet,summary,details,boundaries);
+}
+function encap(){packetMode='frame';drawPacket();}
+function decap(){packetMode='application';drawPacket();}
+function makePcap(frame){
+  const file=new Uint8Array(40+frame.length),v=new DataView(file.buffer);
+  v.setUint32(0,0xa1b2c3d4,true);v.setUint16(4,2,true);v.setUint16(6,4,true);
+  v.setUint32(16,65535,true);v.setUint32(20,1,true); // Ethernet
+  // Timestamp zero is intentional: synthetic capture, not a live observation.
+  v.setUint32(32,frame.length,true);v.setUint32(36,frame.length,true);file.set(frame,40);return file;
+}
+document.getElementById('encapBtn').addEventListener('click',encap);
+document.getElementById('decapBtn').addEventListener('click',decap);
+document.getElementById('packetHop').addEventListener('change',drawPacket);
+document.getElementById('payload').addEventListener('input',drawPacket);
+document.getElementById('packetDownload').addEventListener('click',()=>{
+  const packet=currentPacket();if(!packet)return;
+  const url=URL.createObjectURL(new Blob([makePcap(packet.frame)],{type:'application/vnd.tcpdump.pcap'}));
+  const link=document.createElement('a');link.href=url;link.download='netlab-http.pcap';link.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
 encap();
+
 
 /* ============ 2. endereçamento ============ */
 function octRead(){
@@ -526,10 +1330,14 @@ function tipoIp(v){
   if(v[0]===172 && v[1]>=16 && v[1]<=31) return "privado (172.16.0.0/12)";
   if(v[0]===192 && v[1]===168) return "privado (192.168.0.0/16)";
   if(v[0]===127) return "loopback (127.0.0.0/8), é a própria máquina";
-  if(v[0]===169 && v[1]===254) return "link-local (169.254.0.0/16), aparece quando o DHCP falha";
+  if(v[0]===169 && v[1]===254) return "link-local (169.254.0.0/16), pode ser autoconfigurado quando não há concessão DHCP";
   if(v[0]>=224 && v[0]<=239) return "multicast (224.0.0.0/4)";
-  if(v[0]===0) return "reservado";
-  return "público, roteável na internet";
+  if(v[0]===0) return "reservado (0.0.0.0/8)";
+  if(v[0]===255 && v.slice(1).every(x=>x===255)) return "broadcast limitado";
+  if(v[0]>=240) return "reservado (240.0.0.0/4)";
+  if((v[0]===192&&v[1]===0&&v[2]===2)||(v[0]===198&&v[1]===51&&v[2]===100)||(v[0]===203&&v[1]===0&&v[2]===113)) return "documentação (não usar como destino público real)";
+  if(v[0]===100&&v[1]>=64&&v[1]<=127) return "endereçamento compartilhado (100.64.0.0/10), comum em CGNAT";
+  return "fora das faixas destacadas aqui; consulte os registros especiais da IANA antes de concluir que é público";
 }
 function octDraw(){
   const v=octRead();
@@ -550,12 +1358,12 @@ function v6Expand(s){
   }
   const h=head?head.split(":"):[];
   const t=tail?tail.split(":"):[];
-  if(h.some(x=>x&&!/^[0-9a-f]{1,4}$/.test(x))||t.some(x=>x&&!/^[0-9a-f]{1,4}$/.test(x))) return null;
+  if(h.some(x=>!/^[0-9a-f]{1,4}$/.test(x))||t.some(x=>!/^[0-9a-f]{1,4}$/.test(x))) return null;
   const hf=h.filter(x=>x!==""), tf=t.filter(x=>x!=="");
   let groups;
   if(s.indexOf("::")>=0){
     const fill=8-hf.length-tf.length;
-    if(fill<0) return null;
+    if(fill<1) return null;
     groups=hf.concat(Array(fill).fill("0"),tf);
   }else{
     groups=hf;
@@ -607,7 +1415,7 @@ function cidrDraw(){
   document.getElementById("cBc").textContent=p>=31?"não se aplica":intToIp(bc);
   document.getElementById("cF").textContent=p>=31?intToIp(net):intToIp(net+1);
   document.getElementById("cL").textContent=p>=31?intToIp(bc):intToIp(bc-1);
-  document.getElementById("cH").textContent=p>=31?fmtNum(total)+" (caso especial de enlace ponto a ponto)":fmtNum(total-2);
+  document.getElementById("cH").textContent=p===32?"1 (endereço individual)":p===31?"2 (enlace ponto a ponto)":fmtNum(total-2);
   document.getElementById("cT").textContent=fmtNum(total);
 }
 document.getElementById("cidrIp").addEventListener("input",cidrDraw);
@@ -624,12 +1432,13 @@ document.getElementById("spBtn").addEventListener("click",()=>{
   const p=parseInt(document.getElementById("spPfx").value,10);
   const np=parseInt(document.getElementById("spNew").value,10);
   if(ip===null||isNaN(p)||isNaN(np)){ out.innerHTML='<p class="no">Endereço ou prefixo inválido.</p>'; return; }
+  if(p<0||p>30||!Number.isInteger(Number(document.getElementById("spPfx").value))||!Number.isInteger(Number(document.getElementById("spNew").value))){ out.textContent="Use prefixos inteiros; o bloco inicial deve estar entre /0 e /30."; return; }
   if(np<=p){ out.innerHTML='<p class="no">O novo prefixo precisa ser maior que '+p+'.</p>'; return; }
   if(np>32){ out.innerHTML='<p class="no">O prefixo máximo é 32.</p>'; return; }
   const qtd=Math.pow(2,np-p);
   if(qtd>256){ out.innerHTML='<p class="no">Isso geraria '+fmtNum(qtd)+' sub-redes. Escolha uma diferença de até 8 bits para ver a lista.</p>'; return; }
   const base=netInt(ip,p), step=Math.pow(2,32-np);
-  let h='<p class="small" style="margin-top:.8rem">Pegando '+(np-p)+' bit(s) emprestado(s) da parte de host, o bloco vira '+qtd+' sub-redes de '+fmtNum(step)+' endereços cada.</p>';
+  let h='<p class="small" style="margin-top:.8rem">Acrescentando '+(np-p)+' bit(s) ao prefixo, o bloco resulta em '+qtd+' sub-redes de '+fmtNum(step)+' endereços cada.</p>';
   h+='<table><thead><tr><th>#</th><th>rede</th><th>primeiro host</th><th>último host</th><th>broadcast</th></tr></thead><tbody>';
   for(let i=0;i<qtd;i++){
     const n=(base+i*step)>>>0, b=(n+step-1)>>>0;
@@ -679,10 +1488,10 @@ novaQuestao();
 
 /* ============ 5. ARP ============ */
 const HOSTS=[
-  {id:"A",ip:"192.168.1.10",mac:"aa:00:01"},
-  {id:"B",ip:"192.168.1.20",mac:"aa:00:02"},
-  {id:"C",ip:"192.168.1.30",mac:"aa:00:03"},
-  {id:"GW",ip:"192.168.1.1",mac:"aa:00:fe"}
+  {id:"A",ip:"192.168.1.10",mac:"02:00:00:00:00:01"},
+  {id:"B",ip:"192.168.1.20",mac:"02:00:00:00:00:02"},
+  {id:"C",ip:"192.168.1.30",mac:"02:00:00:00:00:03"},
+  {id:"GW",ip:"192.168.1.1",mac:"02:00:00:00:00:fe"}
 ];
 let arpStep=0, arpCase="local";
 function arpDraw(){
@@ -691,7 +1500,7 @@ function arpDraw(){
   if(arpStep>=2) lit.push("B","C","GW");
   const respondente = arpCase==="local" ? "B" : "GW";
   let s='<line x1="60" y1="150" x2="560" y2="150" stroke="#9AA8B4" stroke-width="3"/>';
-  s+='<text x="60" y="172" class="svgsm">switch / mesmo domínio de broadcast</text>';
+  s+='<text x="60" y="172" class="svgsm">switch / mesma VLAN; rótulos MAC mostram os últimos 3 bytes</text>';
   const xs={A:70,B:220,C:370,GW:490};
   HOSTS.forEach(h=>{
     const x=xs[h.id];
@@ -703,7 +1512,7 @@ function arpDraw(){
     s+='<rect class="'+cls+'" x="'+x+'" y="55" width="80" height="50" rx="2"/>';
     s+='<text class="svgtxt" x="'+(x+8)+'" y="74">'+h.id+'</text>';
     s+='<text class="svgsm" x="'+(x+8)+'" y="88">'+h.ip+'</text>';
-    s+='<text class="svgsm" x="'+(x+8)+'" y="99">'+h.mac+'</text>';
+    s+='<text class="svgsm" x="'+(x+8)+'" y="99">'+h.mac.slice(-8)+'</text>';
   });
   if(arpCase==="remote"){
     s+='<line x1="530" y1="80" x2="600" y2="80" stroke="#9AA8B4" stroke-width="2"/>';
@@ -711,10 +1520,10 @@ function arpDraw(){
     s+='<text class="svgsm" x="530" y="30">8.8.8.8</text>';
   }
   if(arpStep===2){
-    s+='<text class="svgtxt" x="70" y="210" fill="#D75C12">ARP request em broadcast: quem tem '+(arpCase==="local"?"192.168.1.20":"192.168.1.1")+'? responda para aa:00:01</text>';
+    s+='<text class="svgtxt" x="70" y="210" fill="#D75C12">ARP request em broadcast: quem tem '+(arpCase==="local"?"192.168.1.20":"192.168.1.1")+'? responda para A</text>';
   }
   if(arpStep>=3){
-    s+='<text class="svgtxt" x="70" y="210" fill="#1B7A48">ARP reply unicast de '+respondente+': '+(arpCase==="local"?"192.168.1.20":"192.168.1.1")+' está em '+(arpCase==="local"?"aa:00:02":"aa:00:fe")+'</text>';
+    s+='<text class="svgtxt" x="70" y="210" fill="#1B7A48">ARP reply unicast de '+respondente+': '+(arpCase==="local"?"192.168.1.20":"192.168.1.1")+' respondeu com seu MAC (ver tabela)' +'</text>';
   }
   svg.innerHTML=s;
 
@@ -733,7 +1542,7 @@ function arpDraw(){
     '<div class="step '+(i<arpStep?"done":(i===arpStep?"now":""))+'">'+t+'</div>').join("");
 
   const tb=document.getElementById("arpTable");
-  if(arpStep>=4) tb.textContent=(arpCase==="local"?"192.168.1.20  aa:00:02":"192.168.1.1  aa:00:fe")+"   (expira em alguns minutos)";
+  if(arpStep>=4) tb.textContent=(arpCase==="local"?"192.168.1.20  02:00:00:00:00:02":"192.168.1.1  02:00:00:00:00:fe")+"   (entrada dinâmica; validade depende do sistema)";
   else tb.textContent="vazia";
   document.getElementById("arpTarget").textContent=arpCase==="local"?"192.168.1.20":"8.8.8.8";
 }
@@ -857,6 +1666,181 @@ function ospfCalc(){
 document.getElementById("ospfCalc").addEventListener("click",ospfCalc);
 document.getElementById("ospfReset").addEventListener("click",()=>{ LINKS.forEach(l=>l.up=true); ospfCalc(); });
 ospfCalc();
+/* ============ módulos complementares: simulações locais ============ */
+const SERVICE_STEPS=[
+  ['DHCP Discover','O cliente procura servidores DHCP na rede local, normalmente por broadcast.'],
+  ['DHCP Offer','O servidor oferece 192.168.10.37/24 e parâmetros de configuração.'],
+  ['DHCP Request','O cliente solicita a oferta escolhida e informa sua escolha aos servidores.'],
+  ['DHCP ACK','O servidor confirma a concessão. Neste exemplo: IP 192.168.10.37/24, gateway 192.168.10.1 e DNS 192.168.10.53.'],
+  ['Consulta DNS','Para acessar portal.example, o cliente pergunta ao resolvedor pelo registro A.'],
+  ['Resolução DNS','Sem resposta em cache, o resolvedor segue referências até o servidor autoritativo.'],
+  ['Resposta DNS','O resolvedor retorna 192.0.2.10 e mantém a resposta em cache pelo TTL. O cliente agora pode tentar a conexão ao serviço.']
+];
+let serviceStep=0;
+function drawServices(){
+  const steps=document.getElementById('serviceSteps');
+  steps.replaceChildren();
+  SERVICE_STEPS.forEach(([title],i)=>{
+    const item=document.createElement('div');
+    item.className='step'+(i<serviceStep-1?' done':i===serviceStep-1?' now':'');
+    item.textContent=(i+1)+'. '+title;
+    steps.appendChild(item);
+  });
+  document.getElementById('serviceOut').textContent=serviceStep?SERVICE_STEPS[serviceStep-1][1]:'Notebook conectado, ainda sem concessão DHCP. Avance para começar.';
+  document.getElementById('serviceNext').disabled=serviceStep===SERVICE_STEPS.length;
+}
+document.getElementById('serviceNext').addEventListener('click',()=>{if(serviceStep<SERVICE_STEPS.length) serviceStep++;drawServices();});
+document.getElementById('serviceReset').addEventListener('click',()=>{serviceStep=0;drawServices();});
+drawServices();
+
+function drawWeb(){
+  const secure=document.getElementById('webMode').value==='https';
+  document.getElementById('webOut').textContent=secure
+    ?'HTTPS: método, caminho, cabeçalhos e corpo ficam cifrados em trânsito entre as pontas TLS. Um observador ainda vê IPs, volume e horários. O certificado ajuda a verificar o domínio, mas não garante que o conteúdo seja confiável.'
+    :'HTTP sem TLS: um observador com acesso ao tráfego pode ler método, caminho, cabeçalhos e corpo, inclusive dados enviados. Um atacante no caminho pode alterar a comunicação. Trocar POST por GET, ou usar uma porta diferente, não acrescenta criptografia.';
+}
+document.getElementById('webMode').addEventListener('change',drawWeb);
+drawWeb();
+
+function evaluateFirewall(){
+  const source=document.getElementById('fwSource').value;
+  const protocol=document.getElementById('fwProtocol').value;
+  const input=document.getElementById('fwPort');
+  const port=Number(input.value);
+  const valid=input.value.trim()!==''&&Number.isInteger(port)&&port>=0&&port<=65535;
+  input.classList.toggle('bad',!valid);
+  input.setAttribute('aria-invalid',String(!valid));
+  const out=document.getElementById('fwOut');
+  if(!valid){out.textContent='Porta inválida: informe um inteiro de 0 a 65535.';return;}
+  const rule=protocol==='TCP'&&source==='10'&&port===443?1:protocol==='TCP'&&source==='99'&&port===22?2:3;
+  out.textContent=rule===3
+    ?'BLOQUEADO — regra 3. Nenhuma permissão anterior combina com origem VLAN '+source+', '+protocol+' e porta '+port+'. Estar em uma VPN ou mudar apenas a VLAN não cria uma permissão.'
+    :'PERMITIDO — regra '+rule+'. A origem VLAN '+source+' pode iniciar uma conexão '+protocol+' na porta '+port+' do servidor. Isso autoriza o tráfego; autenticação e permissões da aplicação continuam necessárias.';
+}
+document.getElementById('fwCheck').addEventListener('click',evaluateFirewall);
+evaluateFirewall();
+
+function drawRisk(){
+  const probability=Number(document.getElementById('riskProbability').value);
+  const impact=Number(document.getElementById('riskImpact').value);
+  const score=probability*impact;
+  const level=score<=2?'baixa':score<=4?'média':'alta';
+  document.getElementById('riskOut').textContent='Pontuação = '+probability+' × '+impact+' = '+score+'. Prioridade '+level+' nesta matriz: 1–2 baixa, 3–4 média, 6–9 alta. '+(score>=6?'Priorize o tratamento e acompanhe a recuperação.':'Registre a decisão e acompanhe mudanças no cenário.')+' O resultado é uma triagem didática, não uma garantia de segurança.';
+}
+['riskProbability','riskImpact'].forEach(id=>document.getElementById(id).addEventListener('change',drawRisk));
+drawRisk();
+
+const ENDPOINT_TIPS={
+  updates:'Planeje as atualizações e substitua versões sem suporte.',
+  access:'Revise privilégios, contas individuais e proteção de login.',
+  disk:'Habilite a criptografia conforme a política e proteja a chave de recuperação.',
+  defense:'Confira a proteção do endpoint, as regras do firewall e os alertas.',
+  backup:'Separe o backup do dispositivo e teste a restauração.'
+};
+function drawEndpoint(){
+  const checks=[...document.querySelectorAll('#endpointChecks input')];
+  const missing=checks.filter(input=>!input.checked);
+  document.getElementById('endpointOut').textContent=(checks.length-missing.length)+' de '+checks.length+' medidas marcadas. '+(missing.length?missing.map(input=>ENDPOINT_TIPS[input.value]).join(' '):'As medidas do checklist estão cobertas no cenário. Continue revisando configurações e alertas; isso não certifica que o equipamento esteja seguro.');
+}
+document.querySelectorAll('#endpointChecks input').forEach(input=>input.addEventListener('change',drawEndpoint));
+drawEndpoint();
+
+/* Questões com resposta explícita e justificativa, acessíveis por teclado. */
+const QUIZZES={
+  quizServices:[
+    {q:'O computador recebeu IP e gateway, mas não resolve nomes. Qual serviço investigar primeiro?',options:['DHCP, porque traduz nomes em IPs.','DNS, porque consulta os registros associados aos nomes.','ARP, porque fornece concessões de endereços.'],answer:1,why:'DHCP fornece configuração; DNS resolve nomes; ARP descobre o MAC de um vizinho IPv4. O sintoma orienta a investigação, sem provar sozinho a causa.'},
+    {q:'Uma concessão DHCP expirou. Qual afirmação está correta?',options:['O endereço pertence para sempre ao cliente.','O DNS passa a renovar o endereço.','O cliente precisa obter uma concessão válida para continuar usando aquele endereço.'],answer:2,why:'A atribuição DHCP tem prazo. Renovação e obtenção de concessões fazem parte do DHCP, não do DNS.'}
+  ],
+  quizWeb:[
+    {q:'Um site usa HTTPS. O que isso permite concluir?',options:['A conexão é protegida por TLS, com validação correta do certificado.','A organização por trás do site é necessariamente honesta.','Nenhum metadado da conexão pode ser observado.'],answer:0,why:'TLS protege o canal e autentica o domínio conforme o certificado. Sites fraudulentos também podem usar HTTPS, e metadados de rede ainda podem aparecer.'},
+    {q:'Uma regra libera TCP 443. Ela também libera automaticamente UDP 443?',options:['Sim, o número da porta é o único critério.','Não; transporte e porta precisam combinar com a regra.','Sim, porque toda conexão HTTPS usa TCP.'],answer:1,why:'TCP e UDP são transportes distintos. HTTP/3 usa QUIC sobre UDP, portanto uma regra restrita a TCP não o libera automaticamente.'}
+  ],
+  quizNetworkSecurity:[
+    {q:'Duas VLANs podem se comunicar através de um roteador. Como limitar o acesso entre elas?',options:['Trocar o número da VLAN por um número secreto.','Confiar que a VLAN já cifra e bloqueia todo acesso.','Aplicar uma política de firewall ou ACL no caminho do tráfego.'],answer:2,why:'VLAN separa domínios de broadcast. O roteamento permite comunicação entre eles; regras de acesso determinam o que será permitido.'},
+    {q:'Qual é o limite de uma VPN de segurança?',options:['Ela protege o tráfego do túnel, mas não corrige um endpoint infectado.','Ela elimina a necessidade de autenticar usuários.','Ela garante anonimato em qualquer site.'],answer:0,why:'O túnel tem pontas e escopo. Malware no endpoint pode acessar os dados antes da cifragem ou depois da decifragem.'}
+  ],
+  quizPrinciples:[
+    {q:'Uma planilha salarial foi enviada a uma pessoa sem autorização. Qual princípio foi diretamente afetado?',options:['Disponibilidade.','Confidencialidade.','Rastreabilidade.'],answer:1,why:'Houve divulgação indevida. A planilha pode continuar íntegra e disponível, mas deixou de ser confidencial para aquele público.'},
+    {q:'Alguém alterou sem autorização a conta de pagamento em um cadastro. Qual princípio foi diretamente afetado?',options:['Integridade.','Disponibilidade.','Somente rastreabilidade.'],answer:0,why:'O cadastro sofreu uma modificação indevida. Permissões, verificações e auditoria ajudam a prevenir ou detectar esse tipo de alteração.'},
+    {q:'O sistema ficou fora do ar durante o expediente. Qual objetivo foi diretamente prejudicado?',options:['Autenticidade.','Confidencialidade.','Disponibilidade.'],answer:2,why:'Usuários autorizados não conseguem usar o serviço quando precisam. Redundância e recuperação ajudam a reduzir a interrupção.'},
+    {q:'MFA e logs de contas individuais apoiam principalmente quais objetivos, respectivamente?',options:['Disponibilidade e criptografia.','Autenticidade e rastreabilidade.','Classificação e anonimização.'],answer:1,why:'MFA reforça a verificação da identidade. Registros protegidos, com conta individual e horário confiável, permitem reconstruir ações.'}
+  ],
+  quizRisk:[
+    {q:'Um atacante explora um servidor sem correção para furtar dados. O que é a vulnerabilidade?',options:['A base de dados que tem valor.','O atacante.','A falha sem correção no servidor.'],answer:2,why:'O servidor e os dados são ativos; o atacante é uma fonte de ameaça; a falha é a fraqueza explorável. O risco considera a possibilidade e as consequências desse cenário.'},
+    {q:'Qual alternativa combina um controle detectivo e um de recuperação?',options:['Alerta de acesso anômalo e restauração de backup.','Senha e treinamento preventivo.','Fechadura e restrição de portas.'],answer:0,why:'O alerta ajuda a perceber o incidente; restaurar uma cópia íntegra ajuda a recuperar a operação. Controles podem desempenhar mais de uma função.'}
+  ],
+  quizEndpoint:[
+    {q:'Por que usar uma conta sem privilégios administrativos no dia a dia?',options:['Porque ela impede qualquer malware.','Porque limita as ações e o alcance de erros ou programas maliciosos.','Porque dispensa atualizar o sistema.'],answer:1,why:'Menor privilégio reduz o impacto potencial. Arquivos e dados acessíveis à conta ainda podem ser afetados; correções e outras proteções continuam importantes.'},
+    {q:'Um notebook tem disco cifrado. Qual medida continua necessária?',options:['Nenhuma: todos os arquivos já estão protegidos contra perda.','Somente esconder o nome do computador.','Backup separado com restauração testada.'],answer:2,why:'Cifrar o disco ajuda a proteger o acesso aos dados em certas situações de perda ou furto. Não recupera arquivos apagados, disco danificado ou dados cifrados por ransomware.'}
+  ],
+  quizPhishingMessage:[
+    {q:'Qual é a melhor ação diante da mensagem?',options:['Abrir o link porque começa com HTTPS.','Não usar o link; verificar pelo canal oficial conhecido e reportar.','Enviar só o código MFA, sem a senha.'],answer:1,why:'O pedido de senha e MFA, a urgência e a instrução para ignorar alertas são sinais de fraude. No exemplo, o host está sob validacao.example, não sob empresa.example. Confira o endereço completo: palavras familiares no começo não bastam.'}
+  ],
+  quizMalware:[
+    {q:'Um anexo executado começou a cifrar arquivos. Qual resposta é adequada?',options:['Reportar e seguir o procedimento de isolamento, preservando evidências.','Apagar todos os logs para remover o malware.','Continuar trabalhando até confirmar que todos os arquivos foram afetados.'],answer:0,why:'A resposta rápida ajuda a conter o dano. A equipe responsável deve orientar investigação e recuperação; apagar registros prejudica a análise.'},
+    {q:'Uma mensagem parece vir de um colega e pede transferência urgente. O que fazer?',options:['Confiar no nome exibido.','Responder enviando credenciais para provar identidade.','Confirmar por outro canal já conhecido antes de agir.'],answer:2,why:'O nome pode ser falsificado e até uma conta legítima pode estar comprometida. Confirmação independente reduz o risco de engenharia social.'}
+  ],
+  quizPrivacy:[
+    {q:'Qual exemplo é dado pessoal sensível na definição da LGPD?',options:['Preço público de um produto.','Diagnóstico de saúde associado a uma pessoa.','Número de patrimônio de uma mesa sem vínculo com pessoas.'],answer:1,why:'Informações de saúde vinculadas a uma pessoa integram a categoria de dados sensíveis. O contexto e a possibilidade de identificação precisam ser considerados.'},
+    {q:'Consentimento é sempre a única base legal possível?',options:['Sim; qualquer tratamento exige marcar uma caixa.','Sim; e ele autoriza todo uso futuro.','Não; a base aplicável depende da finalidade e da hipótese legal.'],answer:2,why:'Há outras hipóteses, como obrigação legal e execução de contrato. Dados sensíveis têm regras próprias. A escolha precisa ser justificada, não usada para contornar direitos.'}
+  ],
+  quizClassification:[
+    {q:'Pela política didática acima, como tratar um conjunto de prontuários identificados?',options:['Como informação pública, se foi digitalizada.','Como informação interna, liberada a qualquer empregado.','Como restrita, com acesso mínimo e proteção reforçada.'],answer:2,why:'Prontuários contêm dados de saúde. Neste exemplo de política, recebem o nível restrito; essa classificação organizacional não substitui os requisitos legais.'},
+    {q:'Um comunicado já aprovado para divulgação é classificado como público. O que ainda importa?',options:['Preservar sua integridade e publicar a versão autorizada.','Permitir que qualquer pessoa altere o original.','Remover toda responsabilidade pelo conteúdo.'],answer:0,why:'Público significa que a divulgação foi autorizada. Não significa liberar alteração indevida nem dispensar controle de versão.'}
+  ]
+};
+Object.entries(QUIZZES).forEach(([target,questions])=>{
+  const container=document.getElementById(target);
+  questions.forEach((question,index)=>{
+    const field=document.createElement('fieldset');
+    field.className='q';
+    const legend=document.createElement('legend');
+    legend.textContent=question.q;
+    field.appendChild(legend);
+    const choices=document.createElement('div');
+    choices.className='choices';
+    const group=target+'-'+index;
+    question.options.forEach((option,i)=>{
+      const label=document.createElement('label');
+      label.className='choice';
+      const input=document.createElement('input');
+      input.type='radio';input.name=group;input.value=String(i);
+      label.append(input,document.createTextNode(option));
+      choices.appendChild(label);
+    });
+    field.appendChild(choices);
+    const button=document.createElement('button');
+    button.className='btn';button.type='button';button.textContent='Conferir resposta';
+    const feedback=document.createElement('div');
+    feedback.className='fb';feedback.id=group+'-feedback';feedback.setAttribute('role','status');
+    button.setAttribute('aria-describedby',feedback.id);
+    button.addEventListener('click',()=>{
+      const selected=field.querySelector('input:checked');
+      feedback.className='fb';
+      if(!selected){feedback.textContent='Selecione uma alternativa antes de conferir.';return;}
+      const correct=Number(selected.value)===question.answer;
+      feedback.classList.add(correct?'ok':'no');
+      feedback.textContent=(correct?'Correto. ':'Ainda não. ')+question.why;
+    });
+    choices.addEventListener('change',()=>{feedback.textContent='';feedback.className='fb';});
+    field.append(button,feedback);container.appendChild(field);
+  });
+});
+
+/* Ações sequenciais também ficam disponíveis no fim de cada módulo. */
+document.querySelectorAll('.mod').forEach((section,index)=>{
+  const intro=document.createElement('div');intro.className='module-guide';
+  const objective=document.createElement('p');objective.textContent='Objetivo: '+MODULES[index].goal;
+  const prerequisites=document.createElement('p');prerequisites.className='small';prerequisites.textContent=index===0?'Comece aqui. Não há pré-requisitos técnicos.':'Antes desta etapa: '+MODULES[index-1].name+'. Siga a ordem do menu para construir os pré-requisitos.';
+  intro.append(objective,prerequisites);section.querySelector('.kicker').after(intro);
+  const footer=document.createElement('div');footer.className='module-footer';
+  const previous=document.createElement('button');previous.className='btn ghost';previous.textContent='← Anterior';previous.disabled=index===0;
+  previous.addEventListener('click',()=>show(index-1,true));
+  const next=document.createElement('button');next.className='btn';next.textContent=index===MODS.length-1?'Voltar ao início':'Próximo: '+MODS[index+1]+' →';
+  next.addEventListener('click',()=>show(index===MODS.length-1?0:index+1,true));
+  footer.append(previous,next);section.appendChild(footer);
+});
+
 </script>
 </body>
 </html>
