@@ -545,7 +545,7 @@ footer.end {
   <p><strong>Laravel</strong> é um framework PHP: um conjunto de peças prontas e bem testadas — roteamento, acesso a banco de dados, validação, linha de comando — sobre o qual você constrói a sua aplicação. Em vez de reinventar essas peças, você escreve apenas o que é específico do seu projeto.</p>
   <p><strong>Composer</strong> é o gerenciador de dependências do PHP (o equivalente ao <code>npm</code> do JavaScript ou ao <code>pip</code> do Python). É ele quem baixa o Laravel e todas as bibliotecas de que o projeto precisa.</p>
   <p>O Laravel também traz o <strong>Artisan</strong>, uma ferramenta de linha de comando (<code>php artisan ...</code>) que vamos usar o tempo todo: para subir o servidor, criar arquivos, rodar migrations e muito mais.</p>
-  <p>Requisitos desta seção: o Laravel 12 exige <strong>PHP entre 8.2 e 8.4</strong> — neste curso usamos o <strong>PHP 8.4</strong> — e um banco de dados (usaremos <strong>MySQL</strong>, que vai subir <strong>via Docker no Passo 2</strong>; nada de instalar MySQL na máquina).</p>
+  <p>Requisitos desta seção: o Laravel 12 exige <strong>PHP 8.2 ou superior</strong> — neste curso usamos o <strong>PHP 8.4</strong> — e um banco de dados (usaremos <strong>MySQL</strong>, que vai subir <strong>via Docker no Passo 2</strong>; nada de instalar MySQL na máquina).</p>
 
   <h3>Mão na massa: instalando o PHP 8.4 (Ubuntu)</h3>
   <p>O PPA do Ondřej Šurý é o repositório de referência do PHP para Debian/Ubuntu. Instale o PHP 8.4 com as extensões que o Laravel e o MySQL precisam:</p>
@@ -579,48 +579,32 @@ sudo mv composer.phar /usr/local/bin/composer
 composer --version</code></pre>
   </figure>
 
-  <h3>Mão na massa: instalando o instalador do Laravel</h3>
-  <p>O jeito oficial de criar projetos Laravel é com o <strong>instalador global</strong>, o pacote <code>laravel/installer</code>. Instale-o uma única vez com o Composer e ganhe o comando <code>laravel</code> no terminal:</p>
-
-  <figure class="code code--term">
-    <figcaption>Terminal</figcaption>
-    <pre><code>composer global require laravel/installer
-
-# make Composer's global bin folder visible to the shell
-echo 'export PATH="$HOME/.config/composer/vendor/bin:$PATH"' &gt;&gt; ~/.bashrc
-source ~/.bashrc
-
-# check the installation
-laravel --version</code></pre>
-  </figure>
-
-  <p>O ajuste do <code>PATH</code> é necessário porque o Composer instala os binários globais em <code>~/.config/composer/vendor/bin</code>, pasta que o shell não conhece por padrão. Se você usa zsh, troque <code>~/.bashrc</code> por <code>~/.zshrc</code>.</p>
-
   <h3>Mão na massa: criando o projeto BookShelf</h3>
-  <p>Agora nasce o nosso projeto. O <code>laravel new</code> baixa o esqueleto do Laravel 12, instala todas as dependências e deixa tudo pronto na pasta <code>bookshelf-api/</code> — os arquivos de infraestrutura do Passo 2 (Dockerfiles, <code>compose.yaml</code>) vão morar nessa mesma raiz, ao lado do código:</p>
+  <p>Agora nasce o nosso projeto. Vamos usar o <code>composer create-project</code> com a versão <code>12.*</code> explícita: ele baixa o esqueleto do <strong>Laravel 12</strong> com suas dependências compatíveis, incluindo o <strong>PHPUnit 11</strong> para testes. Tudo fica na pasta <code>bookshelf-api/</code> — os arquivos de infraestrutura do Passo 2 (Dockerfiles, <code>compose.yaml</code>) vão morar nessa mesma raiz, ao lado do código:</p>
 
   <figure class="code code--term">
     <figcaption>Terminal</figcaption>
-    <pre><code>laravel new bookshelf-api --using=laravel/laravel:^12.0
+    <pre><code>composer create-project laravel/laravel bookshelf-api "12.*"
 cd bookshelf-api
+php artisan --version
 php artisan serve</code></pre>
   </figure>
 
-  <p>Se você não utilizar a opção "----using=laravel/laravel:^12.0", o instalador faz algumas perguntas e instala o Laravel 13. Para este curso, responda: <strong>starter kit — None</strong> (nossa API não terá telas de login prontas); <strong>banco de dados — SQLite</strong>, o padrão, apenas por enquanto (no Passo 2 trocamos para o MySQL do Docker); e <strong>npm install — No</strong> (não vamos usar front-end).</p>
+  <p>O <code>php artisan --version</code> deve mostrar <strong>Laravel Framework 12.x</strong>. Esse caminho não usa o instalador global nem faz perguntas sobre starter kit ou framework de testes. O projeto vem com SQLite configurado para o primeiro acesso; no Passo 2 trocamos para o MySQL do Docker. Não é necessário instalar dependências npm para esta API.</p>
 
   <p>O <code>php artisan serve</code> sobe o servidor de desenvolvimento em <code>http://localhost:8000</code>. Abra esse endereço no navegador: você deve ver a página de boas-vindas do Laravel. Para parar o servidor, pressione <code>Ctrl+C</code>.</p>
 
   <div class="callout callout--tip">
     <p class="callout-label">Dica</p>
-    <p>Existe um caminho alternativo sem o instalador global: <code>composer create-project laravel/laravel bookshelf-api "12.*"</code>. Os dois chegam ao mesmo lugar — neste curso ficamos com o <code>laravel new</code>, que é o modo recomendado pela documentação oficial.</p>
+    <p>Se você já tem o instalador global e prefere usá-lo, a alternativa é <code>laravel new bookshelf-api --using="laravel/laravel:^12.0" --phpunit</code>. Execute apenas um dos caminhos de criação. A opção <code>--using</code> seleciona o esqueleto do Laravel 12, e <code>--phpunit</code> mantém o framework de testes desse esqueleto. Fixar só o esqueleto não fixa a versão do Pest que o instalador pode tentar adicionar. Se aparecerem perguntas adicionais, mantenha SQLite e responda <strong>No</strong> à instalação de dependências npm e do Laravel Boost.</p>
   </div>
 
-  <p>E o banco de dados? Ainda não conectamos nenhum — de propósito. No Passo 2 o MySQL sobe <strong>via Docker</strong>, e é lá que configuraremos o <code>.env</code> e rodaremos as primeiras migrations.</p>
+  <p>E o banco de dados? A criação do projeto prepara um SQLite local e executa as migrations padrão. No Passo 2 o MySQL sobe <strong>via Docker</strong>, e é lá que configuraremos o <code>.env</code> e rodaremos essas migrations no banco do curso.</p>
 
   <div class="verify">
     <h4>Como verificar</h4>
     <ul class="checklist">
-      <li><label><input type="checkbox" data-ck="p1-1"> <span><code>php -v</code> mostra PHP 8.4.x, e <code>composer --version</code> e <code>laravel --version</code> respondem sem erro.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p1-1"> <span><code>php -v</code> mostra PHP 8.4.x, <code>composer --version</code> responde sem erro e, dentro do projeto, <code>php artisan --version</code> mostra Laravel Framework 12.x.</span></label></li>
       <li><label><input type="checkbox" data-ck="p1-2"> <span>Com <code>php artisan serve</code> rodando, <code>http://localhost:8000</code> exibe a página de boas-vindas do Laravel.</span></label></li>
       <li><label><input type="checkbox" data-ck="p1-3"> <span>A pasta <code>bookshelf-api/</code> existe e contém o esqueleto do Laravel (<code>artisan</code>, <code>composer.json</code>, <code>app/</code>…).</span></label></li>
     </ul>
@@ -647,7 +631,7 @@ php artisan serve</code></pre>
   <h3>Conceito: uma imagem para desenvolver, outra para publicar</h3>
   <p>O container PHP terá <strong>dois Dockerfiles</strong>, porque desenvolvimento e produção pedem coisas diferentes:</p>
   <ul>
-    <li><strong><code>Dockerfile.dev</code></strong> — a imagem de desenvolvimento: instala <em>todas</em> as dependências (inclusive as de teste, como o PHPUnit) e serve a aplicação com o <code>artisan serve</code>, recarregando o código a cada requisição;</li>
+    <li><strong><code>Dockerfile.dev</code></strong> — a imagem de desenvolvimento: valida o <code>composer.lock</code>, instala <em>todas</em> as dependências (inclusive as de teste, como o PHPUnit) e repete essa verificação no projeto montado ao iniciar o container, antes de servir a aplicação com o <code>artisan serve</code>;</li>
     <li><strong><code>Dockerfile</code></strong> — a imagem de produção: instala só as dependências de runtime (<code>--no-dev</code>), otimiza o autoloader e habilita o <strong>OPcache</strong>, que guarda o PHP compilado em memória.</li>
   </ul>
   <p>É uma convenção comum: o <code>Dockerfile</code> "sem sobrenome" é o de produção — é ele que pipelines de deploy procuram por padrão — e as variantes ganham sufixo (<code>.dev</code>).</p>
@@ -670,17 +654,22 @@ WORKDIR /app
 
 COPY . .
 
-RUN composer install
+# validate the lock file and include development dependencies
+RUN composer validate --no-check-publish \
+    &amp;&amp; composer install --no-interaction --prefer-dist
 
 EXPOSE 8000
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0"]</code></pre>
+# the project bind mount is available only when the container starts
+CMD ["sh", "-c", "composer validate --no-check-publish &amp;&amp; composer install --no-interaction --prefer-dist &amp;&amp; exec php artisan serve --host=0.0.0.0"]</code></pre>
   </figure>
 
   <div class="callout callout--concept">
     <p class="callout-label">Conceito</p>
     <p>A imagem oficial do PHP já vem com <code>curl</code>, <code>xml</code> e <code>mbstring</code> habilitados — só precisamos instalar <code>pdo_mysql</code>, <code>zip</code> e <code>bcmath</code>. E o <code>--host=0.0.0.0</code> é obrigatório: sem ele, o <code>artisan serve</code> não aceita conexões vindas de fora do container.</p>
   </div>
+
+  <p>O <code>composer validate</code> confere se o <code>composer.json</code> e o <code>composer.lock</code> estão consistentes. O <code>composer install</code> instala as versões desse lock, incluindo as dependências de teste; as versões do PHPUnit e do Pest são definidas no projeto. Se a validação ou a instalação falhar, o <code>&amp;&amp;</code> interrompe a sequência antes de iniciar o Laravel. Corrija o conflito com os comandos de recuperação desta seção.</p>
 
   <h3>Mão na massa: Dockerfile (produção)</h3>
   <p>Agora crie o <code>Dockerfile</code> de produção, também na raiz. A estrutura é a mesma; as diferenças estão marcadas com comentários:</p>
@@ -753,10 +742,19 @@ node_modules
     build:
       context: .
       dockerfile: Dockerfile.dev
+    depends_on:
+      mysql:
+        condition: service_healthy
     ports:
       - "8000:8000"
     volumes:
       - .:/app
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/up"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
 
 volumes:
   mysql_data:</code></pre>
@@ -764,12 +762,12 @@ volumes:
 
   <div class="callout callout--tip">
     <p class="callout-label">Boas práticas aplicadas</p>
-    <p><strong>Build apontando para o <code>Dockerfile.dev</code></strong>: o compose é a ferramenta do dia a dia de desenvolvimento, então constrói a imagem de dev — o <code>Dockerfile</code> de produção fica reservado para o deploy. <strong>Versão fixa da imagem</strong> (<code>mysql:8.4</code> em vez de <code>latest</code>) e <strong>healthcheck</strong>: sem ele, o <code>depends_on</code> só espera o container <em>iniciar</em> — e comandos como <code>migrate</code> podem falhar na primeira subida porque o MySQL ainda não estava pronto de verdade. Repare também no ping via <code>127.0.0.1</code> com <code>--protocol=tcp</code>, e não <code>localhost</code>: durante a inicialização, a imagem do MySQL sobe um servidor temporário que responde apenas pelo socket local — pingar por TCP garante que "healthy" significa "aceitando conexões de verdade".</p>
+    <p><strong>Build apontando para o <code>Dockerfile.dev</code></strong>: o compose é a ferramenta do dia a dia de desenvolvimento, então constrói a imagem de dev — o <code>Dockerfile</code> de produção fica reservado para o deploy. <strong>Versão fixa da imagem</strong> (<code>mysql:8.4</code> em vez de <code>latest</code>) e <strong>healthcheck</strong>: o <code>depends_on</code> com <code>condition: service_healthy</code> espera o MySQL aceitar conexões antes de iniciar o PHP. Repare também no ping via <code>127.0.0.1</code> com <code>--protocol=tcp</code>, e não <code>localhost</code>: durante a inicialização, a imagem do MySQL sobe um servidor temporário que responde apenas pelo socket local. O healthcheck do PHP consulta a rota <code>/up</code> do Laravel e só passa quando a aplicação já está respondendo, depois da instalação das dependências.</p>
   </div>
 
   <div class="callout callout--warn">
     <p class="callout-label">Atenção ao volume</p>
-    <p>O bind mount <code>.:/app</code> sobrepõe o que foi copiado na imagem, inclusive o <code>vendor/</code> gerado pelo <code>composer install</code> do Dockerfile. Em desenvolvimento, rode <code>composer install</code> na raiz do projeto na sua máquina, ou dentro do container: <code>docker compose exec php composer install</code>.</p>
+    <p>O bind mount <code>.:/app</code> sobrepõe o que foi copiado na imagem, inclusive o <code>vendor/</code> gerado durante o build. Por isso o <code>Dockerfile.dev</code> executa o Composer novamente ao iniciar: ele instala as dependências no projeto montado, mesmo quando o <code>vendor/</code> local ainda não existe. Como essa pasta é compartilhada com a sua máquina, arquivos criados pelo container podem pertencer ao usuário root.</p>
   </div>
 
   <h3>Mão na massa: configurando o banco no <code>.env</code></h3>
@@ -805,7 +803,7 @@ DB_PASSWORD=bookshelf</code></pre>
 
   <figure class="code code--term">
     <figcaption>Terminal</figcaption>
-    <pre><code>docker compose up -d mysql
+    <pre><code>docker compose up -d --wait mysql
 
 # from the project root, run the default migrations and enable API routes
 php artisan migrate
@@ -816,12 +814,14 @@ php artisan install:api</code></pre>
 
   <figure class="code code--term">
     <figcaption>Terminal</figcaption>
-    <pre><code>docker compose up -d
+    <pre><code>docker compose up -d --build --wait
 
 # run the default migrations and enable API routes inside the container
 docker compose exec php php artisan migrate
 docker compose exec php php artisan install:api</code></pre>
   </figure>
+
+  <p>O <code>--build</code> reconstrói a imagem quando você altera o <code>Dockerfile.dev</code>. O <code>--wait</code> aguarda os healthchecks antes de devolver o terminal; assim, no Modo B, o Composer já terminou e o Laravel está respondendo antes de você executar as migrations. Se a subida falhar, consulte <code>docker compose logs php</code> e <code>docker compose logs mysql</code> para identificar a etapa que parou.</p>
 
   <p>Sobre esses dois comandos do Artisan: o <code>migrate</code> roda as <em>migrations</em> padrão do Laravel, que criam tabelas internas do framework (usuários, cache, filas) — no Passo 5 você vai entender migrations a fundo. E o <code>install:api</code> cria o arquivo de rotas de API (<code>routes/api.php</code>), que no Laravel 11/12 <strong>não vem por padrão</strong>; se ele perguntar se deve executar novas migrations, responda <strong>yes</strong>. A partir daí, toda rota declarada em <code>routes/api.php</code> responde automaticamente sob o prefixo <code>/api</code>.</p>
 
@@ -829,6 +829,38 @@ docker compose exec php php artisan install:api</code></pre>
     <p class="callout-label">Atenção</p>
     <p>O <code>install:api</code> também instala o Laravel Sanctum, um pacote de autenticação. <strong>Não vamos usá-lo agora</strong> — nossa API é pública nesta etapa. Autenticação é assunto do próximo módulo; deixe o pacote quieto aí.</p>
   </div>
+
+  <h3>Se apareceu conflito entre Pest e PHPUnit</h3>
+  <p>Se você criou o projeto com o instalador global seguindo uma versão anterior deste tutorial, pode aparecer <code>Root composer.json requires pestphp/pest ^5.3</code> junto de <code>phpunit/phpunit ... fixed to 11.5.57 ... by a partial update</code>. Isso significa que o <code>composer.json</code> pede uma versão do Pest que exige PHPUnit 13, mas o <code>composer.lock</code> ainda contém PHPUnit 11. O problema está na combinação das dependências de teste, e a instalação do Sanctum acaba bloqueada por ela.</p>
+
+  <div class="callout callout--warn">
+    <p class="callout-label">Instalação incompleta</p>
+    <p>No Laravel 12, o Artisan pode mostrar <code>Published API routes file</code> e <code>API scaffolding installed</code> mesmo depois de o Composer informar <code>Installation failed</code>. Essas mensagens não confirmam que o Sanctum foi instalado. Corrija as dependências e confira o pacote antes de continuar.</p>
+  </div>
+
+  <p>Para corrigir <strong>esse conflito em um projeto Laravel 12</strong> sem recriar a pasta, pare o servidor com <code>Ctrl+C</code> e execute na raiz do projeto, um comando por vez. Só avance quando o comando anterior terminar sem erro:</p>
+
+  <figure class="code code--term">
+    <figcaption>Terminal — recuperar um projeto já criado (Modo A)</figcaption>
+    <pre><code># confirm this is a Laravel 12 project
+php artisan --version
+
+# Pest 3 and its Laravel plugin use PHPUnit 11
+composer require --dev "pestphp/pest:^3.0" "pestphp/pest-plugin-laravel:^3.0" -W
+
+# complete the Sanctum installation that failed
+composer require "laravel/sanctum:^4.0" -W
+php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+php artisan migrate
+
+# verify the package and API route registration
+composer show laravel/sanctum
+php artisan route:list --path=api</code></pre>
+  </figure>
+
+  <p>O <code>-W</code> permite ao Composer ajustar também as dependências relacionadas no <code>composer.lock</code>. Aqui fixamos <strong>Pest 3 + plugin Laravel 3 + PHPUnit 11</strong>, uma combinação compatível com o projeto do curso; apenas adicionar <code>-W</code> mantendo Pest 5 não corrige essa combinação. Essa relação entre Pest 3 e PHPUnit 11 está documentada no <a href="https://pestphp.com/docs/upgrade-guide#upgrading-to-3x-from-2x">guia oficial do Pest</a>.</p>
+  <p>No erro mostrado acima, o Artisan já criou <code>routes/api.php</code> e registrou esse arquivo no <code>bootstrap/app.php</code>, por isso a recuperação publica apenas os arquivos do Sanctum que faltaram. Se <code>routes/api.php</code> ainda não existir, execute <code>php artisan install:api</code> depois de corrigir as dependências. Se ele já existir, preserve as rotas que você escreveu. Ao final, <code>composer show laravel/sanctum</code> deve mostrar a versão <strong>4.x</strong>, <code>route:list --path=api</code> deve listar a rota inicial <code>api/user</code> (ou as rotas da API que você já criou) e <code>migrate:status</code> deve mostrar <code>create_personal_access_tokens_table</code> como <em>Ran</em>.</p>
+  <p>No <strong>Modo B</strong>, execute cada comando de recuperação com o prefixo <code>docker compose run --rm php</code>. Por exemplo: <code>docker compose run --rm php composer require --dev "pestphp/pest:^3.0" "pestphp/pest-plugin-laravel:^3.0" -W</code> e <code>docker compose run --rm php php artisan migrate</code>. Isso funciona mesmo quando o container principal parou por causa do conflito: o comando informado substitui a sequência de inicialização. Se o erro impediu até o primeiro build da imagem, use o PHP e o Composer locais do Passo 1 para corrigir as dependências. Depois da recuperação, execute <code>docker compose up -d --build --wait</code>.</p>
 
   <div class="callout callout--tip">
     <p class="callout-label">Dica</p>
@@ -838,10 +870,10 @@ docker compose exec php php artisan install:api</code></pre>
   <div class="verify">
     <h4>Como verificar</h4>
     <ul class="checklist">
-      <li><label><input type="checkbox" data-ck="p2-1"> <span><code>docker compose ps</code> mostra o serviço <code>mysql</code> como <em>healthy</em> (e o <code>php</code> rodando, se você estiver no Modo B).</span></label></li>
+      <li><label><input type="checkbox" data-ck="p2-1"> <span><code>docker compose ps</code> mostra o serviço <code>mysql</code> como <em>healthy</em> (e o <code>php</code> também como <em>healthy</em>, se você estiver no Modo B).</span></label></li>
       <li><label><input type="checkbox" data-ck="p2-2"> <span><code>http://localhost:8000</code> exibe a página de boas-vindas do Laravel.</span></label></li>
       <li><label><input type="checkbox" data-ck="p2-3"> <span><code>php artisan migrate</code> (ou <code>docker compose exec php php artisan migrate</code>) conecta no banco e roda sem erros — e <code>php artisan migrate:status</code> lista as migrations como <em>Ran</em>.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p2-4"> <span>O arquivo <code>routes/api.php</code> existe no projeto.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p2-4"> <span>O arquivo <code>routes/api.php</code> existe, <code>php artisan route:list --path=api</code> lista as rotas da API e <code>composer show laravel/sanctum</code> confirma a instalação do Sanctum 4.x.</span></label></li>
       <li><label><input type="checkbox" data-ck="p2-5"> <span>Os arquivos <code>Dockerfile</code>, <code>Dockerfile.dev</code>, <code>.dockerignore</code> e <code>compose.yaml</code> estão na raiz de <code>bookshelf-api/</code>, ao lado do <code>artisan</code>.</span></label></li>
     </ul>
   </div>
@@ -851,7 +883,7 @@ docker compose exec php php artisan install:api</code></pre>
   <h2><span class="step-badge">Passo 3</span> Conhecendo o projeto por dentro</h2>
 
   <h3>Conceito: a estrutura de pastas do Laravel 11/12</h3>
-  <p>O <code>laravel new</code> gerou dezenas de arquivos — e no Passo 2 somamos a eles os arquivos de infraestrutura (<code>Dockerfile</code>, <code>Dockerfile.dev</code>, <code>.dockerignore</code>, <code>compose.yaml</code>), todos na raiz do projeto. Calma: você não precisa entender todos hoje. Este é o mapa do que importa:</p>
+  <p>A criação do projeto gerou dezenas de arquivos — e no Passo 2 somamos a eles os arquivos de infraestrutura (<code>Dockerfile</code>, <code>Dockerfile.dev</code>, <code>.dockerignore</code>, <code>compose.yaml</code>), todos na raiz do projeto. Calma: você não precisa entender todos hoje. Este é o mapa do que importa:</p>
 
   <figure class="code code--file" data-nocopy>
     <figcaption>Estrutura de pastas — bookshelf-api/</figcaption>
