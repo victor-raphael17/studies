@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Tutorial passo a passo de Laravel 12 em português: construa a BookShelf API, uma API REST completa — MVC, migrations, Eloquent, arquitetura MSC, Form Requests e API Resources.">
+<meta name="description" content="Tutorial passo a passo de Laravel 12 em português para Ubuntu 24.04 e 26.04: construa a BookShelf API, uma API REST completa — MVC, migrations, Eloquent, arquitetura MSC, Form Requests e API Resources.">
 <title>BookShelf API — Tutorial completo de Laravel 12</title>
 <style>
 :root {
@@ -545,68 +545,107 @@ footer.end {
   <p><strong>Laravel</strong> é um framework PHP: um conjunto de peças prontas e bem testadas — roteamento, acesso a banco de dados, validação, linha de comando — sobre o qual você constrói a sua aplicação. Em vez de reinventar essas peças, você escreve apenas o que é específico do seu projeto.</p>
   <p><strong>Composer</strong> é o gerenciador de dependências do PHP (o equivalente ao <code>npm</code> do JavaScript ou ao <code>pip</code> do Python). É ele quem baixa o Laravel e todas as bibliotecas de que o projeto precisa.</p>
   <p>O Laravel também traz o <strong>Artisan</strong>, uma ferramenta de linha de comando (<code>php artisan ...</code>) que vamos usar o tempo todo: para subir o servidor, criar arquivos, rodar migrations e muito mais.</p>
-  <p>Requisitos desta seção: o Laravel 12 exige <strong>PHP 8.2 ou superior</strong> — neste curso usamos o <strong>PHP 8.4</strong> — e um banco de dados (usaremos <strong>MySQL</strong>, que vai subir <strong>via Docker no Passo 2</strong>; nada de instalar MySQL na máquina).</p>
+  <p>Requisitos desta seção: o Laravel 12 exige <strong>PHP 8.2 ou superior</strong>. Este tutorial usa o PHP dos repositórios oficiais do <strong>Ubuntu 24.04 LTS ou 26.04 LTS</strong> na máquina e mantém <strong>PHP 8.4 no container</strong> do Passo 2. O banco será o <strong>MySQL via Docker</strong>; não é necessário instalar MySQL na máquina.</p>
 
-  <h3>Mão na massa: instalando o PHP 8.4 (Ubuntu)</h3>
-  <p>O PPA do Ondřej Šurý é o repositório de referência do PHP para Debian/Ubuntu. Instale o PHP 8.4 com as extensões que o Laravel e o MySQL precisam:</p>
+  <h3>Mão na massa: instalando o PHP (Ubuntu 24.04 e 26.04)</h3>
+  <p>Os dois sistemas já oferecem uma versão compatível com o Laravel 12. Usaremos os pacotes sem número de versão, como <code>php-cli</code> e <code>php-mysql</code>: o APT instala o PHP padrão da sua distribuição e as extensões correspondentes, <strong>sem adicionar o PPA <code>ondrej/php</code></strong>.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Sistema</th><th>PHP local dos repositórios oficiais</th><th>PHP no Docker</th></tr></thead>
+      <tbody>
+        <tr><td>Ubuntu 24.04 LTS (Noble)</td><td>PHP 8.3.x</td><td>PHP 8.4.x</td></tr>
+        <tr><td>Ubuntu 26.04 LTS (Resolute)</td><td>PHP 8.5.x</td><td>PHP 8.4.x</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>As versões padrão podem ser conferidas na <a href="https://packages.ubuntu.com/search?keywords=php-cli&amp;searchon=names&amp;exact=1">lista oficial de pacotes do Ubuntu</a>. As atualizações podem mudar o número final da versão; os comandos abaixo são os mesmos nas duas versões do Ubuntu.</p>
+
+  <div class="callout callout--warn">
+    <p class="callout-label">Se você já tentou adicionar o PPA</p>
+    <p>Se o <code>sudo apt update</code> falhar citando <code>ondrej/php</code> (por exemplo, <code>404 Not Found</code> ou ausência de <code>Release file</code>), desative essa fonte antes de instalar os pacotes. Localize a entrada com <code>sudo grep -RIn 'ondrej/php' /etc/apt/sources.list.d/</code> e confira também <code>/etc/apt/sources.list</code>, se existir. Abra o arquivo indicado com <code>sudo nano</code>: em um arquivo <code>.sources</code>, defina <code>Enabled: no</code> no bloco desse PPA (substitua <code>Enabled: yes</code>, se já existir); em um <code>.list</code>, comente as linhas desse PPA com <code>#</code>. Depois execute <code>sudo apt update</code> novamente. Mantenha as fontes oficiais da sua versão do Ubuntu; não troque <code>resolute</code> por <code>noble</code> para contornar o erro.</p>
+  </div>
 
   <figure class="code code--term">
-    <figcaption>Terminal</figcaption>
-    <pre><code>sudo add-apt-repository ppa:ondrej/php
+    <figcaption>Terminal — os mesmos comandos no Ubuntu 24.04 e 26.04</figcaption>
+    <pre><code># install tools and enable Ubuntu's official Universe component
 sudo apt update
-sudo apt install php8.4 php8.4-mysql php8.4-xml php8.4-curl \
-  php8.4-zip php8.4-bcmath php8.4-mbstring php8.4-sqlite3
+sudo apt install software-properties-common ca-certificates curl git unzip
+sudo add-apt-repository -y universe
+sudo apt update
+sudo apt install php-cli php-mysql php-xml php-curl \
+  php-zip php-bcmath php-mbstring php-sqlite3
 
-# check the installed version
-php -v</code></pre>
+# check the installed version and extensions
+php -v
+php -m</code></pre>
   </figure>
+
+  <p>O componente <code>universe</code> faz parte dos repositórios oficiais do Ubuntu. <code>php-cli</code> instala o interpretador de terminal; <code>php-mysql</code> fornece o driver para conectar ao MySQL do Docker, e <code>php-sqlite3</code> atende ao banco inicial do projeto e aos testes. <code>curl</code>, os certificados, <code>git</code> e <code>unzip</code> serão usados nos downloads e na instalação das dependências.</p>
+  <p>Se <code>php -v</code> mostrar uma versão diferente da tabela ou o Composer reclamar de uma extensão que você acabou de instalar, confira <code>command -v php</code> e <code>php --ini</code>. Uma instalação anterior (por exemplo, Herd ou outro PHP no <code>PATH</code>) pode estar sendo usada no lugar de <code>/usr/bin/php</code>. As extensões precisam estar habilitadas no PHP que realmente executa os comandos.</p>
 
   <h3>Mão na massa: instalando o Composer</h3>
   <p>O instalador do Composer é um script baixado da internet — então, antes de executá-lo, <strong>verificamos a integridade do download</strong> contra o checksum oficial que o projeto publica. É o passo que muita gente pula; não pule (as instruções sempre atualizadas ficam em <a href="https://getcomposer.org/download/">getcomposer.org/download</a>):</p>
 
   <figure class="code code--term">
     <figcaption>Terminal</figcaption>
-    <pre><code>php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    <pre><code>curl -fsSL https://getcomposer.org/installer -o composer-setup.php &amp;&amp; \
+  php -r "if (hash_file('sha384', 'composer-setup.php') === trim(file_get_contents('https://composer.github.io/installer.sig'))) { echo 'Installer verified' . PHP_EOL; } else { echo 'Installer corrupt' . PHP_EOL; unlink('composer-setup.php'); exit(1); }" &amp;&amp; \
+  php composer-setup.php &amp;&amp; \
+  sudo install -m 0755 composer.phar /usr/local/bin/composer &amp;&amp; \
+  php -r "unlink('composer-setup.php'); unlink('composer.phar');"
 
-# verify the installer against the official checksum before running it
-php -r "if (hash_file('sha384', 'composer-setup.php') === trim(file_get_contents('https://composer.github.io/installer.sig'))) { echo 'Installer verified' . PHP_EOL; } else { echo 'Installer corrupt' . PHP_EOL; unlink('composer-setup.php'); exit(1); }"
-
-php composer-setup.php
-php -r "unlink('composer-setup.php');"
-sudo mv composer.phar /usr/local/bin/composer
-
-# check the installation
+# check the installation only after the sequence succeeds
 composer --version</code></pre>
   </figure>
 
+  <p>O <code>&amp;&amp;</code> só executa a próxima etapa quando a anterior termina sem erro: se o download ou a verificação falhar, o instalador não será executado. O resultado esperado é <code>Installer verified</code> e, ao final, <strong>Composer 2.x</strong>. Use <code>sudo</code> apenas para copiar o executável para <code>/usr/local/bin</code>; os comandos do Composer no projeto rodam com seu usuário normal.</p>
+
   <h3>Mão na massa: criando o projeto BookShelf</h3>
-  <p>Agora nasce o nosso projeto. Vamos usar o <code>composer create-project</code> com a versão <code>12.*</code> explícita: ele baixa o esqueleto do <strong>Laravel 12</strong> com suas dependências compatíveis, incluindo o <strong>PHPUnit 11</strong> para testes. Tudo fica na pasta <code>bookshelf-api/</code> — os arquivos de infraestrutura do Passo 2 (Dockerfiles, <code>compose.yaml</code>) vão morar nessa mesma raiz, ao lado do código:</p>
+  <p>Agora nasce o nosso projeto. Vamos usar o <code>composer create-project</code> com a versão <code>12.*</code> explícita para baixar o esqueleto do <strong>Laravel 12</strong>, que inclui o <strong>PHPUnit 11</strong> para testes. Primeiro baixamos apenas o esqueleto, depois definimos <strong>PHP 8.3 como alvo das dependências</strong> e as instalamos. Assim o PHP 8.5 do Ubuntu 26.04 não escolhe pacotes que exigem uma versão maior que a disponível no Ubuntu 24.04 ou no container PHP 8.4. Tudo fica na pasta <code>bookshelf-api/</code> — os arquivos de infraestrutura do Passo 2 vão morar nessa mesma raiz:</p>
 
   <figure class="code code--term">
     <figcaption>Terminal</figcaption>
-    <pre><code>composer create-project laravel/laravel bookshelf-api "12.*"
+    <pre><code>composer create-project laravel/laravel bookshelf-api "12.*" --no-install --no-scripts
 cd bookshelf-api
+
+# resolve dependencies for the oldest PHP used in this tutorial
+composer config platform.php 8.3.0
+cp .env.example .env
+composer install
+composer check-platform-reqs
+
+# initialize the application after installing its dependencies
+php artisan key:generate
+touch database/database.sqlite
+php artisan migrate
 php artisan --version
 php artisan serve</code></pre>
   </figure>
 
-  <p>O <code>php artisan --version</code> deve mostrar <strong>Laravel Framework 12.x</strong>. Esse caminho não usa o instalador global nem faz perguntas sobre starter kit ou framework de testes. O projeto vem com SQLite configurado para o primeiro acesso; no Passo 2 trocamos para o MySQL do Docker. Não é necessário instalar dependências npm para esta API.</p>
+  <p>Execute um comando por vez e só avance quando o anterior terminar sem erro. <code>--no-install --no-scripts</code> adia a instalação e a inicialização para permitir configurar o alvo do PHP primeiro. Por isso copiamos o <code>.env</code>, geramos a chave e preparamos o SQLite explicitamente. O <code>php artisan --version</code> deve mostrar <strong>Laravel Framework 12.x</strong>. Esse caminho não usa o instalador global nem faz perguntas sobre starter kit ou framework de testes. No Passo 2 trocamos o SQLite pelo MySQL do Docker. Não é necessário instalar dependências npm para esta API.</p>
+
+  <div class="callout callout--concept">
+    <p class="callout-label">Dependências compatíveis nas duas versões</p>
+    <p><code>composer config platform.php 8.3.0</code> grava o alvo em <code>composer.json</code>; ele orienta a seleção dos pacotes e <strong>não troca o PHP instalado</strong>. <code>composer check-platform-reqs</code> verifica o PHP e as extensões reais da máquina, como recomenda a <a href="https://getcomposer.org/doc/06-config.md#platform">documentação oficial do Composer</a>. Mantenha essa configuração e versione <code>composer.json</code> e <code>composer.lock</code> juntos para compartilhar as mesmas dependências entre Ubuntu 24.04, Ubuntu 26.04 e Docker.</p>
+  </div>
 
   <p>O <code>php artisan serve</code> sobe o servidor de desenvolvimento em <code>http://localhost:8000</code>. Abra esse endereço no navegador: você deve ver a página de boas-vindas do Laravel. Para parar o servidor, pressione <code>Ctrl+C</code>.</p>
 
   <div class="callout callout--tip">
     <p class="callout-label">Dica</p>
-    <p>Se você já tem o instalador global e prefere usá-lo, a alternativa é <code>laravel new bookshelf-api --using="laravel/laravel:^12.0" --phpunit</code>. Execute apenas um dos caminhos de criação. A opção <code>--using</code> seleciona o esqueleto do Laravel 12, e <code>--phpunit</code> mantém o framework de testes desse esqueleto. Fixar só o esqueleto não fixa a versão do Pest que o instalador pode tentar adicionar. Se aparecerem perguntas adicionais, mantenha SQLite e responda <strong>No</strong> à instalação de dependências npm e do Laravel Boost.</p>
+    <p>Se você já criou o projeto com uma versão anterior deste tutorial ou com o instalador global, não execute <code>create-project</code> novamente na mesma pasta. Na raiz desse projeto Laravel 12, execute <code>composer config platform.php 8.3.0</code>, depois <code>composer update -W</code> e <code>composer check-platform-reqs</code>, um por vez. Revise as mudanças em <code>composer.lock</code>: o update ajusta as dependências ao alvo comum antes de construir o container. Se aparecer conflito entre Pest e PHPUnit, use a recuperação do Passo 2.</p>
   </div>
 
-  <p>E o banco de dados? A criação do projeto prepara um SQLite local e executa as migrations padrão. No Passo 2 o MySQL sobe <strong>via Docker</strong>, e é lá que configuraremos o <code>.env</code> e rodaremos essas migrations no banco do curso.</p>
+  <p>E o banco de dados? Os comandos acima preparam um SQLite local e executam as migrations padrão. No Passo 2 o MySQL sobe <strong>via Docker</strong>, e é lá que configuraremos o <code>.env</code> e rodaremos essas migrations no banco do curso.</p>
 
   <div class="verify">
     <h4>Como verificar</h4>
     <ul class="checklist">
-      <li><label><input type="checkbox" data-ck="p1-1"> <span><code>php -v</code> mostra PHP 8.4.x, <code>composer --version</code> responde sem erro e, dentro do projeto, <code>php artisan --version</code> mostra Laravel Framework 12.x.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p1-1"> <span><code>php -v</code> mostra PHP 8.3.x no Ubuntu 24.04 ou 8.5.x no Ubuntu 26.04, <code>composer --version</code> mostra Composer 2.x e, dentro do projeto, <code>php artisan --version</code> mostra Laravel Framework 12.x.</span></label></li>
       <li><label><input type="checkbox" data-ck="p1-2"> <span>Com <code>php artisan serve</code> rodando, <code>http://localhost:8000</code> exibe a página de boas-vindas do Laravel.</span></label></li>
       <li><label><input type="checkbox" data-ck="p1-3"> <span>A pasta <code>bookshelf-api/</code> existe e contém o esqueleto do Laravel (<code>artisan</code>, <code>composer.json</code>, <code>app/</code>…).</span></label></li>
+      <li><label><input type="checkbox" data-ck="p1-4"> <span><code>composer config platform.php</code> mostra <code>8.3.0</code> e <code>composer check-platform-reqs</code> termina sem erros de PHP ou extensões.</span></label></li>
     </ul>
   </div>
 </section>
@@ -618,6 +657,34 @@ php artisan serve</code></pre>
     <p class="callout-label">Atenção</p>
     <p>Este passo é <strong>obrigatório</strong>. Neste curso, o MySQL sobe <strong>exclusivamente via Docker</strong> — não vamos instalar nem configurar MySQL direto na máquina. Já o PHP você pode continuar rodando localmente para desenvolver (como no Passo 1); o container PHP existe para garantir um ambiente idêntico ao dos colegas e para preparar o caminho da produção.</p>
   </div>
+
+  <h3>Mão na massa: preparando o Docker no Ubuntu 24.04 e 26.04</h3>
+  <p>Se você já usa Docker Engine ou Docker Desktop e <code>docker info</code> e <code>docker compose version</code> funcionam, mantenha sua instalação e pule este bloco. Em uma máquina sem Docker, instale o Engine, o Compose e o Buildx dos repositórios do Ubuntu (o <code>universe</code> foi habilitado no Passo 1). Os <a href="https://packages.ubuntu.com/search?keywords=docker-compose-v2&amp;searchon=names&amp;exact=1">pacotes do Compose</a> estão disponíveis nas duas versões; não misture esses pacotes com uma instalação de <code>docker-ce</code>.</p>
+  <p>Se o Engine já está instalado e só falta o Compose, confira a origem da instalação: para <code>docker.io</code> do Ubuntu, instale <code>docker-compose-v2 docker-buildx</code> com o APT; para Docker CE, siga a <a href="https://docs.docker.com/compose/install/linux/">instalação oficial do plugin Compose</a>.</p>
+
+  <figure class="code code--term">
+    <figcaption>Terminal — somente se o Docker ainda não estiver instalado</figcaption>
+    <pre><code>sudo apt update
+sudo apt install docker.io docker-compose-v2 docker-buildx
+sudo systemctl enable --now docker
+
+# allow your current user to access the Docker daemon
+sudo usermod -aG docker "$USER"</code></pre>
+  </figure>
+
+  <p>Depois do <code>usermod</code>, <strong>encerre a sessão do Ubuntu e entre novamente</strong> para ativar o grupo. Apenas fechar e abrir o terminal pode não atualizar os grupos da sessão. O grupo <code>docker</code> concede privilégios administrativos, conforme a <a href="https://docs.docker.com/engine/install/linux-postinstall/">documentação do Docker</a>. Então abra um terminal e verifique:</p>
+
+  <figure class="code code--term">
+    <figcaption>Terminal — depois de entrar novamente na sessão</figcaption>
+    <pre><code>docker info
+docker compose version
+docker run --rm hello-world
+
+# return to the project directory before the next commands
+cd <span class="ph">/path/to/bookshelf-api</span></code></pre>
+  </figure>
+
+  <p>Troque <code>/path/to/bookshelf-api</code> pelo caminho em que você criou o projeto. Os comandos devem funcionar sem <code>sudo</code>, e o último teste deve exibir <code>Hello from Docker!</code>. O tutorial usa <strong><code>docker compose</code>, com espaço</strong>, e a opção <code>--wait</code>; se aparecer <code>unknown flag: --wait</code>, atualize o Compose da sua instalação. Se aparecer <code>permission denied</code> ao acessar <code>docker.sock</code>, confira o grupo e a nova sessão antes de continuar.</p>
 
   <h3>Conceito: por que Docker?</h3>
   <p>Docker executa aplicações em <strong>containers</strong>: pacotes isolados que carregam o programa e tudo de que ele precisa (versão exata do PHP, extensões, MySQL). O clássico "na minha máquina funciona" desaparece, porque a máquina passa a ser a mesma para todo mundo.</p>
@@ -656,12 +723,13 @@ COPY . .
 
 # validate the lock file and include development dependencies
 RUN composer validate --no-check-publish \
-    &amp;&amp; composer install --no-interaction --prefer-dist
+    &amp;&amp; composer install --no-interaction --prefer-dist \
+    &amp;&amp; composer check-platform-reqs
 
 EXPOSE 8000
 
 # the project bind mount is available only when the container starts
-CMD ["sh", "-c", "composer validate --no-check-publish &amp;&amp; composer install --no-interaction --prefer-dist &amp;&amp; exec php artisan serve --host=0.0.0.0"]</code></pre>
+CMD ["sh", "-c", "composer validate --no-check-publish &amp;&amp; composer install --no-interaction --prefer-dist &amp;&amp; composer check-platform-reqs &amp;&amp; exec php artisan serve --host=0.0.0.0"]</code></pre>
   </figure>
 
   <div class="callout callout--concept">
@@ -669,7 +737,7 @@ CMD ["sh", "-c", "composer validate --no-check-publish &amp;&amp; composer insta
     <p>A imagem oficial do PHP já vem com <code>curl</code>, <code>xml</code> e <code>mbstring</code> habilitados — só precisamos instalar <code>pdo_mysql</code>, <code>zip</code> e <code>bcmath</code>. E o <code>--host=0.0.0.0</code> é obrigatório: sem ele, o <code>artisan serve</code> não aceita conexões vindas de fora do container.</p>
   </div>
 
-  <p>O <code>composer validate</code> confere se o <code>composer.json</code> e o <code>composer.lock</code> estão consistentes. O <code>composer install</code> instala as versões desse lock, incluindo as dependências de teste; as versões do PHPUnit e do Pest são definidas no projeto. Se a validação ou a instalação falhar, o <code>&amp;&amp;</code> interrompe a sequência antes de iniciar o Laravel. Corrija o conflito com os comandos de recuperação desta seção.</p>
+  <p>O <code>composer validate</code> confere se o <code>composer.json</code> e o <code>composer.lock</code> estão consistentes. O <code>composer install</code> instala as versões desse lock, incluindo as dependências de teste, usando o alvo PHP 8.3 definido no Passo 1. O <code>composer check-platform-reqs</code> confirma que o PHP 8.4 e as extensões reais do container atendem aos requisitos. Se qualquer etapa falhar, o <code>&amp;&amp;</code> interrompe a sequência antes de iniciar o Laravel. Corrija o conflito com os comandos de recuperação desta seção.</p>
 
   <h3>Mão na massa: Dockerfile (produção)</h3>
   <p>Agora crie o <code>Dockerfile</code> de produção, também na raiz. A estrutura é a mesma; as diferenças estão marcadas com comentários:</p>
@@ -691,7 +759,8 @@ WORKDIR /app
 COPY . .
 
 # no dev dependencies (phpunit etc.) and an optimized class map
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader \
+    &amp;&amp; composer check-platform-reqs --no-dev
 
 EXPOSE 8000
 
@@ -807,7 +876,8 @@ DB_PASSWORD=bookshelf</code></pre>
 
 # from the project root, run the default migrations and enable API routes
 php artisan migrate
-php artisan install:api</code></pre>
+php artisan install:api
+php artisan serve</code></pre>
   </figure>
 
   <p><strong>Modo B — tudo no Docker</strong> (PHP e MySQL em containers):</p>
@@ -2715,7 +2785,7 @@ curl -i -X POST http://localhost:8000/api/books \
 </section>
 
 <footer class="end">
-  <p>BookShelf API — material didático do Módulo 4 do Curso de Programação. Construído sobre Laravel 12, PHP 8.4 e MySQL.</p>
+  <p>BookShelf API — material didático do Módulo 4 do Curso de Programação. Laravel 12 e MySQL, com PHP local no Ubuntu 24.04/26.04 e PHP 8.4 no Docker.</p>
   <p>Referências: <a href="https://laravel.com/docs">laravel.com/docs</a> · <a href="https://docs.docker.com">docs.docker.com</a> · <a href="https://www.php-fig.org">php-fig.org</a></p>
 </footer>
 
