@@ -602,7 +602,7 @@ composer --version</code></pre>
   <p>O <code>&amp;&amp;</code> só executa a próxima etapa quando a anterior termina sem erro: se o download ou a verificação falhar, o instalador não será executado. O resultado esperado é <code>Installer verified</code> e, ao final, <strong>Composer 2.x</strong>. Use <code>sudo</code> apenas para copiar o executável para <code>/usr/local/bin</code>; os comandos do Composer no projeto rodam com seu usuário normal.</p>
 
   <h3>Mão na massa: criando o projeto BookShelf</h3>
-  <p>Agora nasce o nosso projeto. Vamos usar o <code>composer create-project</code> com a versão <code>12.*</code> explícita para baixar o esqueleto do <strong>Laravel 12</strong>, que inclui o <strong>PHPUnit 11</strong> para testes. Primeiro baixamos apenas o esqueleto, depois definimos <strong>PHP 8.3 como alvo das dependências</strong> e as instalamos. Assim o PHP 8.5 do Ubuntu 26.04 não escolhe pacotes que exigem uma versão maior que a disponível no Ubuntu 24.04 ou no container PHP 8.4. Tudo fica na pasta <code>bookshelf-api/</code> — os arquivos de infraestrutura do Passo 2 vão morar nessa mesma raiz:</p>
+  <p>Agora nasce o nosso projeto. Vamos usar o <code>composer create-project</code> com a versão <code>12.*</code> explícita para baixar o <a href="https://github.com/laravel/laravel/blob/12.x/composer.json">esqueleto oficial do Laravel 12</a>. O framework de testes deste tutorial será o <strong>PHPUnit 11</strong>, já incluído nesse esqueleto. Antes da primeira instalação, definimos <strong>PHP 8.3 como alvo das dependências</strong> e restringimos o PHPUnit à série 11. Assim o PHP 8.5 do Ubuntu 26.04 resolve dependências compatíveis com o Ubuntu 24.04 e com o container PHP 8.4. Comece em uma pasta em que <code>bookshelf-api/</code> ainda não exista — os arquivos de infraestrutura do Passo 2 vão morar na raiz desse novo projeto:</p>
 
   <figure class="code code--term">
     <figcaption>Terminal</figcaption>
@@ -611,19 +611,25 @@ cd bookshelf-api
 
 # resolve dependencies for the oldest PHP used in this tutorial
 composer config platform.php 8.3.0
+
+# keep the test framework on the Laravel 12 skeleton's PHPUnit series
+composer require --dev "phpunit/phpunit:^11.5.50" --no-update
 cp .env.example .env
 composer install
+composer validate --no-check-publish
 composer check-platform-reqs
+composer show phpunit/phpunit
 
 # initialize the application after installing its dependencies
 php artisan key:generate
 touch database/database.sqlite
 php artisan migrate
 php artisan --version
+php artisan test
 php artisan serve</code></pre>
   </figure>
 
-  <p>Execute um comando por vez e só avance quando o anterior terminar sem erro. <code>--no-install --no-scripts</code> adia a instalação e a inicialização para permitir configurar o alvo do PHP primeiro. Por isso copiamos o <code>.env</code>, geramos a chave e preparamos o SQLite explicitamente. O <code>php artisan --version</code> deve mostrar <strong>Laravel Framework 12.x</strong>. Esse caminho não usa o instalador global nem faz perguntas sobre starter kit ou framework de testes. No Passo 2 trocamos o SQLite pelo MySQL do Docker. Não é necessário instalar dependências npm para esta API.</p>
+  <p>Execute um comando por vez e só avance quando o anterior terminar sem erro. <code>--no-install --no-scripts</code> adia a instalação e a inicialização para permitir configurar as dependências primeiro; <code>--no-update</code> grava a restrição do PHPUnit antes de resolver todos os pacotes juntos e gerar o <code>composer.lock</code>. Por isso copiamos o <code>.env</code>, geramos a chave e preparamos o SQLite explicitamente. O <code>php artisan --version</code> deve mostrar <strong>Laravel Framework 12.x</strong>, <code>composer show phpunit/phpunit</code> deve indicar <strong>11.x</strong> e <code>php artisan test</code> deve passar. Use essa sequência nos dois Ubuntus: o esqueleto usa apenas PHPUnit, sem instalar o Pest, evitando a combinação incompatível dos dois frameworks. No Passo 2 trocamos o SQLite pelo MySQL do Docker. Não é necessário instalar dependências npm para esta API.</p>
 
   <div class="callout callout--concept">
     <p class="callout-label">Dependências compatíveis nas duas versões</p>
@@ -631,11 +637,6 @@ php artisan serve</code></pre>
   </div>
 
   <p>O <code>php artisan serve</code> sobe o servidor de desenvolvimento em <code>http://localhost:8000</code>. Abra esse endereço no navegador: você deve ver a página de boas-vindas do Laravel. Para parar o servidor, pressione <code>Ctrl+C</code>.</p>
-
-  <div class="callout callout--tip">
-    <p class="callout-label">Dica</p>
-    <p>Se você já criou o projeto com uma versão anterior deste tutorial ou com o instalador global, não execute <code>create-project</code> novamente na mesma pasta. Na raiz desse projeto Laravel 12, execute <code>composer config platform.php 8.3.0</code>, depois <code>composer update -W</code> e <code>composer check-platform-reqs</code>, um por vez. Revise as mudanças em <code>composer.lock</code>: o update ajusta as dependências ao alvo comum antes de construir o container. Se aparecer conflito entre Pest e PHPUnit, use a recuperação do Passo 2.</p>
-  </div>
 
   <p>E o banco de dados? Os comandos acima preparam um SQLite local e executam as migrations padrão. No Passo 2 o MySQL sobe <strong>via Docker</strong>, e é lá que configuraremos o <code>.env</code> e rodaremos essas migrations no banco do curso.</p>
 
@@ -646,6 +647,7 @@ php artisan serve</code></pre>
       <li><label><input type="checkbox" data-ck="p1-2"> <span>Com <code>php artisan serve</code> rodando, <code>http://localhost:8000</code> exibe a página de boas-vindas do Laravel.</span></label></li>
       <li><label><input type="checkbox" data-ck="p1-3"> <span>A pasta <code>bookshelf-api/</code> existe e contém o esqueleto do Laravel (<code>artisan</code>, <code>composer.json</code>, <code>app/</code>…).</span></label></li>
       <li><label><input type="checkbox" data-ck="p1-4"> <span><code>composer config platform.php</code> mostra <code>8.3.0</code> e <code>composer check-platform-reqs</code> termina sem erros de PHP ou extensões.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p1-5"> <span><code>composer validate --no-check-publish</code> confirma que o lock está consistente, <code>composer show phpunit/phpunit</code> mostra <code>11.x</code> e <code>php artisan test</code> passa.</span></label></li>
     </ul>
   </div>
 </section>
@@ -657,34 +659,6 @@ php artisan serve</code></pre>
     <p class="callout-label">Atenção</p>
     <p>Este passo é <strong>obrigatório</strong>. Neste curso, o MySQL sobe <strong>exclusivamente via Docker</strong> — não vamos instalar nem configurar MySQL direto na máquina. Já o PHP você pode continuar rodando localmente para desenvolver (como no Passo 1); o container PHP existe para garantir um ambiente idêntico ao dos colegas e para preparar o caminho da produção.</p>
   </div>
-
-  <h3>Mão na massa: preparando o Docker no Ubuntu 24.04 e 26.04</h3>
-  <p>Se você já usa Docker Engine ou Docker Desktop e <code>docker info</code> e <code>docker compose version</code> funcionam, mantenha sua instalação e pule este bloco. Em uma máquina sem Docker, instale o Engine, o Compose e o Buildx dos repositórios do Ubuntu (o <code>universe</code> foi habilitado no Passo 1). Os <a href="https://packages.ubuntu.com/search?keywords=docker-compose-v2&amp;searchon=names&amp;exact=1">pacotes do Compose</a> estão disponíveis nas duas versões; não misture esses pacotes com uma instalação de <code>docker-ce</code>.</p>
-  <p>Se o Engine já está instalado e só falta o Compose, confira a origem da instalação: para <code>docker.io</code> do Ubuntu, instale <code>docker-compose-v2 docker-buildx</code> com o APT; para Docker CE, siga a <a href="https://docs.docker.com/compose/install/linux/">instalação oficial do plugin Compose</a>.</p>
-
-  <figure class="code code--term">
-    <figcaption>Terminal — somente se o Docker ainda não estiver instalado</figcaption>
-    <pre><code>sudo apt update
-sudo apt install docker.io docker-compose-v2 docker-buildx
-sudo systemctl enable --now docker
-
-# allow your current user to access the Docker daemon
-sudo usermod -aG docker "$USER"</code></pre>
-  </figure>
-
-  <p>Depois do <code>usermod</code>, <strong>encerre a sessão do Ubuntu e entre novamente</strong> para ativar o grupo. Apenas fechar e abrir o terminal pode não atualizar os grupos da sessão. O grupo <code>docker</code> concede privilégios administrativos, conforme a <a href="https://docs.docker.com/engine/install/linux-postinstall/">documentação do Docker</a>. Então abra um terminal e verifique:</p>
-
-  <figure class="code code--term">
-    <figcaption>Terminal — depois de entrar novamente na sessão</figcaption>
-    <pre><code>docker info
-docker compose version
-docker run --rm hello-world
-
-# return to the project directory before the next commands
-cd <span class="ph">/path/to/bookshelf-api</span></code></pre>
-  </figure>
-
-  <p>Troque <code>/path/to/bookshelf-api</code> pelo caminho em que você criou o projeto. Os comandos devem funcionar sem <code>sudo</code>, e o último teste deve exibir <code>Hello from Docker!</code>. O tutorial usa <strong><code>docker compose</code>, com espaço</strong>, e a opção <code>--wait</code>; se aparecer <code>unknown flag: --wait</code>, atualize o Compose da sua instalação. Se aparecer <code>permission denied</code> ao acessar <code>docker.sock</code>, confira o grupo e a nova sessão antes de continuar.</p>
 
   <h3>Conceito: por que Docker?</h3>
   <p>Docker executa aplicações em <strong>containers</strong>: pacotes isolados que carregam o programa e tudo de que ele precisa (versão exata do PHP, extensões, MySQL). O clássico "na minha máquina funciona" desaparece, porque a máquina passa a ser a mesma para todo mundo.</p>
@@ -737,7 +711,7 @@ CMD ["sh", "-c", "composer validate --no-check-publish &amp;&amp; composer insta
     <p>A imagem oficial do PHP já vem com <code>curl</code>, <code>xml</code> e <code>mbstring</code> habilitados — só precisamos instalar <code>pdo_mysql</code>, <code>zip</code> e <code>bcmath</code>. E o <code>--host=0.0.0.0</code> é obrigatório: sem ele, o <code>artisan serve</code> não aceita conexões vindas de fora do container.</p>
   </div>
 
-  <p>O <code>composer validate</code> confere se o <code>composer.json</code> e o <code>composer.lock</code> estão consistentes. O <code>composer install</code> instala as versões desse lock, incluindo as dependências de teste, usando o alvo PHP 8.3 definido no Passo 1. O <code>composer check-platform-reqs</code> confirma que o PHP 8.4 e as extensões reais do container atendem aos requisitos. Se qualquer etapa falhar, o <code>&amp;&amp;</code> interrompe a sequência antes de iniciar o Laravel. Corrija o conflito com os comandos de recuperação desta seção.</p>
+  <p>O <code>composer validate</code> confere se o <code>composer.json</code> e o <code>composer.lock</code> estão consistentes. O <code>composer install</code> instala as versões desse lock, incluindo o PHPUnit 11 definido no Passo 1. O <code>composer check-platform-reqs</code> confirma que o PHP 8.4 e as extensões reais do container atendem aos requisitos. Se qualquer etapa falhar, o <code>&amp;&amp;</code> interrompe a sequência antes de iniciar o Laravel. Conclua as verificações do Passo 1 antes de construir a imagem.</p>
 
   <h3>Mão na massa: Dockerfile (produção)</h3>
   <p>Agora crie o <code>Dockerfile</code> de produção, também na raiz. A estrutura é a mesma; as diferenças estão marcadas com comentários:</p>
@@ -899,38 +873,6 @@ docker compose exec php php artisan install:api</code></pre>
     <p class="callout-label">Atenção</p>
     <p>O <code>install:api</code> também instala o Laravel Sanctum, um pacote de autenticação. <strong>Não vamos usá-lo agora</strong> — nossa API é pública nesta etapa. Autenticação é assunto do próximo módulo; deixe o pacote quieto aí.</p>
   </div>
-
-  <h3>Se apareceu conflito entre Pest e PHPUnit</h3>
-  <p>Se você criou o projeto com o instalador global seguindo uma versão anterior deste tutorial, pode aparecer <code>Root composer.json requires pestphp/pest ^5.3</code> junto de <code>phpunit/phpunit ... fixed to 11.5.57 ... by a partial update</code>. Isso significa que o <code>composer.json</code> pede uma versão do Pest que exige PHPUnit 13, mas o <code>composer.lock</code> ainda contém PHPUnit 11. O problema está na combinação das dependências de teste, e a instalação do Sanctum acaba bloqueada por ela.</p>
-
-  <div class="callout callout--warn">
-    <p class="callout-label">Instalação incompleta</p>
-    <p>No Laravel 12, o Artisan pode mostrar <code>Published API routes file</code> e <code>API scaffolding installed</code> mesmo depois de o Composer informar <code>Installation failed</code>. Essas mensagens não confirmam que o Sanctum foi instalado. Corrija as dependências e confira o pacote antes de continuar.</p>
-  </div>
-
-  <p>Para corrigir <strong>esse conflito em um projeto Laravel 12</strong> sem recriar a pasta, pare o servidor com <code>Ctrl+C</code> e execute na raiz do projeto, um comando por vez. Só avance quando o comando anterior terminar sem erro:</p>
-
-  <figure class="code code--term">
-    <figcaption>Terminal — recuperar um projeto já criado (Modo A)</figcaption>
-    <pre><code># confirm this is a Laravel 12 project
-php artisan --version
-
-# Pest 3 and its Laravel plugin use PHPUnit 11
-composer require --dev "pestphp/pest:^3.0" "pestphp/pest-plugin-laravel:^3.0" -W
-
-# complete the Sanctum installation that failed
-composer require "laravel/sanctum:^4.0" -W
-php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
-php artisan migrate
-
-# verify the package and API route registration
-composer show laravel/sanctum
-php artisan route:list --path=api</code></pre>
-  </figure>
-
-  <p>O <code>-W</code> permite ao Composer ajustar também as dependências relacionadas no <code>composer.lock</code>. Aqui fixamos <strong>Pest 3 + plugin Laravel 3 + PHPUnit 11</strong>, uma combinação compatível com o projeto do curso; apenas adicionar <code>-W</code> mantendo Pest 5 não corrige essa combinação. Essa relação entre Pest 3 e PHPUnit 11 está documentada no <a href="https://pestphp.com/docs/upgrade-guide#upgrading-to-3x-from-2x">guia oficial do Pest</a>.</p>
-  <p>No erro mostrado acima, o Artisan já criou <code>routes/api.php</code> e registrou esse arquivo no <code>bootstrap/app.php</code>, por isso a recuperação publica apenas os arquivos do Sanctum que faltaram. Se <code>routes/api.php</code> ainda não existir, execute <code>php artisan install:api</code> depois de corrigir as dependências. Se ele já existir, preserve as rotas que você escreveu. Ao final, <code>composer show laravel/sanctum</code> deve mostrar a versão <strong>4.x</strong>, <code>route:list --path=api</code> deve listar a rota inicial <code>api/user</code> (ou as rotas da API que você já criou) e <code>migrate:status</code> deve mostrar <code>create_personal_access_tokens_table</code> como <em>Ran</em>.</p>
-  <p>No <strong>Modo B</strong>, execute cada comando de recuperação com o prefixo <code>docker compose run --rm php</code>. Por exemplo: <code>docker compose run --rm php composer require --dev "pestphp/pest:^3.0" "pestphp/pest-plugin-laravel:^3.0" -W</code> e <code>docker compose run --rm php php artisan migrate</code>. Isso funciona mesmo quando o container principal parou por causa do conflito: o comando informado substitui a sequência de inicialização. Se o erro impediu até o primeiro build da imagem, use o PHP e o Composer locais do Passo 1 para corrigir as dependências. Depois da recuperação, execute <code>docker compose up -d --build --wait</code>.</p>
 
   <div class="callout callout--tip">
     <p class="callout-label">Dica</p>
@@ -2766,7 +2708,7 @@ curl -i -X POST http://localhost:8000/api/books \
   <ul>
     <li><strong>Filtros:</strong> aceitar <code>GET /api/books?status=reading</code> — um <code>where()</code> condicional no <code>BookService</code>;</li>
     <li><strong>Paginação:</strong> trocar <code>get()</code> por <code>paginate(10)</code> no service e observar os metadados que a Resource adiciona ao JSON;</li>
-    <li><strong>Factories e testes:</strong> gerar dados falsos com <code>php artisan make:factory</code> e escrever os primeiros testes automatizados com Pest — o trait <code>HasFactory</code> dos models (Passo 6) já está lá esperando por isso.</li>
+    <li><strong>Factories e testes:</strong> gerar dados falsos com <code>php artisan make:factory</code> e escrever os primeiros testes automatizados com PHPUnit — o trait <code>HasFactory</code> dos models (Passo 6) já está lá esperando por isso.</li>
   </ul>
 
   <div class="callout callout--concept">
