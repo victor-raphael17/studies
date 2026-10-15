@@ -703,7 +703,7 @@ RUN composer validate --no-check-publish \
 EXPOSE 8000
 
 # the project bind mount is available only when the container starts
-CMD ["sh", "-c", "composer validate --no-check-publish &amp;&amp; composer install --no-interaction --prefer-dist &amp;&amp; composer check-platform-reqs &amp;&amp; exec php artisan serve --host=0.0.0.0"]</code></pre>
+CMD ["php", "artisan", "serve", "--host=0.0.0.0"]</code></pre>
   </figure>
 
   <div class="callout callout--concept">
