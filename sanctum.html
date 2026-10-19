@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Tutorial passo a passo de autenticação em Laravel 12 com Sanctum: quando usar cookie de SPA ou token Bearer, rotas protegidas, revogação, expiração e habilidades.">
+<meta name="description" content="Módulo 5 do tutorial BookShelf API: autenticação com Laravel Sanctum, MVC + Service Layer, Form Requests e API Resources; proteção das rotas RESTful com API tokens Bearer, expiração e habilidades.">
 <title>BookShelf API protegida — autenticação com Laravel Sanctum</title>
 <style>
 :root {
@@ -336,7 +336,7 @@ footer.end {
     <li><a href="#passo-1">Passo 1 — Sessões, tokens e o lugar do Sanctum</a></li>
     <li><a href="#passo-2">Passo 2 — O Sanctum já está no projeto</a></li>
     <li><a href="#passo-3">Passo 3 — O model User e o HasApiTokens</a></li>
-    <li><a href="#passo-4">Passo 4 — Registro e login em quatro camadas</a></li>
+    <li><a href="#passo-4">Passo 4 — Registro e login com MVC + Service Layer</a></li>
     <li><a href="#passo-5">Passo 5 — Protegendo as rotas com auth:sanctum</a></li>
     <li><a href="#passo-6">Passo 6 — me, logout e revogação de tokens</a></li>
     <li><a href="#passo-7">Passo 7 — Expiração de tokens</a></li>
@@ -344,7 +344,7 @@ footer.end {
     <li><a href="#passo-9">Passo 9 — Testando a API protegida</a></li>
     <li><a href="#passo-10">Passo 10 — Revisão final e próximos passos</a></li>
   </ol>
-  <a class="toc-back" href="html-complete-tutorial.html">← Módulo 4: construindo a BookShelf API</a>
+  <a class="toc-back" href="laravel.html">← Módulo 4: construindo a BookShelf API</a>
 </nav>
 
 <main id="conteudo" tabindex="-1">
@@ -352,29 +352,31 @@ footer.end {
 <header class="hero">
   <p class="hero-kicker">Curso de Programação — Módulo 5</p>
   <h1>BookShelf API protegida: autenticação com Laravel Sanctum</h1>
-  <p class="lead">A continuação direta do módulo anterior. Você já tem uma API REST completa — e completamente aberta. Aqui vamos fechá-la usando uma das duas modalidades do Sanctum: <strong>API tokens Bearer</strong>, com rotas privadas, revogação instantânea e, o assunto que quase todo tutorial esquece, <strong>tokens que expiram</strong>.</p>
+  <p class="lead">A continuação direta do Módulo 4. Você já tem uma API RESTful completa — dez endpoints de <code>genres</code> e <code>books</code>, organizados com MVC + Service Layer, Form Requests e API Resources — e completamente aberta. Aqui vamos protegê-la com <strong>tokens de acesso pessoal (personal access tokens) do Sanctum enviados pelo esquema Bearer</strong>, rotas privadas, revogação instantânea e, o assunto que quase todo tutorial esquece, <strong>tokens que expiram</strong>.</p>
 </header>
 
 <section id="introducao">
   <h2>Introdução — de API aberta a API protegida</h2>
 
-  <p>No <a href="html-complete-tutorial.html">Módulo 4</a> construímos a <strong>BookShelf API</strong>: dez endpoints de <code>genres</code> e <code>books</code>, arquitetura Model-Service-Controller, validação com Form Requests e respostas formatadas por API Resources. E terminamos com um aviso desconfortável: <em>qualquer pessoa com um <code>curl</code> pode apagar a sua estante inteira</em>.</p>
+  <p>No <a href="laravel.html">Módulo 4</a> construímos a <strong>BookShelf API</strong>: dez endpoints RESTful para <code>genres</code> e <code>books</code>, MVC + Service Layer, validação com Form Requests e respostas formatadas por API Resources. O banco começa com 4 gêneros e 12 livros; as respostas dos livros incluem o gênero relacionado. E terminamos com um aviso desconfortável: <em>qualquer pessoa com um <code>curl</code> pode apagar a sua estante inteira</em>.</p>
 
-  <p>Este módulo paga essa dívida. Na implementação que construiremos, a API vai exigir um <strong>token Bearer</strong> válido em toda operação sobre a estante e ganhará cinco endpoints para gerenciar esses tokens:</p>
+  <p>Este módulo paga essa dívida. Na implementação que construiremos, as dez rotas de <code>genres</code> e <code>books</code> continuarão com os mesmos contratos e passarão a exigir autenticação. Também vamos adicionar cinco endpoints para registro, login e gerenciamento dos tokens de acesso pessoal:</p>
 
   <div class="table-wrap">
     <table>
       <thead><tr><th>Método</th><th>Rota</th><th>Ação</th><th>Acesso</th></tr></thead>
       <tbody>
-        <tr><td><span class="m m-post">POST</span></td><td><code>/api/register</code></td><td>Cria uma conta e devolve o primeiro token</td><td>Público</td></tr>
-        <tr><td><span class="m m-post">POST</span></td><td><code>/api/login</code></td><td>Autentica e devolve um token novo</td><td>Público</td></tr>
-        <tr><td><span class="m m-get">GET</span></td><td><code>/api/me</code></td><td>Dados do dono do token atual</td><td>Bearer</td></tr>
-        <tr><td><span class="m m-post">POST</span></td><td><code>/api/logout</code></td><td>Revoga o token usado nesta requisição</td><td>Bearer</td></tr>
-        <tr><td><span class="m m-post">POST</span></td><td><code>/api/logout-all</code></td><td>Revoga <em>todos</em> os tokens do usuário</td><td>Bearer</td></tr>
-        <tr><td colspan="2"><code>/api/genres</code> e <code>/api/books</code></td><td>Os 10 endpoints do Módulo 4, intactos</td><td>Bearer</td></tr>
+        <tr><td><span class="m m-post">POST</span></td><td><code>/api/register</code></td><td>Cria uma conta e devolve o primeiro token de acesso pessoal</td><td>Pública</td></tr>
+        <tr><td><span class="m m-post">POST</span></td><td><code>/api/login</code></td><td>Autentica e devolve um novo token de acesso pessoal</td><td>Pública; <code>throttle:6,1</code></td></tr>
+        <tr><td><span class="m m-get">GET</span></td><td><code>/api/me</code></td><td>Dados do usuário autenticado</td><td><code>auth:sanctum</code></td></tr>
+        <tr><td><span class="m m-post">POST</span></td><td><code>/api/logout</code></td><td>Revoga o token de acesso pessoal usado nesta requisição</td><td><code>auth:sanctum</code></td></tr>
+        <tr><td><span class="m m-post">POST</span></td><td><code>/api/logout-all</code></td><td>Revoga <em>todos</em> os tokens de acesso pessoal do usuário</td><td><code>auth:sanctum</code></td></tr>
+        <tr><td colspan="2"><code>/api/genres</code> e <code>/api/books</code></td><td>Os 10 endpoints do Módulo 4, preservados</td><td><code>auth:sanctum</code></td></tr>
       </tbody>
     </table>
   </div>
+
+  <p>Neste módulo, as rotas protegidas usam personal access tokens, enviados no header <code>Authorization: Bearer ...</code>. No Passo 8, <code>DELETE /api/books/{id}</code> também exige a habilidade <code>books:delete</code>. A autenticação protege o catálogo compartilhado: nesta versão, <code>books</code> e <code>genres</code> ainda não têm <code>user_id</code> nem propriedade por usuário.</p>
 
   <div class="callout callout--concept">
     <p class="callout-label">Escopo deste módulo</p>
@@ -383,7 +385,7 @@ footer.end {
 
   <h3>O que você precisa ter em mãos</h3>
   <ul>
-    <li><strong>O projeto do Módulo 4 funcionando:</strong> <code>php artisan migrate:fresh --seed</code> reconstrói o banco e os 10 endpoints respondem. Se ainda não é o caso, volte e termine <a href="html-complete-tutorial.html">o tutorial anterior</a> — este continua exatamente de onde ele parou.</li>
+    <li><strong>O projeto do Módulo 4 funcionando:</strong> <code>php artisan migrate:fresh --seed</code> reconstrói o banco e os 10 endpoints respondem. Se ainda não é o caso, volte e termine <a href="laravel.html">o tutorial anterior</a> — este continua exatamente de onde ele parou.</li>
     <li><strong>O ambiente Docker do Passo 2</strong> daquele módulo: MySQL no container, PHP local ou no container.</li>
     <li><strong>Nada de novo para instalar.</strong> O Sanctum já está no projeto desde o <code>php artisan install:api</code> — só nunca foi usado.</li>
   </ul>
@@ -697,15 +699,15 @@ class UserSeeder extends Seeder
 </section>
 
 <section class="step" id="passo-4">
-  <h2><span class="step-badge">Passo 4</span> Registro e login em quatro camadas</h2>
+  <h2><span class="step-badge">Passo 4</span> Registro e login com MVC + Service Layer</h2>
 
   <h3>Conceito: autenticação também respeita a arquitetura</h3>
-  <p>Nada aqui inventa uma estrutura nova. O fluxo de autenticação atravessa exatamente as mesmas quatro camadas que os gêneros e os livros atravessam desde o Módulo 4:</p>
+  <p>Seguimos a arquitetura MVC + Service Layer do Módulo 4. No fluxo de autenticação, o <code>User</code> é o Model, o <code>AuthService</code> concentra as regras de negócio e o <code>AuthController</code> cuida do HTTP. A entrada e a saída passam, respectivamente, por um Form Request e uma API Resource:</p>
   <ol class="flow">
     <li><strong>Form Request</strong> valida o que chegou (e devolve 422 sozinho se algo estiver errado);</li>
     <li><strong>Controller</strong> recebe os dados validados e delega;</li>
-    <li><strong>Service</strong> executa a regra de negócio — criar o usuário, conferir a senha, emitir o token;</li>
-    <li><strong>Resource</strong> decide o que do usuário vira JSON.</li>
+    <li><strong>Service</strong> executa a regra de negócio usando o Model <code>User</code> — criar o usuário, conferir a senha, emitir o token;</li>
+    <li><strong>API Resource</strong> define quais dados do usuário viram JSON.</li>
   </ol>
 
   <h3>Mão na massa: os Form Requests</h3>
@@ -786,7 +788,7 @@ class LoginRequest extends FormRequest
     <p>Repare que o <code>LoginRequest</code> <strong>não</strong> repete a política de senha forte. E é proposital: aqui não estamos definindo uma senha, estamos conferindo uma. Se um usuário antigo tem uma senha de 6 caracteres, exigir <code>Password::min(8)</code> no login o trancaria para fora da própria conta com um 422 confuso. Valide formato na entrada; valide força só onde a senha é <em>criada</em>.</p>
   </div>
 
-  <h3>Mão na massa: a Resource do usuário</h3>
+  <h3>Mão na massa: a API Resource do usuário</h3>
 
   <figure class="code code--term">
     <figcaption>Terminal</figcaption>
@@ -817,7 +819,7 @@ class UserResource extends JsonResource
 }</code></pre>
   </figure>
 
-  <p>O <code>$hidden</code> do model já esconderia a senha; a Resource resolve o problema pelo outro lado, que é o mais seguro dos dois: em vez de listar o que <em>não</em> pode sair, ela lista o que pode. Adicione amanhã uma coluna <code>cpf</code> na tabela <code>users</code> e ela não vaza por descuido — simplesmente não está aqui.</p>
+  <p>O <code>$hidden</code> do model já esconderia a senha; a API Resource resolve o problema pelo outro lado, que é o mais seguro dos dois: em vez de listar o que <em>não</em> pode sair, ela lista o que pode. Adicione amanhã uma coluna <code>cpf</code> na tabela <code>users</code> e ela não vaza por descuido — simplesmente não está aqui.</p>
 
   <h3>Mão na massa: o AuthService</h3>
   <p>O coração do passo. Crie <code>app/Services/AuthService.php</code>, ao lado dos services que você já tem:</p>
@@ -942,7 +944,7 @@ class AuthController extends Controller
 
   <div class="callout callout--concept">
     <p class="callout-label">Conceito</p>
-    <p><strong>Por que esta resposta não vem embrulhada em <code>"data"</code>?</strong> No Módulo 4, retornar <code>new GenreResource($genre)</code> direto do controller produzia <code>{"data": {...}}</code>. Aqui a Resource está <em>dentro</em> de um <code>response()-&gt;json([...])</code>, e nesse caso ela se comporta como um simples objeto serializável: o envelope <code>data</code> só é adicionado quando a Resource <strong>é</strong> a resposta, não quando é um pedaço dela. O resultado é exatamente o que queremos — <code>{"user": {...}, "token": "...", "token_type": "Bearer"}</code>, sem aninhamento inútil.</p>
+    <p><strong>Por que esta resposta não vem embrulhada em <code>"data"</code>?</strong> No Módulo 4, retornar <code>new GenreResource($genre)</code> direto do controller produzia <code>{"data": {...}}</code>. Aqui a API Resource está <em>dentro</em> de um <code>response()-&gt;json([...])</code>, e nesse caso ela se comporta como um simples objeto serializável: o envelope <code>data</code> só é adicionado quando a Resource <strong>é</strong> a resposta, não quando é um pedaço dela. O resultado é exatamente o que queremos — <code>{"user": {...}, "token": "...", "token_type": "Bearer"}</code>, sem aninhamento inútil.</p>
     <p>O <code>token_type: "Bearer"</code> não é obrigatório, mas é convenção de mercado: muitos clientes HTTP montam o header sozinhos a partir desses dois campos.</p>
   </div>
 
@@ -1765,7 +1767,7 @@ curl -i http://localhost:8000/api/genres \
       <tbody>
         <tr><td>Model <code>User</code> emitindo tokens com <code>HasApiTokens</code></td><td>Passo 3</td></tr>
         <tr><td>Senhas hasheadas pelo cast <code>'password' =&gt; 'hashed'</code>, nunca em texto puro</td><td>Passo 3</td></tr>
-        <tr><td>Registro e login pelas quatro camadas (Request → Controller → Service → Resource)</td><td>Passo 4</td></tr>
+        <tr><td>Registro e login no fluxo Form Request → Controller → Service (Model <code>User</code>) → API Resource</td><td>Passo 4</td></tr>
         <tr><td>401 idiomático por exceção, sem <code>if</code> no controller; mensagem genérica contra enumeração</td><td>Passo 4</td></tr>
         <tr><td>Todas as rotas de <code>genres</code> e <code>books</code> atrás do <code>auth:sanctum</code></td><td>Passo 5</td></tr>
         <tr><td>Rate limit na rota de login (<code>throttle:6,1</code>)</td><td>Passo 5</td></tr>
@@ -1848,7 +1850,7 @@ curl -i http://localhost:8000/api/genres \
 </section>
 
 <footer class="end">
-  <p>BookShelf API protegida — material didático do Módulo 5 do Curso de Programação. Continuação de <a href="html-complete-tutorial.html">BookShelf API: aprenda Laravel 12 construindo uma API REST completa</a>.</p>
+  <p>BookShelf API protegida — material didático do Módulo 5 do Curso de Programação. Continuação de <a href="laravel.html">BookShelf API: aprenda Laravel 12 construindo uma API REST completa</a>.</p>
   <p>Referências: <a href="https://laravel.com/docs/12.x/sanctum">Laravel 12 — Sanctum</a> · <a href="https://laravel.com/docs/12.x/authentication">Laravel 12 — Authentication</a> · <a href="https://owasp.org/www-project-api-security/">OWASP — API Security</a></p>
 </footer>
 
