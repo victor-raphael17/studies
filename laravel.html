@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Tutorial passo a passo de Laravel 12 em português para Ubuntu 24.04 e 26.04: construa a BookShelf API, uma API REST completa — MVC, migrations, Eloquent, arquitetura MSC, Form Requests e API Resources.">
+<meta name="description" content="Tutorial passo a passo de Laravel 12 em português para Ubuntu 24.04 e 26.04: construa a BookShelf API, uma API REST completa — MVC + Service Layer, migrations, Eloquent, Form Requests e API Resources.">
 <title>BookShelf API — Tutorial completo de Laravel 12</title>
 <style>
 :root {
@@ -446,7 +446,7 @@ footer.end {
     <li><a href="#passo-5">Passo 5 — Banco de dados: migrations e seeders</a></li>
     <li><a href="#passo-6">Passo 6 — Models e Eloquent</a></li>
     <li><a href="#passo-7">Passo 7 — Controllers e rotas RESTful</a></li>
-    <li><a href="#passo-8">Passo 8 — Refatorando para MSC (camada Service)</a></li>
+    <li><a href="#passo-8">Passo 8 — MVC + Service Layer: adicionando a camada Service</a></li>
     <li><a href="#passo-9">Passo 9 — Form Requests e API Resources</a></li>
     <li><a href="#passo-10">Passo 10 — PSRs e convenções de nomenclatura</a></li>
     <li><a href="#passo-11">Passo 11 — Testando a API de ponta a ponta</a></li>
@@ -485,7 +485,7 @@ footer.end {
     </table>
   </div>
 
-  <p>Pelo caminho, você vai aprender os fundamentos do Laravel na ordem em que eles fazem sentido: instalação e ambiente, estrutura do projeto, arquitetura MVC, migrations e seeders, Eloquent ORM, controllers e rotas RESTful, a arquitetura Model-Service-Controller (MSC), validação com Form Requests, formatação de respostas com API Resources e as convenções PSR que a comunidade PHP segue.</p>
+  <p>Pelo caminho, você vai aprender os fundamentos do Laravel na ordem em que eles fazem sentido: instalação e ambiente, estrutura do projeto, arquitetura MVC + Service Layer, migrations e seeders, Eloquent ORM, controllers e rotas RESTful, validação com Form Requests, formatação de respostas com API Resources e as convenções PSR que a comunidade PHP segue.</p>
 
   <h3>O que você precisa saber antes de começar</h3>
   <ul>
@@ -1016,17 +1016,17 @@ docker compose exec php php artisan install:api</code></pre>
     <table>
       <thead><tr><th>Camada</th><th>Responsabilidade</th></tr></thead>
       <tbody>
-        <tr><td><strong>Model</strong></td><td>Representa os dados e a lógica de negócio. Interage com o banco via Eloquent ORM.</td></tr>
-        <tr><td><strong>View</strong></td><td>Apresentação visual (templates Blade). <strong>Em APIs, é substituída por respostas JSON.</strong></td></tr>
-        <tr><td><strong>Controller</strong></td><td>Recebe as requisições HTTP, coordena a lógica e retorna as respostas apropriadas.</td></tr>
+        <tr><td><strong>Model</strong></td><td>Representa os dados e as regras de dados. Interage com o banco via Eloquent ORM.</td></tr>
+        <tr><td><strong>View</strong></td><td>Apresenta os dados. Em páginas web, gera HTML com Blade; em APIs, compõe a resposta JSON, que pode ser formatada por API Resources.</td></tr>
+        <tr><td><strong>Controller</strong></td><td>Recebe as requisições HTTP, coordena o fluxo e delega as regras de negócio quando há uma camada Service.</td></tr>
       </tbody>
     </table>
   </div>
 
-  <p>A separação vale a pena por um motivo simples: cada tipo de mudança tem um endereço. Mudou uma regra de dados? Model. Mudou o formato da resposta? View. Mudou o fluxo de uma requisição? Controller.</p>
+  <p>A separação vale a pena por um motivo simples: cada tipo de mudança tem um endereço. Mudou o acesso aos dados? Model. Mudou o formato da resposta? View. Mudou o fluxo de uma requisição? Controller.</p>
 
-  <h3>Conceito: e numa API, cadê a View?</h3>
-  <p>Em um site tradicional, a View é um template Blade que gera HTML. O BookShelf não tem telas: quem consome a API é outro programa (um app mobile, um front-end em JavaScript, o próprio <code>curl</code>). Nossa "View" é o <strong>JSON</strong> que devolvemos — e no Passo 9 ela vai ganhar forma explícita com as <strong>API Resources</strong>, classes cujo único trabalho é formatar a saída.</p>
+  <h3>Conceito: como a View aparece numa API?</h3>
+  <p>Em um site tradicional, a View é um template Blade que gera HTML. Uma API também tem uma camada de apresentação: no BookShelf, a resposta é <strong>JSON</strong>, consumido por outro programa (um app mobile, um front-end em JavaScript, o próprio <code>curl</code>). No Passo 9, as <strong>API Resources</strong> vão definir explicitamente o formato dessa saída. A View continua existindo; muda a forma como a resposta é apresentada.</p>
 
   <p>Traduzindo o MVC para o nosso projeto:</p>
 
@@ -1043,7 +1043,7 @@ docker compose exec php php artisan install:api</code></pre>
 
   <div class="callout callout--concept">
     <p class="callout-label">Conceito</p>
-    <p><strong>Spoiler do Passo 8:</strong> em APIs, o MVC puro tem um ponto fraco — a lógica de negócio tende a inchar os Controllers. Quando chegarmos lá, vamos adicionar uma quarta peça, a camada <strong>Service</strong>, evoluindo para a arquitetura <strong>Model-Service-Controller (MSC)</strong>. Primeiro o MVC clássico, depois o refinamento.</p>
+    <p><strong>Spoiler do Passo 8:</strong> quando a lógica de negócio começa a inchar os Controllers, podemos acrescentar a camada <strong>Service</strong> ao MVC. Ela organiza essas regras entre Controller e Model; a View continua responsável pela apresentação da resposta, com API Resources no nosso caso.</p>
   </div>
 
   <div class="verify">
@@ -1051,7 +1051,7 @@ docker compose exec php php artisan install:api</code></pre>
     <ul class="checklist">
       <li><label><input type="checkbox" data-ck="p4-1"> <span>Consigo explicar com minhas palavras o que fazem Model, View e Controller.</span></label></li>
       <li><label><input type="checkbox" data-ck="p4-2"> <span>Sei dizer qual camada conversa com o banco de dados (e qual nunca deveria).</span></label></li>
-      <li><label><input type="checkbox" data-ck="p4-3"> <span>Entendo por que uma API não usa Blade e o que substitui a View aqui.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p4-3"> <span>Entendo como a View se manifesta numa API e como as API Resources formatam o JSON.</span></label></li>
     </ul>
   </div>
 </section>
@@ -1763,26 +1763,27 @@ curl -i -X DELETE http://localhost:8000/api/books/abc -H 'Accept: application/js
 </section>
 
 <section class="step" id="passo-8">
-  <h2><span class="step-badge">Passo 8</span> Refatorando para MSC: a camada Service</h2>
+  <h2><span class="step-badge">Passo 8</span> MVC + Service Layer: adicionando a camada Service</h2>
 
-  <h3>Conceito: por que o MVC aperta em APIs</h3>
+  <h3>Conceito: quando acrescentar uma camada Service</h3>
   <p>Nossos controllers estão saudáveis hoje, mas imagine as regras que uma estante real pediria: "não excluir um gênero com livros em leitura", "recalcular estatísticas ao terminar um livro", "notificar quando a meta de leitura for atingida". Se tudo isso for parar no controller, ele vira um monstro difícil de testar e manter — o famoso <em>fat controller</em>.</p>
-  <p>A solução consagrada em APIs é a arquitetura <strong>Model-Service-Controller (MSC)</strong>: inserir uma camada <strong>Service</strong> entre o Controller e o Model para abrigar a lógica de negócio.</p>
+  <p>Neste tutorial, vamos manter o MVC e acrescentar uma camada <strong>Service</strong> entre o Controller e o Model para organizar a lógica de negócio. Essa composição é chamada aqui de <strong>MVC + Service Layer</strong>. O Service complementa o MVC: a View permanece como camada de apresentação e, no BookShelf, as API Resources formatam as respostas JSON.</p>
 
   <div class="table-wrap">
     <table>
       <thead><tr><th>Camada</th><th>Responsabilidade</th></tr></thead>
       <tbody>
-        <tr><td><strong>Controller</strong></td><td>Recebe a requisição, valida os dados de entrada (via Form Request, Passo 9) e delega ao Service. Retorna a resposta HTTP.</td></tr>
-        <tr><td><strong>Service</strong></td><td>Contém a lógica de negócio. Orquestra operações entre Models e outros serviços.</td></tr>
         <tr><td><strong>Model</strong></td><td>Representa a tabela no banco. Define relacionamentos, scopes e atributos.</td></tr>
+        <tr><td><strong>View</strong></td><td>Apresenta a saída da API; as API Resources definem o formato do JSON retornado.</td></tr>
+        <tr><td><strong>Controller</strong></td><td>Recebe a requisição, valida os dados de entrada (via Form Request, Passo 9), coordena o fluxo e delega ao Service.</td></tr>
+        <tr><td><strong>Service</strong></td><td>Camada adicional ao MVC que contém a lógica de negócio e orquestra operações entre Models e outros serviços.</td></tr>
       </tbody>
     </table>
   </div>
 
   <div class="callout callout--concept">
     <p class="callout-label">Conceito</p>
-    <p><strong>Por que usar Services?</strong> Controllers magros e Services focados facilitam testes unitários, reutilização da lógica em outros contextos (CLI, filas, eventos) e manutenção a longo prazo. O controller cuida do HTTP; o service cuida do negócio.</p>
+    <p><strong>Por que usar Services?</strong> Controllers magros e Services focados facilitam testes unitários, reutilização da lógica em outros contextos (CLI, filas, eventos) e manutenção a longo prazo. O Controller cuida do HTTP, o Service cuida do negócio e a View continua cuidando da apresentação.</p>
   </div>
 
   <h3>Mão na massa: criando os Services</h3>
@@ -2225,7 +2226,7 @@ class StoreBookRequest extends FormRequest
   </figure>
 
   <h3>Conceito: API Resources — a "View" da nossa API</h3>
-  <p>Validamos a entrada; agora vamos assumir o controle da <strong>saída</strong>. Hoje o JSON devolvido é o model serializado cru — tudo o que está na tabela vaza para o cliente. As <strong>API Resources</strong> são classes que declaram exatamente quais campos a API expõe e em que formato. É a materialização daquela "View que virou JSON" do Passo 4: mudou o formato da resposta? Mexa na Resource, e em mais lugar nenhum.</p>
+  <p>Validamos a entrada; agora vamos assumir o controle da <strong>saída</strong>. Hoje o JSON devolvido é o model serializado cru — tudo o que está na tabela vaza para o cliente. As <strong>API Resources</strong> são classes que declaram exatamente quais campos a API expõe e em que formato. Elas implementam a camada View da API: a resposta continua sendo JSON, e a Resource define sua apresentação. Mudou o formato da resposta? Mexa na Resource, e em mais lugar nenhum.</p>
 
   <h3>Mão na massa: criando as Resources</h3>
 
