@@ -920,7 +920,7 @@ docker compose exec php php artisan install:api</code></pre>
 ├── public/
 │   └── index.php           # HTTP entry point
 ├── resources/
-│   └── views/              # Blade templates (we will not need them)
+│   └── views/              # HTML templates (we will not need them)
 ├── routes/
 │   ├── web.php             # web routes
 │   ├── console.php         # Artisan commands
@@ -968,7 +968,7 @@ docker compose exec php php artisan install:api</code></pre>
     <li>O <strong>Router</strong> procura em <code>routes/api.php</code> a rota correspondente.</li>
     <li>Os <strong>Middlewares</strong> são executados (camadas que inspecionam a requisição: CORS, autenticação etc. — nesta etapa, só os padrões do framework).</li>
     <li>O <strong>Controller</strong> processa a requisição e usa os Models necessários.</li>
-    <li>A resposta volta ao cliente — HTML via Blade em sites, <strong>JSON</strong> em APIs como a nossa.</li>
+    <li>A resposta volta ao cliente — <strong>JSON</strong>
   </ol>
 
   <h3>Mão na massa: sua primeira rota de API</h3>
@@ -1017,7 +1017,7 @@ docker compose exec php php artisan install:api</code></pre>
       <thead><tr><th>Camada</th><th>Responsabilidade</th></tr></thead>
       <tbody>
         <tr><td><strong>Model</strong></td><td>Representa os dados e as regras de dados. Interage com o banco via Eloquent ORM.</td></tr>
-        <tr><td><strong>View</strong></td><td>Apresenta os dados. Em páginas web, gera HTML com Blade; em APIs, compõe a resposta JSON, que pode ser formatada por API Resources.</td></tr>
+        <tr><td><strong>View</strong></td><td>Apresenta os dados. Em APIs, compõe a resposta JSON, que pode ser formatada por API Resources.</td></tr>
         <tr><td><strong>Controller</strong></td><td>Recebe as requisições HTTP, coordena o fluxo e delega as regras de negócio quando há uma camada Service.</td></tr>
       </tbody>
     </table>
@@ -1026,7 +1026,7 @@ docker compose exec php php artisan install:api</code></pre>
   <p>A separação vale a pena por um motivo simples: cada tipo de mudança tem um endereço. Mudou o acesso aos dados? Model. Mudou o formato da resposta? View. Mudou o fluxo de uma requisição? Controller.</p>
 
   <h3>Conceito: como a View aparece numa API?</h3>
-  <p>Em um site tradicional, a View é um template Blade que gera HTML. Uma API também tem uma camada de apresentação: no BookShelf, a resposta é <strong>JSON</strong>, consumido por outro programa (um app mobile, um front-end em JavaScript, o próprio <code>curl</code>). No Passo 9, as <strong>API Resources</strong> vão definir explicitamente o formato dessa saída. A View continua existindo; muda a forma como a resposta é apresentada.</p>
+  <p>Numa API moderna, a resposta é <strong>JSON</strong>, consumido por outro programa (um app mobile, um front-end em JavaScript, o próprio <code>curl</code>). No Passo 9, as <strong>API Resources</strong> vão definir explicitamente o formato dessa saída. A View continua existindo; muda a forma como a resposta é apresentada.</p>
 
   <p>Traduzindo o MVC para o nosso projeto:</p>
 
