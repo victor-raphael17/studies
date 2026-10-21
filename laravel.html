@@ -1785,6 +1785,9 @@ curl -i -X DELETE http://localhost:8000/api/books/abc -H 'Accept: application/js
     <p><strong>Por que usar Services?</strong> Controllers magros e Services focados facilitam testes unitários, reutilização da lógica em outros contextos (CLI, filas, eventos) e manutenção a longo prazo. O Controller cuida do HTTP, o Service cuida do negócio e a View continua cuidando da apresentação.</p>
   </div>
 
+  <h3>Uma regra de negócio simples: avaliação só para livro concluído</h3>
+  <p>O campo <code>rating</code> já existe e é opcional, então vamos acrescentar uma regra pequena sem mudar o banco nem criar novas rotas: <strong>um livro só pode ter avaliação quando seu status é <code>finished</code></strong>. Se estiver como <code>to_read</code> ou <code>reading</code>, a avaliação fica vazia. O Form Request do Passo 9 vai conferir o tipo e a faixa de 1 a 5; o Service vai garantir essa regra do BookShelf ao criar ou atualizar o livro.</p>
+
   <h3>Mão na massa: criando os Services</h3>
   <p>Não existe comando <code>make:service</code> — a pasta e as classes são nossas. Crie a pasta <code>app/Services/</code>:</p>
 
@@ -1849,23 +1852,33 @@ class BookService
 {
     public function listAll(): Collection
     {
-        return Book::with('genre')-&gt;get();
+        return Book::with('genre:id,name')-&gt;get();
     }
 
     public function create(array $data): Book
     {
+        if (($data['status'] ?? 'to_read') !== 'finished') {
+            $data['rating'] = null;
+        }
+
         return Book::create($data);
     }
 
     public function findById(int $id): Book
     {
-        return Book::with('genre')-&gt;findOrFail($id);
+        return Book::with('genre:id,name')-&gt;findOrFail($id);
     }
 
     public function update(int $id, array $data): Book
     {
         $book = Book::findOrFail($id);
-        $book-&gt;update($data);
+        $book-&gt;fill($data);
+
+        if ($book-&gt;status !== 'finished') {
+            $book-&gt;rating = null;
+        }
+
+        $book-&gt;save();
 
         return $book;
     }
@@ -1877,14 +1890,16 @@ class BookService
 }</code></pre>
   </figure>
 
+  <p>No <code>create()</code>, usamos <code>to_read</code> como status padrão quando ele não veio na entrada. No <code>update()</code>, primeiro aplicamos os campos recebidos ao livro atual; assim, a regra também funciona com um <code>PATCH</code> que altera só o status ou só a avaliação. Por exemplo, se o status final for <code>reading</code> e vier uma avaliação <code>5</code>, o Service salva <code>rating</code> como <code>null</code>. O controller continua sem conhecer essa regra: seus métodos <code>store()</code> e <code>update()</code> apenas chamam o Service.</p>
+
   <h3>Aprofundando: eager loading e o problema N+1</h3>
-  <p>Duas linhas do <code>BookService</code> merecem parar tudo: o <code>Book::with('genre')</code> do <code>listAll()</code> e do <code>findById()</code>. Sem esse <code>with()</code> o código continua funcionando — e é exatamente por isso que o <strong>N+1</strong> é o problema de performance mais comum em APIs Laravel: ele não quebra nada, só deixa tudo lento, e em silêncio. Vamos ver o antes e o depois, em quatro tempos.</p>
+  <p>Duas linhas do <code>BookService</code> merecem parar tudo: o <code>Book::with('genre:id,name')</code> do <code>listAll()</code> e do <code>findById()</code>. Além de carregar a relação antes do acesso, a sintaxe seleciona somente as colunas <code>id</code> e <code>name</code> do gênero — o bastante para identificar e exibir o gênero junto ao livro. Sem esse <code>with()</code> o código continua funcionando — e é exatamente por isso que o <strong>N+1</strong> é o problema de performance mais comum em APIs Laravel: ele não quebra nada, só deixa tudo lento, e em silêncio. Vamos ver o antes e o depois, em quatro tempos.</p>
 
   <h4>1. Sem eager loading, o gênero simplesmente não vem</h4>
   <p>Suponha que o service fizesse apenas <code>Book::findOrFail($id)</code>, sem o <code>with()</code>. Esta seria a resposta de <code>GET /api/books/1</code>:</p>
 
   <figure class="code code--term">
-    <figcaption>Terminal — GET /api/books/1 <em>sem</em> o with('genre')</figcaption>
+    <figcaption>Terminal — GET /api/books/1 <em>sem</em> eager loading de gênero</figcaption>
     <pre><code>curl -s http://localhost:8000/api/books/1 -H 'Accept: application/json' | python3 -m json.tool</code></pre>
   </figure>
 
@@ -1924,14 +1939,14 @@ class BookService
 
   <p>Treze consultas para montar uma lista de doze livros: <strong>1</strong> para os livros <strong>+ N</strong> para os gêneros — daí o nome do problema. E o número acompanha o tamanho da estante: com 1.000 livros seriam 1.001 consultas na mesma rota. Repare também no desperdício: são só <strong>4</strong> gêneros no banco, e o código foi buscar o mesmo registro várias vezes.</p>
 
-  <h4>3. O <code>with('genre')</code>: duas consultas, sempre</h4>
-  <p>O eager loading (carregamento adiantado) inverte a ordem das coisas: em vez de esperar o código pedir o gênero de cada livro, o Eloquent busca <strong>todos os gêneros de uma vez</strong>, logo depois de buscar os livros, e costura cada gênero no seu livro em memória. Rode a segunda metade do experimento:</p>
+  <h4>3. O <code>with('genre:id,name')</code>: duas consultas, sempre</h4>
+  <p>O eager loading (carregamento adiantado) inverte a ordem das coisas: em vez de esperar o código pedir o gênero de cada livro, o Eloquent busca <strong>todos os gêneros de uma vez</strong>, logo depois de buscar os livros, e costura cada gênero no seu livro em memória. Como nesta resposta só precisamos identificar e nomear o gênero, carregamos somente essas duas colunas. Rode a segunda metade do experimento:</p>
 
   <figure class="code code--term">
     <figcaption>Terminal — php artisan tinker</figcaption>
     <pre><code><span class="pr">&gt; </span>DB::flushQueryLog();
 
-<span class="pr">&gt; </span>$books = Book::with('genre')-&gt;get();
+<span class="pr">&gt; </span>$books = Book::with('genre:id,name')-&gt;get();
 
 <span class="pr">&gt; </span>foreach ($books as $book) { $book-&gt;genre-&gt;name; }  // no extra queries at all
 
@@ -1939,23 +1954,23 @@ class BookService
 <span class="out">= Illuminate\Support\Collection {
     all: [
       "select * from `books`",
-      "select * from `genres` where `genres`.`id` in (?, ?, ?, ?)",
+      "select `id`, `name` from `genres` where `genres`.`id` in (?, ?, ?, ?)",
     ],
   }</span></code></pre>
   </figure>
 
-  <p>Duas consultas — e a segunda é a peça-chave. Os <code>?</code> são os <code>genre_id</code> distintos que apareceram na primeira consulta: o Eloquent os coleta, busca todos os gêneros correspondentes num único <code>where in</code> e distribui cada objeto para o livro certo. Doze livros ou doze mil, continuam sendo <strong>duas</strong> consultas.</p>
+  <p>Duas consultas — e a segunda é a peça-chave. Os <code>?</code> são os <code>genre_id</code> distintos que apareceram na primeira consulta: o Eloquent os coleta, busca apenas <code>id</code> e <code>name</code> dos gêneros correspondentes num único <code>where in</code> e distribui cada objeto para o livro certo. O <code>id</code> é necessário para o Eloquent associar cada gênero ao livro; o <code>genre_id</code> continua vindo na consulta dos livros. Doze livros ou doze mil, continuam sendo <strong>duas</strong> consultas.</p>
 
-  <h4>4. E o JSON passa a vir completo</h4>
-  <p>Com o <code>with('genre')</code> de volta ao service, o mesmo <code>GET /api/books/1</code> devolve o gênero <strong>aninhado</strong>, e o cliente resolve tudo em uma requisição só:</p>
+  <h4>4. E o JSON traz o resumo necessário</h4>
+  <p>Com o <code>with('genre:id,name')</code> de volta ao service, o mesmo <code>GET /api/books/1</code> devolve um resumo do gênero <strong>aninhado</strong> ao livro. O cliente recebe os dados que precisa em uma requisição só:</p>
 
   <figure class="code code--term">
-    <figcaption>Terminal — GET /api/books/1 <em>com</em> o with('genre')</figcaption>
+    <figcaption>Terminal — GET /api/books/1 <em>com</em> o with('genre:id,name')</figcaption>
     <pre><code>curl -s http://localhost:8000/api/books/1 -H 'Accept: application/json' | python3 -m json.tool</code></pre>
   </figure>
 
   <figure class="code code--out">
-    <figcaption>Saída — o gênero vem aninhado</figcaption>
+    <figcaption>Saída — somente id e nome do gênero</figcaption>
     <pre><code>{
     "id": 1,
     "genre_id": 1,
@@ -1968,24 +1983,23 @@ class BookService
     "updated_at": "2025-07-22T12:00:00.000000Z",
     "genre": {
         "id": 1,
-        "name": "Fantasy",
-        "description": "Magic, mythical creatures and epic quests.",
-        "created_at": "2025-07-22T12:00:00.000000Z",
-        "updated_at": "2025-07-22T12:00:00.000000Z"
+        "name": "Fantasy"
     }
 }</code></pre>
   </figure>
 
-  <p>Não é coincidência: ao serializar um model para JSON, o Eloquent inclui os relacionamentos <strong>que já estão carregados</strong> — e só eles. Carregar a relação e expô-la na resposta acabam sendo, aqui, o mesmo gesto. Quer conferir com os próprios olhos? Comente o <code>with('genre')</code> no <code>BookService</code>, repita o <code>curl</code> e veja a chave <code>"genre"</code> desaparecer.</p>
+  <p>A chave <code>genre_id</code> separada ainda aparece porque, neste passo, o controller devolve o Model cru. No Passo 9, a <code>BookResource</code> define o JSON final e não repete esse identificador fora e dentro do resumo do gênero.</p>
+
+  <p>Não é coincidência: ao serializar um model para JSON, o Eloquent inclui os relacionamentos <strong>que já estão carregados</strong> — e, neste caso, somente as colunas selecionadas. Carregar a relação e expô-la na resposta acabam sendo, aqui, o mesmo gesto. Quer conferir com os próprios olhos? Comente o <code>with('genre:id,name')</code> no <code>BookService</code>, repita o <code>curl</code> e veja a chave <code>"genre"</code> desaparecer.</p>
 
   <div class="callout callout--concept">
     <p class="callout-label">Conceito</p>
-    <p><strong>Por que essa decisão mora no Service?</strong> Porque "de quais dados esta operação precisa" é uma pergunta de negócio, não de HTTP. O controller não deveria nem saber que existe uma tabela <code>genres</code>; o model não sabe em que contexto está sendo usado. O service, que orquestra os dois, é o único lugar com informação suficiente para decidir "nesta listagem, o gênero vem junto".</p>
+    <p><strong>Por que essa decisão mora no Service?</strong> Porque "de quais dados esta operação precisa" depende do caso de uso, não do HTTP. O controller não deveria nem saber que existe uma tabela <code>genres</code>; o model não sabe em que contexto está sendo usado. O service, que orquestra os dois, decide que nesta resposta o gênero vem junto — e que bastam seu <code>id</code> e <code>name</code>.</p>
   </div>
 
   <div class="callout callout--tip">
     <p class="callout-label">Boa prática</p>
-    <p>Eager loading não é "quanto mais, melhor". Repare que o <code>GenreService::listAll()</code> <strong>não</strong> tem <code>with('books')</code>: a resposta de gênero não expõe os livros, então carregá-los seria trazer 12 registros do banco para jogar fora — o erro oposto, e igualmente caro. A regra prática cabe em uma linha: <strong>carregue o que a resposta vai usar, e só isso</strong>.</p>
+    <p>Eager loading não é "quanto mais, melhor". Repare que o <code>GenreService::listAll()</code> <strong>não</strong> tem <code>with('books')</code>: a resposta de gênero não expõe os livros, então carregá-los seria trazer 12 registros do banco para jogar fora — o erro oposto, e igualmente caro. Também não precisamos trazer todas as colunas de <code>genres</code> para a resposta de livros. A regra prática cabe em uma linha: <strong>carregue o que a resposta vai usar, e só isso</strong>.</p>
   </div>
 
   <div class="callout callout--warn">
@@ -1993,7 +2007,7 @@ class BookService
     <p>O N+1 é traiçoeiro porque só aparece em escala: em desenvolvimento, com 12 livros e o banco na mesma máquina, as 13 consultas se perdem no ruído. Em produção, com milhares de registros e o banco em outro servidor, cada consulta extra é uma ida e volta de rede — e a rota que respondia em 20 ms passa a levar segundos. Para não descobrir isso pelo cliente reclamando, peça ao Laravel que <em>proíba</em> lazy loading fora de produção: um <code>Model::preventLazyLoading(! app()-&gt;isProduction());</code> no método <code>boot()</code> do <code>AppServiceProvider</code> faz qualquer acesso a uma relação não carregada estourar exceção na hora, na sua máquina.</p>
   </div>
 
-  <p>No Passo 9 esse assunto volta com outro nome: quando as API Resources assumirem o controle da saída, o <code>whenLoaded('genre')</code> vai incluir o gênero no JSON <strong>apenas</strong> se ele tiver sido carregado — garantindo que a camada de apresentação nunca dispare uma consulta escondida por conta própria.</p>
+  <p>No Passo 9 esse assunto volta com outro nome: quando as API Resources assumirem o controle da saída, o <code>whenLoaded('genre')</code> vai incluir o resumo do gênero no JSON <strong>apenas</strong> se ele tiver sido carregado — garantindo que a camada de apresentação nunca dispare uma consulta escondida por conta própria.</p>
 
   <h3>Mão na massa: controllers magros com injeção de dependência</h3>
   <p>Agora os controllers delegam tudo. Repare no construtor: declaramos que o controller <em>precisa</em> de um service, e o <strong>Service Container</strong> do Laravel cria e entrega a instância automaticamente — isso é <strong>injeção de dependência</strong>. A sintaxe <code>private GenreService $genreService</code> direto no construtor (promoção de propriedades, do PHP 8) declara e atribui a propriedade de uma vez só.</p>
@@ -2110,9 +2124,9 @@ curl http://localhost:8000/api/books -H 'Accept: application/json'</code></pre>
     </figure>
     <ul class="checklist">
       <li><label><input type="checkbox" data-ck="p8-1"> <span><code>GET /api/genres</code> responde exatamente como antes da refatoração.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p8-2"> <span><code>GET /api/books</code> agora inclui o objeto <code>genre</code> dentro de cada livro.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p8-2"> <span><code>GET /api/books</code> inclui somente o <code>id</code> e o <code>name</code> do gênero junto de cada livro.</span></label></li>
       <li><label><input type="checkbox" data-ck="p8-3"> <span>Os controllers não contêm mais nenhuma chamada direta a <code>Genre::</code> ou <code>Book::</code> — tudo passa pelos services.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p8-4"> <span>No tinker, o experimento do query log mostrou <strong>13</strong> consultas sem o <code>with('genre')</code> e <strong>2</strong> com ele.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p8-4"> <span>No tinker, o experimento do query log mostrou <strong>13</strong> consultas sem eager loading e <strong>2</strong> com <code>with('genre:id,name')</code>.</span></label></li>
     </ul>
   </div>
 </section>
@@ -2281,7 +2295,10 @@ class BookResource extends JsonResource
 <span class="diff-add">            'pages'      =&gt; $this-&gt;pages,</span>
 <span class="diff-add">            'status'     =&gt; $this-&gt;status,</span>
 <span class="diff-add">            'rating'     =&gt; $this-&gt;rating,</span>
-<span class="diff-add">            'genre'      =&gt; new GenreResource($this-&gt;whenLoaded('genre')),</span>
+<span class="diff-add">            'genre'      =&gt; $this-&gt;whenLoaded('genre', fn ($genre) =&gt; [</span>
+<span class="diff-add">                'id'   =&gt; $genre-&gt;id,</span>
+<span class="diff-add">                'name' =&gt; $genre-&gt;name,</span>
+<span class="diff-add">            ]),</span>
 <span class="diff-add">            'created_at' =&gt; $this-&gt;created_at,</span>
 <span class="diff-add">            'updated_at' =&gt; $this-&gt;updated_at,</span>
 <span class="diff-add">        ];</span>
@@ -2291,7 +2308,7 @@ class BookResource extends JsonResource
 
   <div class="callout callout--concept">
     <p class="callout-label">Conceito</p>
-    <p><strong>Dois detalhes das Resources:</strong> primeiro, <code>whenLoaded('genre')</code> só inclui o gênero no JSON quando ele foi carregado com eager loading (o <code>with('genre')</code> do BookService) — sem disparar consultas escondidas. Segundo, as Resources envelopam tudo numa chave <code>"data"</code>: as respostas passam a ser <code>{"data": [...]}</code>. Isso é padrão e desejável — dá espaço para metadados (paginação, por exemplo) no futuro.</p>
+    <p><strong>Dois detalhes das Resources:</strong> primeiro, <code>whenLoaded('genre', ...)</code> só inclui o resumo do gênero no JSON quando ele foi carregado com eager loading (o <code>with('genre:id,name')</code> do BookService) — sem disparar consultas escondidas. A Resource escolhe expor apenas <code>id</code> e <code>name</code> nesse contexto; a descrição continua disponível na resposta própria de gênero. Segundo, as Resources envelopam tudo numa chave <code>"data"</code>: as respostas passam a ser <code>{"data": [...]}</code>. Isso é padrão e desejável — dá espaço para metadados (paginação, por exemplo) no futuro.</p>
   </div>
 
   <h3>Mão na massa: a versão final dos controllers</h3>
