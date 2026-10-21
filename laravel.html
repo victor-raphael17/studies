@@ -1587,7 +1587,7 @@ class BookSeeder extends Seeder
 php artisan make:controller Api/BookController --api</code></pre>
   </figure>
 
-  <p>Observe: a pasta <code>app/Http/Controllers/Api/</code> corresponde ao namespace <code>App\Http\Controllers\Api</code>. Pasta e namespace andam sempre juntos — isso é o autoloading PSR-4, que detalharemos no Passo 10. Agora preencha os dois controllers:</p>
+  <p>Observe: a pasta <code>app/Http/Controllers/Api/</code> corresponde ao namespace <code>App\Http\Controllers\Api</code>. Pasta e namespace andam sempre juntos — isso é o autoloading PSR-4, que detalharemos no Passo 10. Nos métodos, vamos guardar primeiro o resultado em <code>$genre</code>, <code>$genres</code>, <code>$book</code> ou <code>$books</code> e só depois montar a resposta. Agora preencha os dois controllers:</p>
 
   <figure class="code code--php">
     <figcaption>app/Http/Controllers/Api/GenreController.php</figcaption>
@@ -1603,7 +1603,9 @@ class GenreController extends Controller
 {
     public function index()
     {
-<span class="diff-add">        return response()-&gt;json(Genre::all());</span>
+<span class="diff-add">        $genres = Genre::all();</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return response()-&gt;json($genres);</span>
     }
 
     public function store(Request $request)
@@ -1615,7 +1617,9 @@ class GenreController extends Controller
 
 <span class="diff-add">    public function show(int $id)</span>
     {
-<span class="diff-add">        return response()-&gt;json(Genre::findOrFail($id));</span>
+<span class="diff-add">        $genre = Genre::findOrFail($id);</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return response()-&gt;json($genre);</span>
     }
 
 <span class="diff-add">    public function update(Request $request, int $id)</span>
@@ -1628,7 +1632,8 @@ class GenreController extends Controller
 
 <span class="diff-add">    public function destroy(int $id)</span>
     {
-<span class="diff-add">        Genre::findOrFail($id)-&gt;delete();</span>
+<span class="diff-add">        $genre = Genre::findOrFail($id);</span>
+<span class="diff-add">        $genre-&gt;delete();</span>
 <span class="diff-add"></span>
 <span class="diff-add">        return response()-&gt;noContent();</span>
     }
@@ -1649,7 +1654,9 @@ class BookController extends Controller
 {
     public function index()
     {
-<span class="diff-add">        return response()-&gt;json(Book::all());</span>
+<span class="diff-add">        $books = Book::all();</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return response()-&gt;json($books);</span>
     }
 
     public function store(Request $request)
@@ -1661,7 +1668,9 @@ class BookController extends Controller
 
 <span class="diff-add">    public function show(int $id)</span>
     {
-<span class="diff-add">        return response()-&gt;json(Book::findOrFail($id));</span>
+<span class="diff-add">        $book = Book::findOrFail($id);</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return response()-&gt;json($book);</span>
     }
 
 <span class="diff-add">    public function update(Request $request, int $id)</span>
@@ -1674,7 +1683,8 @@ class BookController extends Controller
 
 <span class="diff-add">    public function destroy(int $id)</span>
     {
-<span class="diff-add">        Book::findOrFail($id)-&gt;delete();</span>
+<span class="diff-add">        $book = Book::findOrFail($id);</span>
+<span class="diff-add">        $book-&gt;delete();</span>
 <span class="diff-add"></span>
 <span class="diff-add">        return response()-&gt;noContent();</span>
     }
@@ -1796,7 +1806,7 @@ curl -i -X DELETE http://localhost:8000/api/books/abc -H 'Accept: application/js
     <pre><code>mkdir app/Services</code></pre>
   </figure>
 
-  <p>Graças ao PSR-4 (Passo 10), basta o namespace <code>App\Services</code> casar com a pasta <code>app/Services/</code> para o Composer encontrar as classes sozinho. Crie os dois arquivos:</p>
+  <p>Graças ao PSR-4 (Passo 10), basta o namespace <code>App\Services</code> casar com a pasta <code>app/Services/</code> para o Composer encontrar as classes sozinho. Nos Services, também vamos guardar cada resultado em uma variável antes de retorná-lo. Crie os dois arquivos:</p>
 
   <figure class="code code--php">
     <figcaption>app/Services/GenreService.php</figcaption>
@@ -1811,17 +1821,23 @@ class GenreService
 {
     public function listAll(): Collection
     {
-        return Genre::all();
+        $genres = Genre::all();
+
+        return $genres;
     }
 
     public function create(array $data): Genre
     {
-        return Genre::create($data);
+        $genre = Genre::create($data);
+
+        return $genre;
     }
 
     public function findById(int $id): Genre
     {
-        return Genre::findOrFail($id);
+        $genre = Genre::findOrFail($id);
+
+        return $genre;
     }
 
     public function update(int $id, array $data): Genre
@@ -1834,7 +1850,8 @@ class GenreService
 
     public function delete(int $id): void
     {
-        Genre::findOrFail($id)-&gt;delete();
+        $genre = Genre::findOrFail($id);
+        $genre-&gt;delete();
     }
 }</code></pre>
   </figure>
@@ -1852,7 +1869,9 @@ class BookService
 {
     public function listAll(): Collection
     {
-        return Book::with('genre:id,name')-&gt;get();
+        $books = Book::with('genre:id,name')-&gt;get();
+
+        return $books;
     }
 
     public function create(array $data): Book
@@ -1861,12 +1880,16 @@ class BookService
             $data['rating'] = null;
         }
 
-        return Book::create($data);
+        $book = Book::create($data);
+
+        return $book;
     }
 
     public function findById(int $id): Book
     {
-        return Book::with('genre:id,name')-&gt;findOrFail($id);
+        $book = Book::with('genre:id,name')-&gt;findOrFail($id);
+
+        return $book;
     }
 
     public function update(int $id, array $data): Book
@@ -1885,7 +1908,8 @@ class BookService
 
     public function delete(int $id): void
     {
-        Book::findOrFail($id)-&gt;delete();
+        $book = Book::findOrFail($id);
+        $book-&gt;delete();
     }
 }</code></pre>
   </figure>
@@ -2030,7 +2054,9 @@ class GenreController extends Controller
 <span class="diff-add"></span>
     public function index()
     {
-<span class="diff-add">        return response()-&gt;json($this-&gt;genreService-&gt;listAll());</span>
+<span class="diff-add">        $genres = $this-&gt;genreService-&gt;listAll();</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return response()-&gt;json($genres);</span>
     }
 
     public function store(Request $request)
@@ -2042,7 +2068,9 @@ class GenreController extends Controller
 
     public function show(int $id)
     {
-<span class="diff-add">        return response()-&gt;json($this-&gt;genreService-&gt;findById($id));</span>
+<span class="diff-add">        $genre = $this-&gt;genreService-&gt;findById($id);</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return response()-&gt;json($genre);</span>
     }
 
     public function update(Request $request, int $id)
@@ -2079,7 +2107,9 @@ class BookController extends Controller
 <span class="diff-add"></span>
     public function index()
     {
-<span class="diff-add">        return response()-&gt;json($this-&gt;bookService-&gt;listAll());</span>
+<span class="diff-add">        $books = $this-&gt;bookService-&gt;listAll();</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return response()-&gt;json($books);</span>
     }
 
     public function store(Request $request)
@@ -2091,7 +2121,9 @@ class BookController extends Controller
 
     public function show(int $id)
     {
-<span class="diff-add">        return response()-&gt;json($this-&gt;bookService-&gt;findById($id));</span>
+<span class="diff-add">        $book = $this-&gt;bookService-&gt;findById($id);</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return response()-&gt;json($book);</span>
     }
 
     public function update(Request $request, int $id)
@@ -2335,7 +2367,9 @@ class GenreController extends Controller
 
     public function index()
     {
-<span class="diff-add">        return GenreResource::collection($this-&gt;genreService-&gt;listAll());</span>
+<span class="diff-add">        $genres = $this-&gt;genreService-&gt;listAll();</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return GenreResource::collection($genres);</span>
     }
 
 <span class="diff-add">    public function store(StoreGenreRequest $request)</span>
@@ -2347,7 +2381,9 @@ class GenreController extends Controller
 
     public function show(int $id)
     {
-<span class="diff-add">        return new GenreResource($this-&gt;genreService-&gt;findById($id));</span>
+<span class="diff-add">        $genre = $this-&gt;genreService-&gt;findById($id);</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return new GenreResource($genre);</span>
     }
 
 <span class="diff-add">    public function update(UpdateGenreRequest $request, int $id)</span>
@@ -2387,7 +2423,9 @@ class BookController extends Controller
 
     public function index()
     {
-<span class="diff-add">        return BookResource::collection($this-&gt;bookService-&gt;listAll());</span>
+<span class="diff-add">        $books = $this-&gt;bookService-&gt;listAll();</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return BookResource::collection($books);</span>
     }
 
 <span class="diff-add">    public function store(StoreBookRequest $request)</span>
@@ -2399,7 +2437,9 @@ class BookController extends Controller
 
     public function show(int $id)
     {
-<span class="diff-add">        return new BookResource($this-&gt;bookService-&gt;findById($id));</span>
+<span class="diff-add">        $book = $this-&gt;bookService-&gt;findById($id);</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return new BookResource($book);</span>
     }
 
 <span class="diff-add">    public function update(UpdateBookRequest $request, int $id)</span>
