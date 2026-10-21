@@ -1974,13 +1974,8 @@ class BookService
 
 <span class="pr">&gt; </span>foreach ($books as $book) { $book-&gt;genre-&gt;name; }  // no extra queries at all
 
-<span class="pr">&gt; </span>collect(DB::getQueryLog())-&gt;pluck('query');
-<span class="out">= Illuminate\Support\Collection {
-    all: [
-      "select * from `books`",
-      "select `id`, `name` from `genres` where `genres`.`id` in (?, ?, ?, ?)",
-    ],
-  }</span></code></pre>
+<span class="pr">&gt; </span>count(DB::getQueryLog());
+<span class="out">= 2</span></code></pre>
   </figure>
 
   <p>Duas consultas — e a segunda é a peça-chave. Os <code>?</code> são os <code>genre_id</code> distintos que apareceram na primeira consulta: o Eloquent os coleta, busca apenas <code>id</code> e <code>name</code> dos gêneros correspondentes num único <code>where in</code> e distribui cada objeto para o livro certo. O <code>id</code> é necessário para o Eloquent associar cada gênero ao livro; o <code>genre_id</code> continua vindo na consulta dos livros. Doze livros ou doze mil, continuam sendo <strong>duas</strong> consultas.</p>
