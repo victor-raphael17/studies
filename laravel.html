@@ -1981,15 +1981,10 @@ class BookService
   <p>Duas consultas — e a segunda é a peça-chave. Os <code>?</code> são os <code>genre_id</code> distintos que apareceram na primeira consulta: o Eloquent os coleta, busca apenas <code>id</code> e <code>name</code> dos gêneros correspondentes num único <code>where in</code> e distribui cada objeto para o livro certo. O <code>id</code> é necessário para o Eloquent associar cada gênero ao livro; o <code>genre_id</code> continua vindo na consulta dos livros. Doze livros ou doze mil, continuam sendo <strong>duas</strong> consultas.</p>
 
   <h4>4. E o JSON traz o resumo necessário</h4>
-  <p>Com o <code>with('genre:id,name')</code> de volta ao service, o mesmo <code>GET /api/books/1</code> devolve um resumo do gênero <strong>aninhado</strong> ao livro. O cliente recebe os dados que precisa em uma requisição só:</p>
-
-  <figure class="code code--term">
-    <figcaption>Terminal — GET /api/books/1 <em>com</em> o with('genre:id,name')</figcaption>
-    <pre><code>curl -s http://localhost:8000/api/books/1 -H 'Accept: application/json' | python3 -m json.tool</code></pre>
-  </figure>
+  <p>Até aqui, criamos o <code>BookService</code>, mas o <code>BookController</code> ainda não o utiliza. Portanto, se você fizer essa requisição agora, a resposta continuará sem a chave <code>genre</code>: o eager loading só terá efeito quando o controller delegar a busca ao service. Essa integração vem logo abaixo. Depois dela, a resposta esperada para <code>GET /api/books/1</code> é:</p>
 
   <figure class="code code--out">
-    <figcaption>Saída — somente id e nome do gênero</figcaption>
+    <figcaption>Resposta esperada após conectar o controller ao service — somente id e nome do gênero</figcaption>
     <pre><code>{
     "id": 1,
     "genre_id": 1,
