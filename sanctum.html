@@ -139,7 +139,7 @@ body {
   padding: 10px 16px; border-radius: 0 0 10px 10px; text-decoration: none;
 }
 .skip-link:focus { top: 0; }
-main:focus { outline: none; }
+main:focus { outline: 2px solid var(--accent); outline-offset: 4px; }
 .layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 100vh; }
 .sidebar {
   border-right: 1px solid var(--line);
@@ -358,7 +358,7 @@ footer.end {
 <section id="introducao">
   <h2>Introdução — de API aberta a API protegida</h2>
 
-  <p>No <a href="laravel.html">Módulo 4</a> construímos a <strong>BookShelf API</strong>: dez endpoints RESTful para <code>genres</code> e <code>books</code>, MVC + Service Layer, validação com Form Requests e respostas formatadas por API Resources. O banco começa com 4 gêneros e 12 livros; as respostas dos livros incluem o gênero relacionado. E terminamos com um aviso desconfortável: <em>qualquer pessoa com um <code>curl</code> pode apagar a sua estante inteira</em>.</p>
+  <p>No <a href="laravel.html">Módulo 4</a> construímos a <strong>BookShelf API</strong>: dez endpoints RESTful para <code>genres</code> e <code>books</code>, MVC + Service Layer, validação com Form Requests e respostas formatadas por API Resources. O banco começa com 4 gêneros e 12 livros. Nas listagens e consultas individuais de livros, a resposta inclui o resumo do gênero relacionado; criação e atualização seguem exatamente o comportamento do <code>BookResource</code> final, detalhado no Passo 5 abaixo. E terminamos com um aviso desconfortável: <em>qualquer pessoa com um <code>curl</code> pode apagar a sua estante inteira</em>.</p>
 
   <p>Este módulo paga essa dívida. Na implementação que construiremos, as dez rotas de <code>genres</code> e <code>books</code> continuarão com os mesmos contratos e passarão a exigir autenticação. Também vamos adicionar cinco endpoints para registro, login e gerenciamento dos tokens de acesso pessoal:</p>
 
@@ -366,7 +366,7 @@ footer.end {
     <table>
       <thead><tr><th>Método</th><th>Rota</th><th>Ação</th><th>Acesso</th></tr></thead>
       <tbody>
-        <tr><td><span class="m m-post">POST</span></td><td><code>/api/register</code></td><td>Cria uma conta e devolve o primeiro token de acesso pessoal</td><td>Pública</td></tr>
+        <tr><td><span class="m m-post">POST</span></td><td><code>/api/register</code></td><td>Cria uma conta e devolve o primeiro token de acesso pessoal</td><td>Pública; <code>throttle:6,1</code></td></tr>
         <tr><td><span class="m m-post">POST</span></td><td><code>/api/login</code></td><td>Autentica e devolve um novo token de acesso pessoal</td><td>Pública; <code>throttle:6,1</code></td></tr>
         <tr><td><span class="m m-get">GET</span></td><td><code>/api/me</code></td><td>Dados do usuário autenticado</td><td><code>auth:sanctum</code></td></tr>
         <tr><td><span class="m m-post">POST</span></td><td><code>/api/logout</code></td><td>Revoga o token de acesso pessoal usado nesta requisição</td><td><code>auth:sanctum</code></td></tr>
@@ -376,11 +376,16 @@ footer.end {
     </table>
   </div>
 
-  <p>Neste módulo, as rotas protegidas usam personal access tokens, enviados no header <code>Authorization: Bearer ...</code>. No Passo 8, <code>DELETE /api/books/{id}</code> também exige a habilidade <code>books:delete</code>. A autenticação protege o catálogo compartilhado: nesta versão, <code>books</code> e <code>genres</code> ainda não têm <code>user_id</code> nem propriedade por usuário.</p>
+  <p>Neste módulo, as rotas protegidas usam personal access tokens, enviados no header <code>Authorization: Bearer ...</code>. No Passo 8, <code>DELETE /api/books/{book}</code> também exige a habilidade <code>books:delete</code>. A autenticação protege o catálogo compartilhado: nesta versão, <code>books</code> e <code>genres</code> ainda não têm <code>user_id</code> nem propriedade por usuário.</p>
 
   <div class="callout callout--concept">
     <p class="callout-label">Escopo deste módulo</p>
     <p><strong>O Sanctum também autentica uma SPA própria com cookie de sessão, mas esse não é o fluxo que construiremos aqui.</strong> Nosso cliente de exercício é <code>curl</code>/Postman e o mesmo desenho atende apps mobile, scripts e integrações. Se a BookShelf ganhar um front-end React/Vue/Next/Nuxt de primeira parte no navegador, compartilhando o mesmo domínio de topo da API, a recomendação muda: use o modo SPA por cookie e não entregue a ele os tokens pessoais criados neste módulo. O Passo 1 separa os dois cenários sem atalhos.</p>
+  </div>
+
+  <div class="callout callout--warn">
+    <p class="callout-label">Somente para estudo local — não publique assim</p>
+    <p>Este módulo deixa o cadastro público, sem propriedade por usuário no catálogo, e cria a conta demo <code>demo@bookshelf.test</code> com a senha pública <code>secret123</code>. O login emite tokens <code>['*']</code>; qualquer conta registrada pode alterar os mesmos livros e gêneros, e a habilidade exigida no <code>DELETE /api/books/{book}</code> é apenas uma demonstração, não uma matriz completa de autorização. Antes de produção, remova a conta demo, decida se o cadastro deve ficar aberto e implemente propriedade/Policies e permissões coerentes para todas as operações.</p>
   </div>
 
   <h3>O que você precisa ter em mãos</h3>
@@ -483,7 +488,7 @@ footer.end {
 
   <div class="callout callout--concept">
     <p class="callout-label">Conceito</p>
-    <p><strong>Token do Sanctum não é JWT.</strong> Um JWT é <em>autocontido</em>: os dados do usuário viajam dentro dele, assinados, e o servidor valida sem tocar no banco. Rápido — e com um preço alto: como nada é consultado, <strong>não dá para invalidar um JWT antes do prazo</strong> sem inventar uma lista de bloqueio (que, ironicamente, exige consultar o banco de novo). O token do Sanctum é o oposto: uma string aleatória e opaca, cujo <em>hash</em> vive numa linha do banco. Cada requisição faz uma consulta — e, em troca, apagar aquela linha revoga o acesso <strong>no mesmo instante</strong>. É essa troca que faz o <code>logout</code> do Passo 6 funcionar de verdade.</p>
+    <p><strong>Token do Sanctum não é JWT.</strong> Um JWT é <em>autocontido</em>: os dados do usuário viajam dentro dele, assinados, e o servidor pode validar assinatura e expiração sem consultar o banco. Se a validação for totalmente offline, não há revogação <strong>individual</strong> imediata; uma lista de bloqueio ou introspecção permite isso ao custo de consultar estado, enquanto a rotação da chave pode invalidar um conjunto de tokens. O token do Sanctum é uma string aleatória e opaca, cujo <em>hash</em> vive numa linha do banco. Cada requisição faz uma consulta — e, em troca, apagar aquela linha revoga o acesso <strong>no mesmo instante</strong>. É essa troca que faz o <code>logout</code> do Passo 6 funcionar de verdade.</p>
   </div>
 
   <div class="verify">
@@ -492,7 +497,7 @@ footer.end {
       <li><label><input type="checkbox" data-ck="p1-1"> <span>Você sabe explicar por que uma SPA própria no mesmo domínio de topo usa cookie de sessão, enquanto os clientes não web deste módulo usam Bearer token.</span></label></li>
       <li><label><input type="checkbox" data-ck="p1-2"> <span>Você entende por que este módulo escolheu Bearer token e sabe que isso não é uma regra para toda SPA.</span></label></li>
       <li><label><input type="checkbox" data-ck="p1-3"> <span>Você sabe o que significa "Bearer" e por que isso torna o token um segredo tão sensível quanto uma senha.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p1-4"> <span>Você consegue dizer a diferença entre um token do Sanctum e um JWT — e por que só o primeiro pode ser revogado na hora sem uma lista de bloqueio adicional.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p1-4"> <span>Você consegue dizer a diferença entre um token do Sanctum e um JWT — e por que a validação offline de JWT não permite revogar individualmente um token sem consultar estado.</span></label></li>
     </ul>
   </div>
 </section>
@@ -536,7 +541,7 @@ php artisan migrate:status</code></pre>
         <tr><td><code>name</code></td><td>Um rótulo livre para você identificar o token ("mobile-app", "integração do Zapier")</td></tr>
         <tr><td><code>token</code></td><td>O <strong>hash SHA-256</strong> do token. O valor original não é guardado em lugar nenhum</td></tr>
         <tr><td><code>abilities</code></td><td>Lista JSON de habilidades. O padrão é <code>["*"]</code> — "pode tudo" (Passo 8)</td></tr>
-        <tr><td><code>last_used_at</code></td><td>Atualizado pelo Sanctum a cada requisição autenticada. Ótimo para auditoria</td></tr>
+        <tr><td><code>last_used_at</code></td><td>Por padrão, o Sanctum atualiza este campo quando o token autentica uma requisição. Útil para auditoria</td></tr>
         <tr><td><code>expires_at</code></td><td>Validade <em>deste</em> token. Nulo por padrão (Passo 7)</td></tr>
         <tr><td><code>created_at</code> / <code>updated_at</code></td><td>Timestamps. O <code>created_at</code> é o que o relógio global de expiração mede (Passo 7)</td></tr>
       </tbody>
@@ -547,7 +552,7 @@ php artisan migrate:status</code></pre>
 
   <div class="callout callout--concept">
     <p class="callout-label">Conceito</p>
-    <p><strong>Por que a coluna se chama <code>token</code> mas guarda um hash?</strong> Pela mesma razão pela qual você nunca guarda senhas em texto puro. Se o banco vazar, um invasor com a lista de hashes não consegue montar nenhum header <code>Authorization</code> válido — o SHA-256 não volta atrás. A consequência prática é dura e importante: <strong>o token em texto puro existe uma única vez, na resposta que o criou</strong>. Perdeu? Não há "ver token de novo". Gera-se outro.</p>
+    <p><strong>Por que a coluna se chama <code>token</code> mas guarda um hash?</strong> Pela mesma razão pela qual você nunca guarda senhas em texto puro. Se o banco vazar, um invasor com a lista de hashes não consegue montar nenhum header <code>Authorization</code> válido — o SHA-256 não volta atrás. A consequência prática é dura e importante: <strong>o servidor não persiste o token em texto puro; o cliente só o recebe na emissão</strong>. Perdeu? Não há "ver token de novo". Gera-se outro.</p>
     <p>E o número antes da barra (<code>3|nQ8x...</code>) é o <code>id</code> da linha. Sem ele, o Sanctum teria que comparar o hash contra a tabela inteira; com ele, vai direto na linha certa e faz uma única comparação — em tempo constante, com <code>hash_equals()</code>.</p>
   </div>
 
@@ -618,8 +623,8 @@ class User extends Authenticatable
 
   <div class="callout callout--concept">
     <p class="callout-label">Conceito</p>
-    <p><strong>O cast <code>'password' =&gt; 'hashed'</code> faz o que você acha que precisa fazer na mão.</strong> Com ele, atribuir <code>$user-&gt;password = 'secret123'</code> guarda no banco o <em>hash bcrypt</em> daquela string, automaticamente. É por isso que, no service do próximo passo, você <strong>não</strong> vai ver nenhum <code>Hash::make()</code> — e não é esquecimento.</p>
-    <p>Em tutoriais mais antigos (e em código Laravel 9 ou anterior) você vai encontrar <code>'password' =&gt; Hash::make($data['password'])</code> no registro. Continua funcionando: antes de hashear, o cast verifica com <code>Hash::isHashed()</code> se o valor <em>já</em> é um hash e, se for, não mexe. Ou seja, não existe risco de hashear duas vezes — mas, no Laravel 12, escrever isso é redundante.</p>
+  <p><strong>O cast <code>'password' =&gt; 'hashed'</code> faz o que você acha que precisa fazer na mão.</strong> Com ele, atribuir <code>$user-&gt;password = 'secret123'</code> guarda no banco o hash produzido pelo driver de hashing da aplicação (bcrypt por padrão no Laravel 12). As opções podem ser publicadas em <code>config/hashing.php</code>. É por isso que, no service do próximo passo, você <strong>não</strong> vai ver nenhum <code>Hash::make()</code> — e não é esquecimento.</p>
+    <p>Em código legado, você pode encontrar <code>'password' =&gt; Hash::make($data['password'])</code> no registro. Isso continua sendo uma forma válida quando o model não tem o cast <code>hashed</code>. Se o cast estiver presente, deixe que ele faça o trabalho: chamar <code>Hash::make()</code> manualmente é redundante e mistura duas responsabilidades.</p>
   </div>
 
   <h3>Mão na massa: um usuário de partida no seeder</h3>
@@ -643,11 +648,13 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-<span class="diff-add">        User::create([</span>
-<span class="diff-add">            'name'     =&gt; 'Demo Reader',</span>
-<span class="diff-add">            'email'    =&gt; 'demo@bookshelf.test',</span>
-<span class="diff-add">            'password' =&gt; 'secret123', // hashed automatically by the model cast</span>
-<span class="diff-add">        ]);</span>
+<span class="diff-add">        User::firstOrCreate(</span>
+<span class="diff-add">            ['email' =&gt; 'demo@bookshelf.test'],</span>
+<span class="diff-add">            [</span>
+<span class="diff-add">                'name'     =&gt; 'Demo Reader',</span>
+<span class="diff-add">                'password' =&gt; 'secret123', // hashed automatically by the model cast</span>
+<span class="diff-add">            ],</span>
+<span class="diff-add">        );</span>
     }
 }</code></pre>
   </figure>
@@ -686,13 +693,19 @@ class UserSeeder extends Seeder
 <span class="pr">&gt; </span>Hash::check('secret123', $user-&gt;password);
 <span class="out">= true</span>
 
-<span class="pr">&gt; </span>$user-&gt;createToken('smoke-test')-&gt;plainTextToken;
-<span class="out">= "1|8fJk2LpQ9xNvB3mZ..."</span></code></pre>
+<span class="pr">&gt; </span>$issued = $user-&gt;createToken('smoke-test');
+
+<span class="pr">&gt; </span>$issued-&gt;accessToken-&gt;delete();  // revoke the temporary token
+<span class="out">= true</span>
+
+<span class="pr">&gt; </span>$issued-&gt;plainTextToken !== '';
+<span class="out">= true</span></code></pre>
     </figure>
+    <p>Esse teste confirma que a emissão funcionou sem imprimir o segredo. Um token real só deve ser exibido quando o cliente precisa recebê-lo; não o inclua em capturas de tela ou logs.</p>
     <ul class="checklist">
       <li><label><input type="checkbox" data-ck="p3-1"> <span>O <code>User</code> tem o trait <code>HasApiTokens</code> e o import correspondente.</span></label></li>
       <li><label><input type="checkbox" data-ck="p3-2"> <span><code>migrate:fresh --seed</code> roda sem erros e cria o usuário <code>demo@bookshelf.test</code>.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p3-3"> <span>No tinker, <code>$user-&gt;password</code> mostra um hash começando com <code>$2y$</code> — nunca <code>secret123</code>.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p3-3"> <span>No tinker, <code>$user-&gt;password</code> mostra um hash, nunca <code>secret123</code>; confirme-o com <code>Hash::check()</code>, sem depender de um prefixo específico de algoritmo.</span></label></li>
       <li><label><input type="checkbox" data-ck="p3-4"> <span><code>createToken()</code> existe e devolve uma string no formato <code>id|aleatório</code>.</span></label></li>
     </ul>
   </div>
@@ -728,6 +741,7 @@ php artisan make:request LoginRequest</code></pre>
 
 namespace App\Http\Requests;
 
+<span class="diff-add">use Closure;</span>
 use Illuminate\Foundation\Http\FormRequest;
 <span class="diff-add">use Illuminate\Validation\Rules\Password;</span>
 
@@ -744,17 +758,29 @@ class RegisterRequest extends FormRequest
         return [
 <span class="diff-add">            'name'     =&gt; ['required', 'string', 'max:255'],</span>
 <span class="diff-add">            'email'    =&gt; ['required', 'email', 'max:255', 'unique:users,email'],</span>
-<span class="diff-add">            'password' =&gt; ['required', 'confirmed', Password::min(8)-&gt;letters()-&gt;numbers()],</span>
+<span class="diff-add">            'password' =&gt; [</span>
+<span class="diff-add">                'required', 'confirmed', 'max:255',</span>
+<span class="diff-add">                Password::min(8)-&gt;letters()-&gt;numbers(),</span>
+<span class="diff-add">                function (string $attribute, mixed $value, Closure $fail): void {</span>
+<span class="diff-add">                    if (</span>
+<span class="diff-add">                        is_string($value)</span>
+<span class="diff-add">                        &amp;&amp; config('hashing.driver', 'bcrypt') === 'bcrypt'</span>
+<span class="diff-add">                        &amp;&amp; strlen($value) &gt; 72</span>
+<span class="diff-add">                    ) {</span>
+<span class="diff-add">                        $fail('A senha não pode exceder 72 bytes quando bcrypt está configurado.');</span>
+<span class="diff-add">                    }</span>
+<span class="diff-add">                },</span>
+<span class="diff-add">            ],</span>
         ];
     }
 }</code></pre>
   </figure>
 
-  <p>Duas regras merecem tradução:</p>
+  <p>As regras mais importantes merecem tradução:</p>
   <ul>
     <li><code>unique:users,email</code> — o e-mail não pode existir na coluna <code>email</code> da tabela <code>users</code>. É a mesma família do <code>exists:genres,id</code> do Módulo 4, ao contrário;</li>
     <li><code>confirmed</code> — exige que o corpo traga também um campo <code>password_confirmation</code> com o valor idêntico. É a checagem de "digite a senha novamente", feita no servidor;</li>
-    <li><code>Password::min(8)-&gt;letters()-&gt;numbers()</code> — em vez de uma string de regras, um objeto que descreve a política de senha: mínimo de 8 caracteres, ao menos uma letra e ao menos um número. Existem outros: <code>-&gt;mixedCase()</code>, <code>-&gt;symbols()</code> e o excelente <code>-&gt;uncompromised()</code>, que consulta a base pública de senhas já vazadas.</li>
+    <li><code>Password::min(8)-&gt;letters()-&gt;numbers()</code> — em vez de uma string de regras, um objeto que descreve a política de senha: mínimo de 8 caracteres, ao menos uma letra e ao menos um número. O <code>max:255</code> também limita o tamanho da entrada. Existem outros métodos: <code>-&gt;mixedCase()</code>, <code>-&gt;symbols()</code> e <code>-&gt;uncompromised()</code>, que consulta a base pública de senhas já vazadas.</li>
   </ul>
 
   <figure class="code code--php">
@@ -763,6 +789,7 @@ class RegisterRequest extends FormRequest
 
 namespace App\Http\Requests;
 
+<span class="diff-add">use Closure;</span>
 use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
@@ -776,8 +803,19 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-<span class="diff-add">            'email'    =&gt; ['required', 'email'],</span>
-<span class="diff-add">            'password' =&gt; ['required', 'string'],</span>
+<span class="diff-add">            'email'    =&gt; ['required', 'email', 'max:255'],</span>
+<span class="diff-add">            'password' =&gt; [</span>
+<span class="diff-add">                'required', 'string', 'max:255',</span>
+<span class="diff-add">                function (string $attribute, mixed $value, Closure $fail): void {</span>
+<span class="diff-add">                    if (</span>
+<span class="diff-add">                        is_string($value)</span>
+<span class="diff-add">                        &amp;&amp; config('hashing.driver', 'bcrypt') === 'bcrypt'</span>
+<span class="diff-add">                        &amp;&amp; strlen($value) &gt; 72</span>
+<span class="diff-add">                    ) {</span>
+<span class="diff-add">                        $fail('A senha não pode exceder 72 bytes quando bcrypt está configurado.');</span>
+<span class="diff-add">                    }</span>
+<span class="diff-add">                },</span>
+<span class="diff-add">            ],</span>
         ];
     }
 }</code></pre>
@@ -786,6 +824,7 @@ class LoginRequest extends FormRequest
   <div class="callout callout--tip">
     <p class="callout-label">Boa prática</p>
     <p>Repare que o <code>LoginRequest</code> <strong>não</strong> repete a política de senha forte. E é proposital: aqui não estamos definindo uma senha, estamos conferindo uma. Se um usuário antigo tem uma senha de 6 caracteres, exigir <code>Password::min(8)</code> no login o trancaria para fora da própria conta com um 422 confuso. Valide formato na entrada; valide força só onde a senha é <em>criada</em>.</p>
+    <p>O limite por bytes para <code>bcrypt</code> aparece nos dois requests, porque o PHP limita esse algoritmo a 72 bytes e entrada maior pode ser truncada. A regra mede bytes com <code>strlen()</code>, não caracteres; no login, isso também impede que um sufixo acima do limite seja ignorado na comparação.</p>
   </div>
 
   <h3>Mão na massa: a API Resource do usuário</h3>
@@ -872,11 +911,13 @@ class AuthService
 }</code></pre>
   </figure>
 
+  <p>O exemplo chama cada token de <code>api-token</code> para manter o fluxo curto. Num produto real, use um nome de cliente ou dispositivo validado (por exemplo, <code>mobile-iphone</code>) para que o usuário consiga reconhecer e revogar credenciais individuais.</p>
+
   <p>Linha a linha do que é novo:</p>
   <ul>
     <li><code>User::create($data)</code> — atribuição em massa filtrada pelo <code>$fillable</code>. O <code>password_confirmation</code>, que nem chega aqui (o <code>validated()</code> só devolve campos que têm regra), seria ignorado de qualquer forma;</li>
     <li><code>Hash::check($senhaEnviada, $hashDoBanco)</code> — aplica o mesmo algoritmo ao texto recebido e compara com o hash guardado. É a única maneira de "conferir" uma senha que você nunca teve;</li>
-    <li><code>$user-&gt;createToken('api-token')</code> — cortesia do <code>HasApiTokens</code>: grava a linha em <code>personal_access_tokens</code> e devolve um objeto <code>NewAccessToken</code>, do qual tiramos o <code>plainTextToken</code> — a única vez em que ele existe;</li>
+    <li><code>$user-&gt;createToken('api-token')</code> — cortesia do <code>HasApiTokens</code>: grava a linha em <code>personal_access_tokens</code> e devolve um objeto <code>NewAccessToken</code>, do qual tiramos o <code>plainTextToken</code> — o valor que o cliente recebe no momento da emissão e que o servidor não persiste em texto puro;</li>
     <li><code>throw new AuthenticationException(...)</code> — e aqui vale uma parada.</li>
   </ul>
 
@@ -888,7 +929,7 @@ class AuthService
 
   <div class="callout callout--warn">
     <p class="callout-label">Atenção — enumeração de usuários</p>
-    <p>Repare que a <strong>mesma</strong> mensagem sai para "esse e-mail não existe" e para "a senha está errada". Se você diferenciasse as duas ("Usuário não encontrado" / "Senha incorreta"), estaria entregando de graça um oráculo: bastaria varrer uma lista de e-mails para descobrir quem tem conta no seu sistema. Mensagens genéricas em falha de login não são preguiça — são a recomendação padrão.</p>
+    <p>Repare que a <strong>mesma</strong> mensagem sai para "esse e-mail não existe" e para "a senha está errada". Se você diferenciasse as duas ("Usuário não encontrado" / "Senha incorreta"), revelaria diretamente quais e-mails têm conta. A mensagem genérica reduz essa enumeração pelo conteúdo da resposta; em sistemas de alto risco, considere também diferenças de tempo de resposta e aplique limitação e monitoramento de tentativas.</p>
   </div>
 
   <h3>Mão na massa: o AuthController</h3>
@@ -926,7 +967,7 @@ class AuthController extends Controller
             'user'       =&gt; new UserResource($result['user']),
             'token'      =&gt; $result['token'],
             'token_type' =&gt; 'Bearer',
-        ], 201);
+        ], 201)-&gt;header('Cache-Control', 'no-store');
     }
 
     public function login(LoginRequest $request)
@@ -937,7 +978,7 @@ class AuthController extends Controller
             'user'       =&gt; new UserResource($result['user']),
             'token'      =&gt; $result['token'],
             'token_type' =&gt; 'Bearer',
-        ]);
+        ])-&gt;header('Cache-Control', 'no-store');
     }
 }</code></pre>
   </figure>
@@ -946,6 +987,7 @@ class AuthController extends Controller
     <p class="callout-label">Conceito</p>
     <p><strong>Por que esta resposta não vem embrulhada em <code>"data"</code>?</strong> No Módulo 4, retornar <code>new GenreResource($genre)</code> direto do controller produzia <code>{"data": {...}}</code>. Aqui a API Resource está <em>dentro</em> de um <code>response()-&gt;json([...])</code>, e nesse caso ela se comporta como um simples objeto serializável: o envelope <code>data</code> só é adicionado quando a Resource <strong>é</strong> a resposta, não quando é um pedaço dela. O resultado é exatamente o que queremos — <code>{"user": {...}, "token": "...", "token_type": "Bearer"}</code>, sem aninhamento inútil.</p>
     <p>O <code>token_type: "Bearer"</code> não é obrigatório, mas é convenção de mercado: muitos clientes HTTP montam o header sozinhos a partir desses dois campos.</p>
+    <p>As respostas de registro e login carregam um segredo. O cabeçalho <code>Cache-Control: no-store</code> instrui caches a não armazená-las.</p>
   </div>
 
   <div class="verify">
@@ -970,14 +1012,14 @@ class AuthController extends Controller
     <li>Quando o modo stateful está configurado e a requisição vem da SPA de primeira parte, tenta autenticar pela sessão/cookie do guard <code>web</code>;</li>
     <li>Se não houver uma sessão autenticada, procura o header <code>Authorization: Bearer ...</code>;</li>
     <li>No ramo Bearer, separa o token no <code>|</code>, busca a linha pelo <code>id</code>, compara o hash e confere a expiração;</li>
-    <li>Qualquer ramo que tenha sucesso disponibiliza o usuário em <code>$request-&gt;user()</code>; no ramo Bearer, o Sanctum também marca <code>last_used_at</code>;</li>
+    <li>Qualquer ramo que tenha sucesso disponibiliza o usuário em <code>$request-&gt;user()</code>; no ramo Bearer, o Sanctum atualiza <code>last_used_at</code> por padrão;</li>
     <li>Se nenhum ramo autenticar a requisição, devolve <strong>401 Unauthorized</strong> e o controller nem é chamado.</li>
   </ol>
 
   <p>Este projeto não configurou o fluxo stateful de uma SPA nem um login de sessão. Portanto, nos testes deste módulo, o guard sempre chegará ao segundo ramo e procurará o Bearer token. O nome <code>auth:sanctum</code>, por si só, não significa “apenas token”.</p>
 
   <h3>Mão na massa: o novo <code>routes/api.php</code></h3>
-  <p>Substitua o conteúdo do arquivo. As duas declarações de <code>apiResource</code> do Módulo 4 continuam idênticas — só mudaram de endereço, para dentro do grupo protegido:</p>
+  <p>Substitua o conteúdo do arquivo. As duas declarações de <code>apiResource</code> do Módulo 4 mantêm os parâmetros numéricos e agora ficam dentro do grupo protegido:</p>
 
   <figure class="code code--php">
     <figcaption>routes/api.php</figcaption>
@@ -989,7 +1031,7 @@ use App\Http\Controllers\Api\GenreController;
 use Illuminate\Support\Facades\Route;
 
 <span class="diff-add">// public: this is where a client gets its very first token</span>
-<span class="diff-add">Route::post('register', [AuthController::class, 'register']);</span>
+<span class="diff-add">Route::post('register', [AuthController::class, 'register'])-&gt;middleware('throttle:6,1');</span>
 <span class="diff-add">Route::post('login', [AuthController::class, 'login'])-&gt;middleware('throttle:6,1');</span>
 <span class="diff-add"></span>
 <span class="diff-add">// protected by Sanctum; this module calls these routes with Bearer tokens</span>
@@ -1000,6 +1042,14 @@ use Illuminate\Support\Facades\Route;
         -&gt;whereNumber('book');
 <span class="diff-add">});</span></code></pre>
   </figure>
+
+  <div class="callout callout--concept">
+    <p class="callout-label">Contrato preservado do Módulo 4</p>
+    <p>As rotas continuam usando os controllers finais: Form Requests validam a entrada, Services executam as operações e <code>GenreResource</code>/<code>BookResource</code> formatam o JSON. Listagens retornam <code>{"data":[...]}</code>, itens individuais retornam <code>{"data":{...}}</code>, criação retorna <strong>201</strong>, atualização retorna <strong>200</strong> e exclusões retornam <strong>204 sem corpo</strong>.</p>
+    <p><strong>Campos públicos finais:</strong> <code>GenreResource</code> expõe <code>id</code>, <code>name</code>, <code>description</code>, <code>created_at</code> e <code>updated_at</code>. <code>BookResource</code> expõe <code>id</code>, <code>title</code>, <code>author</code>, <code>pages</code>, <code>status</code>, <code>rating</code> e os timestamps; <code>genre_id</code> não aparece como campo separado. O resumo <code>genre: {id, name}</code> só entra quando a relação foi carregada. O <code>BookService</code> faz isso em <code>GET /api/books</code> e <code>GET /api/books/{book}</code>; em <code>POST</code>, <code>PUT</code> e <code>PATCH</code>, a relação não é carregada e a chave <code>genre</code> fica ausente.</p>
+    <p><strong>Regras finais dos livros:</strong> <code>status</code> aceita <code>to_read</code>, <code>reading</code> ou <code>finished</code>; <code>rating</code> aceita <code>null</code> ou um inteiro de 1 a 5, mas o <code>BookService</code> salva <code>null</code> sempre que o status final não é <code>finished</code>. Se a criação omitir <code>status</code>, o <code>POST</code> retorna <code>"status": null</code> porque <code>to_read</code> é o default do banco e ainda não está no model em memória; uma leitura posterior retorna <code>to_read</code>. A autenticação não altera esses contratos. Veja os detalhes nos <a href="laravel.html#passo-8">Passos 8</a> e <a href="laravel.html#passo-9">9 do Módulo 4</a>.</p>
+    <p>Na entrada, <code>genre_id</code> precisa apontar para um gênero existente, <code>title</code> e <code>author</code> são obrigatórios na criação, e <code>pages</code> aceita um inteiro positivo ou <code>null</code>. Atualizações podem omitir campos; <code>PUT</code> e <code>PATCH</code> usam a mesma semântica parcial da versão final.</p>
+  </div>
 
   <div class="callout callout--warn">
     <p class="callout-label">Atenção — as restrições numéricas são obrigatórias</p>
@@ -1022,8 +1072,8 @@ php artisan route:list --path=api/books -v</code></pre>
   </div>
 
   <div class="callout callout--warn">
-    <p class="callout-label">Atenção — força bruta no login</p>
-    <p>Repare no <code>-&gt;middleware('throttle:6,1')</code> pendurado só na rota de login: <strong>no máximo 6 requisições por minuto, por IP</strong>. Passou disso, o cliente leva um <strong>429 Too Many Requests</strong>. Sem isso, sua rota de login é um convite a testar milhares de senhas por minuto — e, diferente do resto da API, ela aceita quem ainda não provou ser ninguém.</p>
+    <p class="callout-label">Atenção — abuso das rotas públicas</p>
+    <p>O middleware <code>throttle:6,1</code> protege as rotas públicas de registro e login com um limite básico por IP; ao excedê-lo, o cliente recebe <strong>429 Too Many Requests</strong>. É uma proteção didática, não uma configuração suficiente para todo ambiente de produção: uma política real de login deve considerar também a conta tentada (com e-mail normalizado), aplicar limites contra tentativas distribuídas e monitorar abuso. O limite do exemplo também não substitui controles contra criação automatizada de contas.</p>
     <p>Vale saber de uma mudança do Laravel 11/12: o grupo <code>api</code> <strong>não</strong> tem mais rate limit por padrão (antes vinha um <code>throttle:api</code> embutido). Para aplicar um limite geral à API inteira, chame <code>$middleware-&gt;throttleApi();</code> dentro do <code>-&gt;withMiddleware(...)</code> do <code>bootstrap/app.php</code>.</p>
   </div>
 
@@ -1039,11 +1089,12 @@ curl -i http://localhost:8000/api/genres -H 'Accept: application/json'
 curl -i http://localhost:8000/api/genres \
   -H 'Accept: application/json' -H 'Authorization: Bearer not-a-real-token'
 
-# register is still open (expect 201 and a token in the response)
-curl -i -X POST http://localhost:8000/api/register \
+# register is still open (expect HTTP 201; discard the body containing the token)
+curl -sS -o /dev/null -w 'HTTP %{http_code}\n' -X POST http://localhost:8000/api/register \
   -H 'Accept: application/json' -H 'Content-Type: application/json' \
   -d '{"name":"Ada Lovelace","email":"ada@bookshelf.test","password":"secret123","password_confirmation":"secret123"}'</code></pre>
     </figure>
+    <p>A resposta de registro contém um token em texto puro. Este comando descarta o corpo e mostra somente o status HTTP; nos próximos passos, vamos capturar o valor sem imprimi-lo.</p>
     <ul class="checklist">
       <li><label><input type="checkbox" data-ck="p5-1"> <span><code>GET /api/genres</code> sem token retorna <strong>401</strong> com <code>{"message":"Unauthenticated."}</code>.</span></label></li>
       <li><label><input type="checkbox" data-ck="p5-2"> <span><code>POST /api/register</code> retorna <strong>201</strong> com <code>user</code>, <code>token</code> e <code>token_type</code>.</span></label></li>
@@ -1058,7 +1109,7 @@ curl -i -X POST http://localhost:8000/api/register \
   <h2><span class="step-badge">Passo 6</span> <code>me</code>, <code>logout</code> e revogação de tokens</h2>
 
   <h3>Conceito: sair é apagar uma linha</h3>
-  <p>Numa aplicação com sessão, "sair" significa destruir a sessão no servidor. Com tokens, é ainda mais literal: <strong>logout é <code>DELETE</code> numa linha da tabela <code>personal_access_tokens</code></strong>. Na requisição seguinte, o Sanctum procura aquele hash, não encontra, e devolve 401. É a revogação instantânea que o Passo 1 prometeu — e que um JWT, sozinho, não consegue entregar.</p>
+  <p>Numa aplicação com sessão, "sair" significa destruir a sessão no servidor. Com tokens, é ainda mais literal: <strong>logout é <code>DELETE</code> numa linha da tabela <code>personal_access_tokens</code></strong>. Na requisição seguinte, o Sanctum procura aquele hash, não encontra, e devolve 401. É a revogação individual instantânea que o Passo 1 prometeu; um JWT validado offline só consegue isso se o servidor também consultar estado de revogação.</p>
   <p>O trait <code>HasApiTokens</code> dá as duas ferramentas necessárias:</p>
   <ul>
     <li><code>$user-&gt;currentAccessToken()</code> — o model do token que <strong>autenticou esta requisição específica</strong>. Apagá-lo desconecta este aparelho e só ele;</li>
@@ -1137,26 +1188,32 @@ public function logoutAll(Request $request)
 
   <div class="callout callout--tip">
     <p class="callout-label">Boa prática</p>
-    <p>Um lugar clássico para chamar <code>$user-&gt;tokens()-&gt;delete()</code> é a <strong>troca de senha</strong>. Se alguém mudou a senha porque suspeita que a conta foi comprometida, deixar os tokens antigos válidos anula todo o esforço — o invasor continua dentro, sem nunca precisar da senha nova. Trocar a senha deve derrubar todas as sessões.</p>
+    <p>Ao trocar a senha por suspeita de comprometimento, revogue também os personal access tokens com <code>$user-&gt;tokens()-&gt;delete()</code>; caso contrário, tokens roubados continuam válidos. Isso não encerra sessões web do guard <code>web</code>, que precisam ser invalidadas pelo fluxo de sessão correspondente.</p>
   </div>
 
   <div class="verify">
     <h4>Como verificar</h4>
-    <p>Vamos guardar o token numa <strong>variável de ambiente</strong> do shell para não ficar colando string gigante em toda requisição. O comando abaixo faz o login, extrai o campo <code>token</code> do JSON e exporta o resultado em <code>$TOKEN</code>:</p>
+    <p>Vamos guardar o token numa variável do shell para não ficar colando string gigante em toda requisição. O comando abaixo faz o login e extrai o campo <code>token</code> do JSON para <code>$TOKEN</code>, sem exportá-lo para o ambiente dos processos filhos. A variável serve apenas para estes exercícios locais; não imprima nem registre seu valor.</p>
     <figure class="code code--term">
       <figcaption>Terminal — capturando o token</figcaption>
-      <pre><code>export TOKEN=$(curl -s -X POST http://localhost:8000/api/login \
+      <pre><code>TOKEN=$(curl -fsS -X POST http://localhost:8000/api/login \
   -H 'Accept: application/json' -H 'Content-Type: application/json' \
   -d '{"email":"demo@bookshelf.test","password":"secret123"}' \
   | python3 -c 'import sys, json; print(json.load(sys.stdin)["token"])')
 
-echo $TOKEN</code></pre>
+test -n "$TOKEN" && echo 'TOKEN carregado' || echo 'Falha ao obter TOKEN'</code></pre>
     </figure>
     <figure class="code code--out">
-      <figcaption>Saída esperada do <code>echo</code> — o seu token será outro</figcaption>
-      <pre><code>2|kGq7vX1sJd9RtY2wN5mB8cF...</code></pre>
+      <figcaption>Saída esperada — o segredo não é impresso</figcaption>
+      <pre><code>TOKEN carregado</code></pre>
     </figure>
-    <p>Se o <code>echo</code> não imprimir nada, o login falhou ou o <code>python3</code> não existe na sua máquina. Nesse caso rode só o <code>curl</code> do login, olhe o JSON e exporte o token na mão: <code>export TOKEN='cole-aqui-o-token'</code> (aspas simples, porque o token tem <code>|</code>). Com a variável exportada, as requisições ficam sempre iguais:</p>
+    <p>Se aparecer <code>Falha ao obter TOKEN</code>, o login falhou ou o <code>python3</code> não existe na sua máquina. Nesse caso, faça o login e cole o token num prompt oculto; evite digitá-lo numa atribuição que ficaria no histórico do shell:</p>
+    <figure class="code code--term">
+      <figcaption>Terminal Bash — alternativa manual sem eco</figcaption>
+      <pre><code>read -r -s -p 'Cole o token do login e pressione Enter: ' TOKEN
+printf '\n'</code></pre>
+    </figure>
+    <p>Com a variável no shell, as requisições ficam sempre iguais:</p>
     <figure class="code code--term">
       <figcaption>Terminal — usando o token</figcaption>
       <pre><code># who am I? (expect 200 with the demo user, wrapped in "data")
@@ -1201,7 +1258,7 @@ curl -i http://localhost:8000/api/me \
 
   <div class="callout callout--concept">
     <p class="callout-label">Conceito</p>
-    <p><strong>Escolhendo o prazo.</strong> Não existe número certo, existe uma troca: prazo curto = menos janela para o atacante, mais interrupções para o usuário legítimo. Referências úteis do mercado — <strong>15 minutos a 1 hora</strong> para operações sensíveis (bancos, painéis administrativos), quase sempre acompanhadas de um mecanismo de <em>refresh</em>; <strong>1 a 30 dias</strong> para apps móveis, onde pedir login toda hora é inaceitável. Para a BookShelf, <strong>24 horas</strong> é um meio-termo honesto e didático.</p>
+    <p><strong>Escolhendo o prazo.</strong> Não existe duração universal: prazo curto reduz a janela de uso de um token roubado, mas aumenta a frequência de autenticação. Defina-a a partir do impacto das operações, da capacidade de revogação e da experiência do cliente. Para a BookShelf, <strong>24 horas</strong> é uma escolha didática; como este módulo não implementa renovação, o usuário precisará fazer login novamente quando o token expirar.</p>
   </div>
 
   <h3>Conceito: o Sanctum tem dois relógios (e o mais curto vence)</h3>
@@ -1251,7 +1308,7 @@ SANCTUM_TOKEN_EXPIRATION=1440</code></pre>
   </div>
 
   <h3>Mão na massa: o token que sabe quando vai morrer</h3>
-  <p>Com o relógio global ligado, os tokens já expiram — mas o cliente não tem como saber quando, porque a coluna <code>expires_at</code> continua nula. Vamos preenchê-la e devolver a data no login, para que um app bem-feito possa renovar o token <em>antes</em> de ele virar abóbora. Ajuste o <code>issueToken()</code> e as duas respostas do service:</p>
+  <p>Com o relógio global ligado, os tokens já expiram — mas o cliente não tem como saber quando, porque a coluna <code>expires_at</code> continua nula. Vamos preenchê-la e devolver a data no login, para que o cliente saiba quando precisará autenticar-se novamente. Uma rota de renovação ainda não faz parte deste módulo. Ajuste o <code>issueToken()</code> e as duas respostas do service:</p>
 
   <figure class="code code--php">
     <figcaption>app/Services/AuthService.php</figcaption>
@@ -1305,25 +1362,36 @@ private function issueToken(User $user): NewAccessToken
     <p>Aquele <code>$minutes ? ... : null</code> não é frescura. Se a configuração global estiver desligada (<code>null</code>), um <code>now()-&gt;addMinutes(null)</code> vira <code>now()</code> — e o token nasceria <strong>já expirado</strong>, produzindo o mais divertido dos bugs: "faço login, recebo 200 com um token, e a próxima requisição dá 401". Sempre trate o caso nulo.</p>
   </div>
 
-  <p>Falta expor a data na resposta. No <code>AuthController</code>, adicione a chave nos dois métodos:</p>
+  <p>Falta expor a data na resposta. Adicione <code>expires_at</code> aos dois métodos do <code>AuthController</code>, preservando os status HTTP: registro retorna <strong>201</strong>, login retorna <strong>200</strong>. As duas respostas também usam <code>Cache-Control: no-store</code>, para não armazenar o token em caches:</p>
 
   <figure class="code code--php">
-    <figcaption>app/Http/Controllers/Api/AuthController.php (nos dois métodos)</figcaption>
-    <pre><code>    return response()-&gt;json([
-        'user'       =&gt; new UserResource($result['user']),
-        'token'      =&gt; $result['token'],
-        'token_type' =&gt; 'Bearer',
-<span class="diff-add">        'expires_at' =&gt; $result['expires_at'],</span>
-    ], 201);</code></pre>
+    <figcaption>app/Http/Controllers/Api/AuthController.php — register (201)</figcaption>
+    <pre><code>return response()-&gt;json([
+    'user'       =&gt; new UserResource($result['user']),
+    'token'      =&gt; $result['token'],
+    'token_type' =&gt; 'Bearer',
+    'expires_at' =&gt; $result['expires_at'],
+], 201)-&gt;header('Cache-Control', 'no-store');</code></pre>
   </figure>
 
-  <p>A resposta do login passa a ser assim — e agora o cliente tem tudo o que precisa para se planejar:</p>
+  <figure class="code code--php">
+    <figcaption>app/Http/Controllers/Api/AuthController.php — login (200)</figcaption>
+    <pre><code>return response()-&gt;json([
+    'user'       =&gt; new UserResource($result['user']),
+    'token'      =&gt; $result['token'],
+    'token_type' =&gt; 'Bearer',
+    'expires_at' =&gt; $result['expires_at'],
+])-&gt;header('Cache-Control', 'no-store');</code></pre>
+  </figure>
+
+  <p>A resposta do login passa a ser assim — e agora o cliente tem tudo o que precisa para se planejar. A data do exemplo é ilustrativa; cada execução produz valores baseados no relógio do servidor:</p>
 
   <figure class="code code--term">
     <figcaption>Terminal — POST /api/login</figcaption>
     <pre><code>curl -s -X POST http://localhost:8000/api/login \
   -H 'Accept: application/json' -H 'Content-Type: application/json' \
-  -d '{"email":"demo@bookshelf.test","password":"secret123"}' | python3 -m json.tool</code></pre>
+  -d '{"email":"demo@bookshelf.test","password":"secret123"}' \
+  | python3 -c 'import json, sys; data=json.load(sys.stdin); data["token"]="[redigido]"; print(json.dumps(data, indent=2))'</code></pre>
   </figure>
 
   <figure class="code code--out">
@@ -1341,6 +1409,11 @@ private function issueToken(User $user): NewAccessToken
 }</code></pre>
   </figure>
 
+  <div class="callout callout--warn">
+    <p class="callout-label">Proteja o valor exibido</p>
+    <p>O JSON de registro/login contém o token em texto puro. O token mostrado acima está redigido e as datas são ilustrativas; não compartilhe uma saída real em capturas de tela, logs, issues ou mensagens. Nos exercícios seguintes, capture o token diretamente em <code>$TOKEN</code>, sem imprimi-lo.</p>
+  </div>
+
   <h3>Conceito: o que o cliente vê quando o token expira</h3>
   <p>Exatamente isto:</p>
 
@@ -1352,36 +1425,37 @@ Content-Type: application/json
 {"message":"Unauthenticated."}</code></pre>
   </figure>
 
-  <p>Ou seja: <strong>a mesma resposta de um token inventado, de um token revogado e de nenhum token</strong>. É deliberado — a API não deve confirmar a um atacante que a string que ele testou "era válida até ontem". Para o cliente legítimo, a consequência prática é simples: ao receber 401, refaça o login e repita a requisição. E é por isso que devolver <code>expires_at</code> ajuda tanto: um app bem-feito renova antes, e o usuário nunca vê o erro.</p>
+  <p>Ou seja: <strong>a mesma resposta de um token inventado, de um token revogado e de nenhum token</strong>. É deliberado — a API não deve confirmar a um atacante que a string que ele testou "era válida até ontem". Para o cliente legítimo, a consequência prática é simples: ao receber 401, faça login novamente e só então repita a operação quando ela for segura para repetição. Uma renovação sem senha exigiria um fluxo próprio, que este módulo não implementa.</p>
 
   <h3>Mão na massa: testando a expiração sem esperar 24 horas</h3>
-  <p>Não vamos ficar olhando o relógio. São dois testes, e os dois começam da mesma preparação: um token recém-emitido, guardado na variável de ambiente <code>$TOKEN</code> do shell.</p>
+  <p>Não vamos ficar olhando o relógio. São dois testes, e os dois começam da mesma preparação: um token recém-emitido, guardado na variável de shell <code>$TOKEN</code>.</p>
 
   <h4>Preparação: um token novo em <code>$TOKEN</code></h4>
-  <p>Faça login e exporte o token. O caminho automático é o mesmo one-liner do Passo 6:</p>
+  <p>Faça login e guarde o token numa variável local ao shell. O caminho automático é o mesmo one-liner do Passo 6:</p>
 
   <figure class="code code--term">
-    <figcaption>Terminal — login e export em um comando</figcaption>
-    <pre><code>export TOKEN=$(curl -s -X POST http://localhost:8000/api/login \
+    <figcaption>Terminal — login e captura em um comando</figcaption>
+    <pre><code>TOKEN=$(curl -fsS -X POST http://localhost:8000/api/login \
   -H 'Accept: application/json' -H 'Content-Type: application/json' \
   -d '{"email":"demo@bookshelf.test","password":"secret123"}' \
   | python3 -c 'import sys, json; print(json.load(sys.stdin)["token"])')
 
-echo $TOKEN</code></pre>
+test -n "$TOKEN" && echo 'TOKEN carregado' || echo 'Falha ao obter TOKEN'</code></pre>
   </figure>
 
-  <p>Na mão funciona igual: rode o <code>curl</code> do login, copie o valor do campo <code>token</code> da resposta e coloque-o na variável você mesmo. <strong>O comando que atribui o token à variável de ambiente é o <code>export</code></strong> — sem ele, o <code>$TOKEN</code> dos testes seguintes está vazio:</p>
+  <p>Se não tiver <code>python3</code>, faça o login e cole o token no prompt oculto abaixo; não o coloque numa atribuição que ficaria no histórico do shell. A variável fica disponível para os comandos seguintes na mesma janela.</p>
 
   <figure class="code code--term">
-    <figcaption>Terminal — export manual (troque pelo seu token)</figcaption>
-    <pre><code>export TOKEN='<span class="ph">3|kGq7vX1sJd9RtY2wN5mB8cF...</span>'
+    <figcaption>Terminal Bash — leitura manual sem eco</figcaption>
+    <pre><code>read -r -s -p 'Cole o token do login e pressione Enter: ' TOKEN
+printf '\n'
 
-echo $TOKEN</code></pre>
+test -n "$TOKEN" && echo 'TOKEN carregado' || echo 'Falha ao obter TOKEN'</code></pre>
   </figure>
 
   <div class="callout callout--warn">
     <p class="callout-label">Atenção — 401 que não é expiração</p>
-    <p>Confirme com <code>echo $TOKEN</code> antes de seguir. Se a variável estiver vazia, o <code>curl</code> manda <code>Authorization: Bearer</code> sem nada e a API devolve <strong>401</strong> — não porque o token venceu, mas porque nunca chegou. Vale lembrar também que a variável vive só naquela janela do terminal: abriu outra aba, exporte de novo. As aspas simples no valor são obrigatórias, porque o token tem o caractere <code>|</code>.</p>
+    <p>Confirme que a variável foi carregada sem exibir o segredo: <code>test -n "$TOKEN" &amp;&amp; echo 'TOKEN carregado'</code>. Se a verificação falhar, o <code>curl</code> mandará <code>Authorization: Bearer</code> sem valor e a API devolverá <strong>401</strong> — não por expiração, mas porque o token não foi enviado. A variável vive só naquela janela do terminal: abriu outra aba, faça login e defina-a de novo.</p>
   </div>
 
   <p><strong>Teste A — o relógio por token.</strong> Abra o tinker e empurre o <code>expires_at</code> para o passado:</p>
@@ -1399,7 +1473,7 @@ echo $TOKEN</code></pre>
 <span class="out">= true</span></code></pre>
   </figure>
 
-  <p>Saia do tinker (<code>exit</code>) e repita a requisição no shell onde o <code>$TOKEN</code> está exportado:</p>
+  <p>Saia do tinker (<code>exit</code>) e repita a requisição no shell onde o <code>$TOKEN</code> está definido:</p>
 
   <figure class="code code--term">
     <figcaption>Terminal — o mesmo token, agora vencido</figcaption>
@@ -1415,7 +1489,7 @@ Content-Type: application/json
 {"message":"Unauthenticated."}</code></pre>
   </figure>
 
-  <p><strong>Teste B — o relógio global.</strong> Agora a prova de que os dois relógios são somados. Refaça a preparação — login e <code>export TOKEN=...</code>, para ter um token novo com <code>expires_at</code> lá na frente — e abra o tinker outra vez. Como esta é uma <em>sessão nova</em> do tinker (a anterior morreu no <code>exit</code>), o <code>use</code> precisa ser repetido; sem ele o tinker responde <code>Class "PersonalAccessToken" not found</code>. Desta vez, em vez de mexer no vencimento, envelheça a <em>criação</em> do token em dois dias:</p>
+  <p><strong>Teste B — o relógio global.</strong> Agora a prova de que os dois relógios são somados. Refaça a preparação — login e <code>TOKEN=...</code>, para ter um token novo com <code>expires_at</code> lá na frente — e abra o tinker outra vez. Como esta é uma <em>sessão nova</em> do tinker (a anterior morreu no <code>exit</code>), o <code>use</code> precisa ser repetido; sem ele o tinker responde <code>Class "PersonalAccessToken" not found</code>. Desta vez, em vez de mexer no vencimento, envelheça a <em>criação</em> do token em dois dias:</p>
 
   <figure class="code code--term">
     <figcaption>Terminal — php artisan tinker</figcaption>
@@ -1443,13 +1517,16 @@ php artisan sanctum:prune-expired --hours=24</code></pre>
   </figure>
 
   <p>O <code>--hours=24</code> é uma carência: mantém os tokens por mais um dia <em>depois</em> de vencidos, o que ajuda numa investigação ("este acesso foi feito com um token que expirou quando?"). E o comando entende os dois relógios — remove tanto as linhas com <code>expires_at</code> no passado quanto as linhas velhas demais para o <code>expiration</code> global.</p>
-  <p>Rodar isso na mão toda semana não é plano. No Laravel 11/12, o agendamento mora em <code>routes/console.php</code>:</p>
+  <p>Rodar isso na mão toda semana não é plano. No Laravel 11/12, o agendamento mora em <code>routes/console.php</code>. Adicione o import junto aos demais no início do arquivo e a chamada ao agendador ao final:</p>
+
+  <figure class="code code--php">
+    <figcaption>routes/console.php (junto aos imports no início)</figcaption>
+    <pre><code><span class="diff-add">use Illuminate\Support\Facades\Schedule;</span></code></pre>
+  </figure>
 
   <figure class="code code--php">
     <figcaption>routes/console.php (adicionar ao final)</figcaption>
-    <pre><code><span class="diff-add">use Illuminate\Support\Facades\Schedule;</span>
-<span class="diff-add"></span>
-<span class="diff-add">Schedule::command('sanctum:prune-expired --hours=24')-&gt;daily();</span></code></pre>
+    <pre><code><span class="diff-add">Schedule::command('sanctum:prune-expired --hours=24')-&gt;daily();</span></code></pre>
   </figure>
 
   <div class="callout callout--tip">
@@ -1517,12 +1594,12 @@ return Application::configure(basePath: dirname(__DIR__))
   <p>Repare na diferença entre os dois, que os nomes quase escondem: <code>abilities:a,b</code> exige <strong>todas</strong> as habilidades listadas; <code>ability:a,b</code> exige <strong>pelo menos uma</strong>.</p>
 
   <h3>Mão na massa: exigindo uma habilidade numa rota</h3>
-  <p>Para enxergar o middleware em ação sem transformar este passo numa matriz inteira de permissões, vamos usar <code>DELETE /api/books/{id}</code> como recorte e exigir a habilidade <code>books:delete</code>. Para isso, tiramos o <code>destroy</code> do <code>apiResource</code> e o declaramos separado:</p>
+  <p>Para enxergar o middleware em ação sem transformar este passo numa matriz inteira de permissões, vamos usar <code>DELETE /api/books/{book}</code> como recorte e exigir a habilidade <code>books:delete</code>. Para isso, tiramos o <code>destroy</code> do <code>apiResource</code> e o declaramos separado:</p>
 
   <div class="callout callout--warn">
     <p class="callout-label">Atenção: este é um recorte didático</p>
     <p><strong>Não existe uma regra do domínio que justifique proteger somente a exclusão de livros.</strong> Nesta API, excluir um gênero pode ser ainda mais destrutivo: por causa do <code>cascadeOnDelete()</code> criado no Módulo 4, o banco também exclui todos os livros daquele gênero. A rota de livros foi escolhida abaixo apenas para demonstrar, com uma única rota, como uma habilidade é exigida.</p>
-    <p>Por isso, o token <code>['books:read']</code> deste exemplo <strong>não é um token somente leitura de verdade</strong>. O Sanctum só verifica uma habilidade nas rotas que recebem o middleware (ou cujo código chama <code>tokenCan()</code>); as demais continuam exigindo apenas autenticação. Numa API real, aplique uma matriz coerente de habilidades a <em>todas</em> as operações relevantes de <code>books</code> e <code>genres</code> — e proteja especialmente <code>DELETE /api/genres/{id}</code>. Aqui vamos comprovar somente o mecanismo de <code>books:delete</code>.</p>
+    <p>Por isso, o token <code>['books:read']</code> deste exemplo <strong>não é um token somente leitura de verdade</strong>. O Sanctum só verifica uma habilidade nas rotas que recebem o middleware (ou cujo código chama <code>tokenCan()</code>); as demais continuam exigindo apenas autenticação. Numa API real, aplique uma matriz coerente de habilidades a <em>todas</em> as operações relevantes de <code>books</code> e <code>genres</code> — e proteja especialmente <code>DELETE /api/genres/{genre}</code>. Aqui vamos comprovar somente o mecanismo de <code>books:delete</code>.</p>
   </div>
 
   <figure class="code code--php">
@@ -1535,7 +1612,7 @@ use App\Http\Controllers\Api\GenreController;
 use Illuminate\Support\Facades\Route;
 
 // public: this is where a client gets its very first token
-Route::post('register', [AuthController::class, 'register']);
+Route::post('register', [AuthController::class, 'register'])-&gt;middleware('throttle:6,1');
 Route::post('login', [AuthController::class, 'login'])-&gt;middleware('throttle:6,1');
 
 // protected by Sanctum; this module calls these routes with Bearer tokens
@@ -1551,17 +1628,17 @@ Route::middleware('auth:sanctum')-&gt;group(function () {
         -&gt;whereNumber('book');
 <span class="diff-add"></span>
 <span class="diff-add">    // deleting a book demands a token that was explicitly allowed to do it</span>
-<span class="diff-add">    Route::delete('books/{id}', [BookController::class, 'destroy'])</span>
+<span class="diff-add">    Route::delete('books/{book}', [BookController::class, 'destroy'])</span>
 <span class="diff-add">        -&gt;middleware('abilities:books:delete')</span>
-<span class="diff-add">        -&gt;whereNumber('id');</span>
+<span class="diff-add">        -&gt;whereNumber('book');</span>
 });</code></pre>
   </figure>
 
-  <p>Três detalhes importam nessa declaração. O <code>-&gt;except('destroy')</code> registra o resource sem a rota de exclusão, para não haver duas rotas DELETE disputando a mesma URL. O <code>-&gt;whereNumber('id')</code> exige dígitos na rota DELETE explícita. E o <code>-&gt;whereNumber('book')</code> que veio do Módulo 4 <strong>precisa continuar no resource</strong>, restringindo as rotas GET/PUT/PATCH que compartilham <code>/books/{...}</code>.</p>
+  <p>O resource de livros mantém <code>-&gt;whereNumber('book')</code>, como na versão final do Módulo 4, para restringir os parâmetros das rotas geradas. Como o <code>destroy</code> foi retirado do resource para exigir a habilidade, a rota DELETE explícita usa o mesmo parâmetro <code>{book}</code> e a mesma restrição numérica. O controller continua recebendo esse valor no argumento inteiro <code>$id</code>, como no Módulo 4.</p>
 
   <div class="callout callout--concept">
     <p class="callout-label">Por que só restringir o DELETE produz 405?</p>
-    <p>Se <code>DELETE books/{id}</code> rejeitar <code>abc</code>, mas <code>GET|PUT|PATCH books/{book}</code> ainda aceitarem qualquer texto, o Laravel reconhece a URL <code>/api/books/abc</code> nas rotas dos outros verbos. Como nenhuma delas aceita DELETE, a resposta correta do roteador é <strong>405 Method Not Allowed</strong>. Quando <strong>ambos</strong> os parâmetros — <code>id</code> da rota explícita e <code>book</code> do resource — estão restritos, nenhuma rota reconhece essa URL e o resultado passa a ser <strong>404 Not Found</strong>. Portanto, o <code>whereNumber('id')</code> isolado não basta para esta checklist.</p>
+    <p>Se <code>DELETE books/{book}</code> rejeitar <code>abc</code>, mas <code>GET|PUT|PATCH books/{book}</code> ainda aceitarem qualquer texto, o Laravel reconhece a URL <code>/api/books/abc</code> nas rotas dos outros verbos e pode responder <strong>405 Method Not Allowed</strong>. A restrição <code>whereNumber('book')</code> na rota explícita e no resource faz todas essas rotas rejeitarem o valor não numérico; assim, o resultado é <strong>404 Not Found</strong>.</p>
   </div>
 
   <div class="callout callout--tip">
@@ -1581,12 +1658,18 @@ Route::middleware('auth:sanctum')-&gt;group(function () {
 <span class="pr">&gt; </span>$user-&gt;createToken('report-script', ['books:read'])-&gt;plainTextToken;
 <span class="out">= "7|pQ2mZx8Kd1..."</span></code></pre>
     </figure>
-    <p>Saia do tinker e exporte os dois tokens: o capado que acabou de nascer e o normal do login (se este shell já não tiver o <code>$TOKEN</code>, refaça o <code>export</code> do Passo 6).</p>
+    <p>Saia do tinker. O token que ele imprimiu é um segredo: cole-o no prompt oculto abaixo, sem colocá-lo num comando que ficaria gravado no histórico do shell. O <code>$TOKEN</code> usado no Teste B do Passo 7 foi expirado de propósito; o fato de a variável ainda existir não o torna válido. Faça um login novo agora para obter um token completo:</p>
     <figure class="code code--term">
-      <figcaption>Terminal — troque pelo token que o tinker imprimiu</figcaption>
-      <pre><code>export LIMITED='<span class="ph">7|pQ2mZx8Kd1...</span>'
+      <figcaption>Terminal Bash — leia o token limitado sem ecoá-lo nem gravá-lo no histórico</figcaption>
+      <pre><code>read -r -s -p 'Cole o token limitado e pressione Enter: ' LIMITED
+printf '\n'
 
-echo $LIMITED $TOKEN</code></pre>
+TOKEN=$(curl -fsS -X POST http://localhost:8000/api/login \
+  -H 'Accept: application/json' -H 'Content-Type: application/json' \
+  -d '{"email":"demo@bookshelf.test","password":"secret123"}' \
+  | python3 -c 'import sys, json; print(json.load(sys.stdin)["token"])')
+
+test -n "$LIMITED" && test -n "$TOKEN" && echo 'LIMITED e TOKEN carregados' || echo 'Confira as variáveis do shell'</code></pre>
     </figure>
     <figure class="code code--term">
       <figcaption>Terminal — a mesma API, dois crachás diferentes</figcaption>
@@ -1611,7 +1694,7 @@ curl -i -X DELETE http://localhost:8000/api/books/abc \
       <li><label><input type="checkbox" data-ck="p8-2"> <span>Com o token limitado, <code>GET /api/books</code> retorna <strong>200</strong>.</span></label></li>
       <li><label><input type="checkbox" data-ck="p8-3"> <span>Com o token limitado, <code>DELETE /api/books/1</code> retorna <strong>403</strong> — repare: 403, não 401. Ele <em>é</em> alguém; só não pode isso.</span></label></li>
       <li><label><input type="checkbox" data-ck="p8-4"> <span>Com o token normal do login, o mesmo <code>DELETE</code> retorna <strong>204</strong>.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p8-5"> <span><code>DELETE /api/books/abc</code> retorna <strong>404</strong> (as restrições de <code>id</code> e <code>book</code> em ação), não 405.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p8-5"> <span><code>DELETE /api/books/abc</code> retorna <strong>404</strong> (a restrição numérica de <code>book</code> em todas as rotas em ação), não 405.</span></label></li>
     </ul>
   </div>
 </section>
@@ -1620,7 +1703,7 @@ curl -i -X DELETE http://localhost:8000/api/books/abc \
   <h2><span class="step-badge">Passo 9</span> Testando a API protegida de ponta a ponta</h2>
 
   <h3>Conceito: a mesma bateria, agora com crachá</h3>
-  <p>No Passo 11 do Módulo 4 percorremos os 10 endpoints com <code>curl</code>. Vamos repetir o exercício, mas contando a história completa: bater na porta sem crachá, criar uma conta, entrar, trabalhar, sair — e conferir que o crachá devolvido não abre mais nada.</p>
+  <p>No Passo 11 do Módulo 4 percorremos os 10 endpoints com <code>curl</code>. Vamos repetir a jornada de autenticação e confirmar que a API preserva o contrato final: Form Requests validam, Services executam as operações e API Resources mantêm o envelope <code>data</code> e os campos públicos definidos no módulo anterior.</p>
 
   <h3>Mão na massa: preparação</h3>
 
@@ -1649,10 +1732,11 @@ curl -i http://localhost:8000/api/books \
 
   <figure class="code code--term">
     <figcaption>Terminal 2 — auth</figcaption>
-    <pre><code># 3. register (expect 201 with user + token + expires_at)
-curl -i -X POST http://localhost:8000/api/register \
+    <pre><code># 3. register (expect 201; redact the token before printing the response)
+curl -sS -w '\nHTTP_STATUS:%{http_code}\n' -X POST http://localhost:8000/api/register \
   -H 'Accept: application/json' -H 'Content-Type: application/json' \
-  -d '{"name":"Ada Lovelace","email":"ada@bookshelf.test","password":"secret123","password_confirmation":"secret123"}'
+  -d '{"name":"Ada Lovelace","email":"ada@bookshelf.test","password":"secret123","password_confirmation":"secret123"}' \
+  | python3 -c 'import json, sys; raw=sys.stdin.read(); body,status=raw.rsplit("\nHTTP_STATUS:",1); data=json.loads(body); data.update({"token":"[redigido]"} if "token" in data else {}); print("HTTP "+status.strip()); print(json.dumps(data, indent=2))'
 
 # 4. the same e-mail twice (expect 422, rule "unique")
 curl -i -X POST http://localhost:8000/api/register \
@@ -1669,13 +1753,13 @@ curl -i -X POST http://localhost:8000/api/login \
   -H 'Accept: application/json' -H 'Content-Type: application/json' \
   -d '{"email":"demo@bookshelf.test","password":"wrong-password"}'
 
-# 7. correct login: export the token into the shell environment
-export TOKEN=$(curl -s -X POST http://localhost:8000/api/login \
+# 7. correct login: keep the token in a shell variable, without printing it
+TOKEN=$(curl -fsS -X POST http://localhost:8000/api/login \
   -H 'Accept: application/json' -H 'Content-Type: application/json' \
   -d '{"email":"demo@bookshelf.test","password":"secret123"}' \
   | python3 -c 'import sys, json; print(json.load(sys.stdin)["token"])')
 
-echo $TOKEN</code></pre>
+test -n "$TOKEN" && echo 'TOKEN carregado' || echo 'Falha ao obter TOKEN'</code></pre>
   </figure>
 
   <h3>Mão na massa: trabalhando autenticado</h3>
@@ -1686,24 +1770,34 @@ echo $TOKEN</code></pre>
 curl http://localhost:8000/api/me \
   -H 'Accept: application/json' -H "Authorization: Bearer $TOKEN"
 
-# 9. the 4 seeded genres are back (expect 200)
+# 9. the 4 seeded genres are back in the Resource envelope (expect 200 with data[])
 curl http://localhost:8000/api/genres \
   -H 'Accept: application/json' -H "Authorization: Bearer $TOKEN"
 
-# 10. creating still works exactly like in Module 4 (expect 201)
+# 10. creation still uses the final Form Request, Service and GenreResource (expect 201 with data{})
 curl -i -X POST http://localhost:8000/api/genres \
   -H 'Accept: application/json' -H 'Content-Type: application/json' \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"name":"Horror","description":"Fear, suspense and the supernatural."}'
 
-# 11. validation is untouched: empty body (expect 422, not 401)
+# 11. final StoreGenreRequest validation: empty body (expect 422, not 401)
 curl -i -X POST http://localhost:8000/api/genres \
   -H 'Accept: application/json' -H 'Content-Type: application/json' \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{}'</code></pre>
+  -d '{}'
+
+# check the final BookResource (expect 12 books, each with nested genre {id, name})
+curl http://localhost:8000/api/books \
+  -H 'Accept: application/json' -H "Authorization: Bearer $TOKEN"
+
+# final StoreBookRequest still rejects an invalid status and rating (expect 422)
+curl -i -X POST http://localhost:8000/api/books \
+  -H 'Accept: application/json' -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"genre_id":1,"title":"Test","author":"Tester","status":"abandoned","rating":9}'</code></pre>
   </figure>
 
-  <p>O teste 11 é mais interessante do que parece: ele confirma a <strong>ordem</strong> das camadas. A requisição passou primeiro pelo <code>auth:sanctum</code> (token válido, seguiu adiante) e só então bateu no Form Request, que reprovou o corpo vazio. Autenticação antes de validação — exatamente o desenho do ciclo de vida do Módulo 4.</p>
+  <p>O teste 11 confirma a <strong>ordem</strong> das camadas: a requisição passa primeiro pelo <code>auth:sanctum</code> e, autenticada, chega ao <code>StoreGenreRequest</code>, que rejeita o corpo vazio com 422. As chamadas seguintes confirmam que a listagem de livros conserva o gênero aninhado e que o <code>StoreBookRequest</code> continua rejeitando <code>status</code> e <code>rating</code> inválidos. Nos testes de sucesso, as respostas continuam no formato das Resources finais do Módulo 4.</p>
 
   <h3>Mão na massa: saindo</h3>
 
@@ -1718,7 +1812,7 @@ curl -i http://localhost:8000/api/genres \
   -H 'Accept: application/json' -H "Authorization: Bearer $TOKEN"</code></pre>
   </figure>
 
-  <p>E o banco confirma a história. No tinker:</p>
+  <p>E o banco confirma a história. O token do login demo foi apagado no logout; resta o token criado no registro da Ada. Como nunca enviamos esse token a uma rota protegida, seu <code>last_used_at</code> continua <code>null</code>. Confira no tinker:</p>
 
   <figure class="code code--term">
     <figcaption>Terminal — php artisan tinker</figcaption>
@@ -1731,7 +1825,7 @@ curl -i http://localhost:8000/api/genres \
 <span class="out">= [
     "name" =&gt; "api-token",
     "abilities" =&gt; ["*"],
-    "last_used_at" =&gt; Illuminate\Support\Carbon @1772... ,
+    "last_used_at" =&gt; null,
     "expires_at" =&gt; Illuminate\Support\Carbon @1772... ,
   ]</span></code></pre>
   </figure>
@@ -1748,10 +1842,12 @@ curl -i http://localhost:8000/api/genres \
       <li><label><input type="checkbox" data-ck="p9-2"> <span>Teste 3: <code>POST /api/register</code> devolve <strong>201</strong> com <code>user</code>, <code>token</code>, <code>token_type</code> e <code>expires_at</code>.</span></label></li>
       <li><label><input type="checkbox" data-ck="p9-3"> <span>Testes 4 e 5: e-mail repetido e senha fraca retornam <strong>422</strong> com mensagens claras.</span></label></li>
       <li><label><input type="checkbox" data-ck="p9-4"> <span>Teste 6: senha errada retorna <strong>401</strong> — e a mensagem não revela se o e-mail existe.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p9-5"> <span>Testes 8 a 10: com o token, <code>me</code>, <code>genres</code> e a criação de gênero funcionam normalmente.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p9-5"> <span>Testes 8 a 10: <code>me</code> responde com o usuário; gêneros usam <code>data</code> e a criação retorna <strong>201</strong> com um gênero em <code>data</code>.</span></label></li>
       <li><label><input type="checkbox" data-ck="p9-6"> <span>Teste 11: corpo vazio com token válido retorna <strong>422</strong> (a validação do Módulo 4 continua intacta).</span></label></li>
       <li><label><input type="checkbox" data-ck="p9-7"> <span>Testes 12 e 13: o logout devolve <strong>204</strong> e o token revogado passa a dar <strong>401</strong>.</span></label></li>
       <li><label><input type="checkbox" data-ck="p9-8"> <span>No tinker, resta uma linha de <code>PersonalAccessToken</code>: o token emitido no registro da Ada; o token do login demo foi revogado no teste 12.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p9-9"> <span>A listagem autenticada de <code>/api/books</code> retorna 12 livros no envelope <code>data</code>, cada um com o resumo aninhado do gênero.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p9-10"> <span>O cadastro de livro com <code>status</code> e <code>rating</code> inválidos retorna <strong>422</strong>, mesmo com token válido.</span></label></li>
     </ul>
   </div>
 </section>
@@ -1770,7 +1866,7 @@ curl -i http://localhost:8000/api/genres \
         <tr><td>Registro e login no fluxo Form Request → Controller → Service (Model <code>User</code>) → API Resource</td><td>Passo 4</td></tr>
         <tr><td>401 idiomático por exceção, sem <code>if</code> no controller; mensagem genérica contra enumeração</td><td>Passo 4</td></tr>
         <tr><td>Todas as rotas de <code>genres</code> e <code>books</code> atrás do <code>auth:sanctum</code></td><td>Passo 5</td></tr>
-        <tr><td>Rate limit na rota de login (<code>throttle:6,1</code>)</td><td>Passo 5</td></tr>
+        <tr><td>Rate limit básico por IP no registro e no login (<code>throttle:6,1</code>)</td><td>Passo 5</td></tr>
         <tr><td><code>me</code>, <code>logout</code> (revoga um token) e <code>logout-all</code> (revoga todos)</td><td>Passo 6</td></tr>
         <tr><td>Expiração global por <code>.env</code> + <code>expires_at</code> por token, com <code>expires_at</code> na resposta</td><td>Passo 7</td></tr>
         <tr><td>Faxina agendada dos tokens vencidos (<code>sanctum:prune-expired</code>)</td><td>Passo 7</td></tr>
@@ -1819,7 +1915,7 @@ curl -i http://localhost:8000/api/genres \
     <li><strong>Não entregue personal access token à sua SPA de primeira parte.</strong> Use o modo stateful do Sanctum, com sessão, cookie e proteção CSRF; Bearer token persistido no <code>localStorage</code> não é o fluxo recomendado para esse cliente;</li>
     <li><strong>Trocou a senha, derrube os tokens</strong> (<code>$user-&gt;tokens()-&gt;delete()</code>). Senha nova com token velho ativo é segurança de fachada;</li>
     <li><strong>Considere um prefixo nos tokens.</strong> A opção <code>token_prefix</code> do <code>config/sanctum.php</code> faz cada token começar com uma marca sua (<code>bookshelf_...</code>). Serviços de <em>secret scanning</em> como o do GitHub usam esses prefixos para detectar segredos commitados por engano e avisar antes que alguém os use;</li>
-    <li><strong>Prazo curto por padrão.</strong> Se estiver em dúvida entre 1 dia e 30 dias, comece pelo menor: alongar um prazo é fácil, recolher um token vazado é impossível.</li>
+    <li><strong>Prazo curto por padrão.</strong> Escolha o prazo conforme o risco e a experiência do cliente; mantenha também um caminho para revogar tokens comprometidos imediatamente.</li>
   </ul>
 
   <h3>Para onde ir agora</h3>
@@ -1827,7 +1923,7 @@ curl -i http://localhost:8000/api/genres \
   <ul>
     <li><strong>Autorização e propriedade dos dados</strong> — o buraco que este módulo deixou aberto de propósito. Hoje, a Ada autenticada pode apagar os livros do usuário demo, porque livro nenhum tem dono. O caminho: uma migration adicionando <code>user_id</code> em <code>genres</code> e <code>books</code>, o escopo por usuário nos services e <strong>Policies</strong> decidindo quem pode o quê;</li>
     <li><strong>Testes automatizados</strong> — o Sanctum tem um atalho feito para isso: <code>Sanctum::actingAs($user)</code> autentica um usuário dentro do teste sem precisar de login nem de header. Junte com as factories que o trait <code>HasFactory</code> dos models já habilita desde o Módulo 4;</li>
-    <li><strong>Renovação de token</strong> — implemente uma rota <code>POST /api/refresh</code> que revoga o token atual e emite um novo, para o cliente renovar antes do <code>expires_at</code> sem pedir a senha de novo;</li>
+    <li><strong>Renovação de token</strong> — se a experiência exigir renovação sem pedir a senha novamente, projete um fluxo dedicado com credencial de renovação, rotação e revogação. Não trate um personal access token ainda válido como refresh token sem definir esses controles;</li>
     <li><strong>Verificação de e-mail e recuperação de senha</strong> — o Laravel já traz a estrutura (<code>MustVerifyEmail</code>, notifications); é integrá-la ao fluxo de registro;</li>
     <li><strong>Modo SPA do Sanctum</strong> — se a BookShelf ganhar uma SPA própria que compartilhe o mesmo domínio de topo com a API, implemente a modalidade stateful recomendada: <code>$middleware-&gt;statefulApi()</code>, domínios/CORS com credenciais, chamada inicial a <code>/sanctum/csrf-cookie</code> e login pelo guard <code>web</code>. SPA e API podem estar em subdomínios e repositórios diferentes; não é necessário servir os dois juntos.</li>
   </ul>
@@ -1841,8 +1937,8 @@ curl -i http://localhost:8000/api/genres \
     <h4>Checklist final do módulo</h4>
     <ul class="checklist">
       <li><label><input type="checkbox" data-ck="p10-1"> <span><code>php artisan migrate:fresh --seed</code> reconstrói o banco, com o usuário demo, sem erros.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p10-2"> <span>Nesta implementação por API token, nenhuma rota de <code>genres</code> ou <code>books</code> responde sem um Bearer válido.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p10-3"> <span>Registro, login, <code>me</code>, <code>logout</code> e <code>logout-all</code> respondem como esperado (Passo 9).</span></label></li>
+      <li><label><input type="checkbox" data-ck="p10-2"> <span>Nesta implementação por API token, nenhuma rota de <code>genres</code> ou <code>books</code> responde sem um Bearer válido; com ele, CRUD mantém Form Requests, Services, Resources e as restrições numéricas do Módulo 4.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p10-3"> <span>Registro, login, <code>me</code> e <code>logout</code> foram percorridos no Passo 9; o código de <code>logout-all</code> revoga todos os personal access tokens do usuário.</span></label></li>
       <li><label><input type="checkbox" data-ck="p10-4"> <span>Os tokens emitidos têm <code>expires_at</code> preenchido e param de funcionar quando vencem.</span></label></li>
       <li><label><input type="checkbox" data-ck="p10-5"> <span>Você consegue explicar, sem consultar, a diferença entre 401 e 403 nesta API.</span></label></li>
     </ul>
@@ -1851,7 +1947,7 @@ curl -i http://localhost:8000/api/genres \
 
 <footer class="end">
   <p>BookShelf API protegida — material didático do Módulo 5 do Curso de Programação. Continuação de <a href="laravel.html">BookShelf API: aprenda Laravel 12 construindo uma API REST completa</a>.</p>
-  <p>Referências: <a href="https://laravel.com/docs/12.x/sanctum">Laravel 12 — Sanctum</a> · <a href="https://laravel.com/docs/12.x/authentication">Laravel 12 — Authentication</a> · <a href="https://owasp.org/www-project-api-security/">OWASP — API Security</a></p>
+  <p>Referências: <a href="https://laravel.com/docs/12.x/sanctum">Laravel 12 — Sanctum</a> · <a href="https://laravel.com/docs/12.x/authentication">Laravel 12 — Authentication</a> · <a href="https://www.php.net/manual/en/function.password-hash.php">PHP — password_hash</a> · <a href="https://owasp.org/www-project-api-security/">OWASP — API Security</a></p>
 </footer>
 
 </main>
@@ -1949,7 +2045,7 @@ curl -i http://localhost:8000/api/genres \
     btn.type = 'button';
     btn.className = 'code-copy';
     btn.setAttribute('aria-label', 'Copiar código');
-    btn.innerHTML = copyIcon + checkIcon + '<span class="code-copy-label">Copiar</span>';
+    btn.innerHTML = copyIcon + checkIcon + '<span class="code-copy-label" role="status" aria-live="polite" aria-atomic="true">Copiar</span>';
     caption.appendChild(btn);
 
     var label = btn.querySelector('.code-copy-label');
