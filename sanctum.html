@@ -363,9 +363,9 @@ footer.end {
 
   <p>Partimos do estado final da aula anterior: o Laravel 12 já tem Sanctum instalado por <code>php artisan install:api</code>, o banco já foi migrado e <code>routes/api.php</code> expõe os CRUDs de <code>genres</code> e <code>books</code> sem autenticação. Nesta aula, vamos manter os controllers, services, Form Requests e Resources do catálogo e alterar o acesso às rotas.</p>
 
-  <p>A Aula 1 sobe o Laravel em <code>http://localhost:8000</code>. Para acompanhar sem criar outro projeto de frontend, abra esse endereço no navegador e use o Console das ferramentas de desenvolvedor como cliente temporário. As chamadas para <code>/api</code> e <code>/sanctum</code> ficam na mesma origem da página.</p>
+  <p>Nesta aula, o frontend e a API rodam em containers separados. Abra o frontend em <code>http://127.0.0.1</code> (porta 80) e a API Laravel em <code>http://127.0.0.1:8000</code>. No Console do navegador, as chamadas do frontend irão para a API pela URL completa; por usarem portas diferentes, precisam de CORS e credenciais de cookie.</p>
 
-  <p>Use o mesmo host e a mesma porta em todas as chamadas. <code>localhost:8000</code> e <code>127.0.0.1:8000</code> são origens diferentes; se preferir o segundo, troque também o domínio stateful no <code>.env</code>. O endereço <code>0.0.0.0</code> serve para o servidor escutar conexões, não para abrir a página no navegador.</p>
+  <p>Mantenha <code>127.0.0.1</code> como host nos dois endereços. <code>localhost</code> e <code>127.0.0.1</code> são hosts diferentes para o navegador. A porta 80 é a porta padrão do HTTP e aparece na origem como <code>http://127.0.0.1</code>; a origem da API continua sendo <code>http://127.0.0.1:8000</code>. O endereço <code>0.0.0.0</code> serve para o servidor escutar conexões, não para abrir a página no navegador.</p>
 
   <div class="table-wrap">
     <table>
@@ -399,25 +399,25 @@ footer.end {
   <ul>
     <li>O projeto e o banco do BookShelf funcionando como ficaram ao fim da Aula 1.</li>
     <li>Laravel Sanctum instalado por <code>php artisan install:api</code> e a tabela <code>users</code> criada pelas migrations da Aula 1.</li>
-    <li>O servidor Laravel acessível em <code>http://localhost:8000</code> e essa mesma página aberta no navegador.</li>
+    <li>O frontend acessível no navegador em <code>http://127.0.0.1</code> (porta 80) e a API Laravel em <code>http://127.0.0.1:8000</code>.</li>
   </ul>
 </section>
 
 <section class="step" id="passo-1">
   <h2><span class="step-badge">Passo 1</span> Como o navegador mantém o login</h2>
 
-  <p>Depois do login, o Laravel cria uma sessão e devolve um cookie. O navegador envia esse cookie automaticamente nas próximas chamadas para o mesmo site. A API usa a sessão para saber qual usuário está fazendo cada requisição.</p>
+  <p>Depois do login, o Laravel cria uma sessão e devolve um cookie. Como as chamadas saem do frontend em <code>http://127.0.0.1</code> e chegam à API em <code>http://127.0.0.1:8000</code>, o navegador precisa enviar essas chamadas com credenciais. O host é o mesmo nos dois endereços, então os cookies da API continuam disponíveis ao navegador; o CORS autoriza o frontend a fazer e ler as chamadas.</p>
 
   <ol class="flow">
-    <li>O frontend chama <code>/sanctum/csrf-cookie</code>.</li>
-    <li>O frontend envia e-mail e senha para <code>/api/login</code>.</li>
+    <li>O frontend chama <code>http://127.0.0.1:8000/sanctum/csrf-cookie</code>.</li>
+    <li>O frontend envia e-mail e senha para <code>http://127.0.0.1:8000/api/login</code>.</li>
     <li>O Laravel cria a sessão e devolve o cookie de sessão.</li>
     <li>O navegador envia o cookie nas próximas chamadas à API.</li>
   </ol>
 
-  <p>Em operações que mudam dados, como <code>POST</code>, <code>PUT</code>, <code>PATCH</code> e <code>DELETE</code>, o frontend também envia o valor do cookie <code>XSRF-TOKEN</code> no cabeçalho <code>X-XSRF-TOKEN</code>. O Laravel compara esse valor com a sessão.</p>
+  <p>Em operações que mudam dados, como <code>POST</code>, <code>PUT</code>, <code>PATCH</code> e <code>DELETE</code>, o frontend também envia o valor do cookie <code>XSRF-TOKEN</code> no cabeçalho <code>X-XSRF-TOKEN</code>. O Laravel compara esse valor com a sessão. O cookie de sessão é enviado pelo navegador e não pode ser lido pelo JavaScript.</p>
 
-  <p>Como a página de teste e a API usam a mesma origem, o navegador envia os cookies sem configuração de CORS. Aqui o próprio servidor Laravel atende a página, <code>/api</code> e <code>/sanctum</code>.</p>
+  <p>As origens são diferentes por causa da porta, então o Laravel precisa permitir a origem exata do frontend em CORS e aceitar credenciais. O frontend usa <code>credentials: 'include'</code>; os caminhos <code>/api/...</code> e <code>/sanctum/...</code> nos próximos exemplos são anexados à URL base da API.</p>
 
   <div class="callout callout--tip">
     <p class="callout-label">Para este projeto</p>
@@ -437,24 +437,46 @@ footer.end {
 })</code></pre>
   </figure>
 
-  <p>Configure o host e a porta que aparecem na barra do navegador. Neste projeto, o endereço é <code>http://localhost:8000</code>:</p>
+  <p>Ative o modo stateful e liste a origem do frontend em <code>SANCTUM_STATEFUL_DOMAINS</code>. Como o navegador abre o front em <code>http://127.0.0.1</code>, a porta 80 padrão não precisa aparecer:</p>
 
   <figure class="code code--file">
     <figcaption>.env</figcaption>
-    <pre><code><span class="diff-add">SANCTUM_STATEFUL_DOMAINS=localhost:8000</span>
+    <pre><code><span class="diff-add">SANCTUM_STATEFUL_DOMAINS=127.0.0.1</span>
 <span class="diff-add">SESSION_SECURE_COOKIE=false</span></code></pre>
   </figure>
 
-  <p>Se abrir o projeto como <code>127.0.0.1:8000</code>, use exatamente esse valor em <code>SANCTUM_STATEFUL_DOMAINS</code>. Em produção com HTTPS, use <code>SESSION_SECURE_COOKIE=true</code>.</p>
+  <p>Se a porta publicada do frontend for diferente de 80, inclua essa porta no domínio stateful, por exemplo <code>127.0.0.1:8080</code>. Use a porta vista pelo navegador, não a porta interna do container. Em produção com HTTPS, use <code>SESSION_SECURE_COOKIE=true</code>.</p>
 
-  <p>Deixe <code>SESSION_DOMAIN</code> sem configurar neste caso local. O Laravel já atende diretamente <code>/sanctum/csrf-cookie</code> e as rotas de <code>/api</code>.</p>
+  <p>Deixe <code>SESSION_DOMAIN</code> sem configurar neste caso local: front e API usam o mesmo host e cookies não são separados por porta. Agora publique a configuração CORS no container da API, se ela ainda não existir, e permita a origem do frontend com credenciais:</p>
+
+  <figure class="code code--term">
+    <figcaption>Terminal — no container/projeto Laravel</figcaption>
+    <pre><code>php artisan config:publish cors</code></pre>
+  </figure>
+
+  <figure class="code code--file">
+    <figcaption>config/cors.php</figcaption>
+    <pre><code>return [
+    'paths' =&gt; ['api/*', 'sanctum/csrf-cookie'],
+    'allowed_methods' =&gt; ['*'],
+    'allowed_origins' =&gt; ['http://127.0.0.1'],
+    'allowed_origins_patterns' =&gt; [],
+    'allowed_headers' =&gt; ['*'],
+    'exposed_headers' =&gt; [],
+    'max_age' =&gt; 0,
+    'supports_credentials' =&gt; true,
+];</code></pre>
+  </figure>
+
+  <p>Não use <code>*</code> em <code>allowed_origins</code> quando a API aceita cookies. Se o frontend for publicado em outra porta, ajuste a origem para o endereço exato, incluindo essa porta.</p>
 
   <div class="verify">
     <h4>Como conferir</h4>
     <ul class="checklist">
       <li><label><input type="checkbox" data-ck="p2-1"> <span><code>bootstrap/app.php</code> chama <code>$middleware-&gt;statefulApi()</code>.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p2-2"> <span><code>SANCTUM_STATEFUL_DOMAINS</code> inclui o mesmo endereço e porta que aparecem no navegador.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p2-3"> <span>O endereço do navegador corresponde ao host e à porta em <code>SANCTUM_STATEFUL_DOMAINS</code>.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p2-2"> <span><code>SANCTUM_STATEFUL_DOMAINS</code> inclui a origem do frontend como ela aparece no navegador.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p2-3"> <span>O CORS da API permite <code>http://127.0.0.1</code> e <code>supports_credentials</code> está ativo.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p2-4"> <span><code>SESSION_DOMAIN</code> está sem configuração neste caso local.</span></label></li>
     </ul>
   </div>
 </section>
@@ -744,11 +766,13 @@ use Illuminate\Support\Facades\Route;
 <section class="step" id="passo-6">
   <h2><span class="step-badge">Passo 6</span> Chamando a API no navegador</h2>
 
-  <p>Como a Aula 1 ainda não criou um frontend, abra <code>http://localhost:8000</code>, abra as ferramentas de desenvolvedor e cole o exemplo no Console. A página de boas-vindas serve como cliente temporário na mesma origem. Num frontend próprio, mantenha os caminhos relativos e use o mesmo helper.</p>
+  <p>Abra o frontend em <code>http://127.0.0.1</code>, abra as ferramentas de desenvolvedor e cole o exemplo no Console. O helper envia as chamadas à API em <code>http://127.0.0.1:8000</code>, inclui cookies entre origens e lê o cookie <code>XSRF-TOKEN</code> para montar o cabeçalho CSRF.</p>
 
   <figure class="code code--js">
     <figcaption>JavaScript no Console do navegador</figcaption>
-    <pre><code>function csrfToken() {
+    <pre><code>const API_BASE_URL = 'http://127.0.0.1:8000';
+
+function csrfToken() {
   const cookie = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
 
   return cookie ? decodeURIComponent(cookie[1]) : '';
@@ -764,11 +788,11 @@ async function apiRequest(path, options = {}) {
     headers.set('X-XSRF-TOKEN', csrfToken());
   }
 
-  return fetch(path, {
+  return fetch(`${API_BASE_URL}${path}`, {
     ...options,
     method,
     headers,
-    credentials: 'same-origin',
+    credentials: 'include',
   });
 }
 
@@ -801,14 +825,15 @@ console.log(registration.status, result);</code></pre>
 const books = await apiRequest('/api/books');</code></pre>
   </figure>
 
-  <p>O JavaScript lê o cookie <code>XSRF-TOKEN</code> para preencher o cabeçalho. O cookie de sessão é separado e protegido contra leitura por JavaScript. O navegador o envia automaticamente; não salve credenciais de sessão em <code>localStorage</code> nem envie um header <code>Authorization</code>.</p>
+  <p>O JavaScript lê o cookie <code>XSRF-TOKEN</code> para preencher o cabeçalho. Como o cookie é associado ao host <code>127.0.0.1</code>, a página na porta 80 consegue lê-lo mesmo que a API o tenha definido na porta 8000. O cookie de sessão é separado e protegido contra leitura por JavaScript; <code>credentials: 'include'</code> faz o navegador enviá-lo à API. Não salve credenciais de sessão em <code>localStorage</code> nem envie um header <code>Authorization</code>.</p>
 
   <div class="callout callout--warn">
     <p class="callout-label">Se usar Axios</p>
     <p>Configure a instância global para enviar cookies e o cabeçalho CSRF:</p>
     <figure class="code code--js">
       <figcaption>resources/js/bootstrap.js</figcaption>
-      <pre><code>axios.defaults.withCredentials = true;
+      <pre><code>axios.defaults.baseURL = 'http://127.0.0.1:8000';
+axios.defaults.withCredentials = true;
 axios.defaults.withXSRFToken = true;</code></pre>
     </figure>
   </div>
@@ -855,13 +880,13 @@ console.log(login.status, await login.json());</code></pre>
   <p>Abra as ferramentas de desenvolvedor do navegador, selecione a aba <strong>Network</strong> e percorra o fluxo:</p>
 
   <ol class="flow">
-    <li><code>GET /sanctum/csrf-cookie</code> responde e cria o cookie <code>XSRF-TOKEN</code>.</li>
-    <li><code>POST /api/register</code> responde <strong>201</strong>, cria a conta e inicia a sessão.</li>
-    <li><code>GET /api/me</code> responde <strong>200</strong> com os dados do usuário.</li>
-    <li><code>GET /api/books</code> responde <strong>200</strong> com o catálogo.</li>
-    <li><code>POST /api/logout</code> responde <strong>204</strong>.</li>
-    <li>Uma nova chamada a <code>GET /api/me</code> responde <strong>401</strong>.</li>
-    <li><code>POST /api/login</code> responde <strong>200</strong> e inicia outra sessão.</li>
+    <li><code>GET http://127.0.0.1:8000/sanctum/csrf-cookie</code> responde e cria o cookie <code>XSRF-TOKEN</code>.</li>
+    <li><code>POST http://127.0.0.1:8000/api/register</code> responde <strong>201</strong>, cria a conta e inicia a sessão.</li>
+    <li><code>GET http://127.0.0.1:8000/api/me</code> responde <strong>200</strong> com os dados do usuário.</li>
+    <li><code>GET http://127.0.0.1:8000/api/books</code> responde <strong>200</strong> com o catálogo.</li>
+    <li><code>POST http://127.0.0.1:8000/api/logout</code> responde <strong>204</strong>.</li>
+    <li>Uma nova chamada a <code>GET http://127.0.0.1:8000/api/me</code> responde <strong>401</strong>.</li>
+    <li><code>POST http://127.0.0.1:8000/api/login</code> responde <strong>200</strong> e inicia outra sessão.</li>
   </ol>
 
   <p>Nas chamadas que alteram dados, confira se o frontend envia <code>X-XSRF-TOKEN</code>. Nenhuma chamada de navegador precisa enviar <code>Authorization: Bearer</code>.</p>
@@ -869,6 +894,7 @@ console.log(login.status, await login.json());</code></pre>
   <div class="callout callout--tip">
     <p class="callout-label">Erros comuns</p>
     <ul>
+      <li><strong>Erro de CORS ou <code>Failed to fetch</code>:</strong> confira se <code>allowed_origins</code> corresponde à origem do frontend (<code>http://127.0.0.1</code>), se <code>supports_credentials</code> está ativo e se o cliente usa credenciais.</li>
       <li><strong>401:</strong> não há sessão válida. Confira se o login funcionou e se o navegador enviou o cookie de sessão.</li>
       <li><strong>419:</strong> o token CSRF não chegou ou não corresponde à sessão. Faça de novo a chamada a <code>/sanctum/csrf-cookie</code> e envie <code>X-XSRF-TOKEN</code>.</li>
       <li><strong>422:</strong> algum dado enviado não passou pela validação.</li>
@@ -904,7 +930,7 @@ console.log(login.status, await login.json());</code></pre>
         <tr><td>Identidade do usuário</td><td>Cookie de sessão do Laravel</td></tr>
         <tr><td>Proteção contra CSRF</td><td>Cookie <code>XSRF-TOKEN</code> enviado no cabeçalho <code>X-XSRF-TOKEN</code></td></tr>
         <tr><td>Rotas privadas</td><td>Middleware <code>auth:sanctum</code></td></tr>
-        <tr><td>Origem do frontend</td><td>Mesmo endereço e porta da API; o exemplo usa <code>localhost:8000</code></td></tr>
+        <tr><td>Endereços</td><td>Frontend em <code>http://127.0.0.1</code> (porta 80); API em <code>http://127.0.0.1:8000</code>, com CORS e credenciais</td></tr>
       </tbody>
     </table>
   </div>
@@ -956,7 +982,7 @@ console.log(login.status, await login.json());</code></pre>
     <li>O logout de sessão desta aula encerra a sessão do navegador; ele não revoga os Bearer tokens de outros dispositivos. Mantenha um fluxo separado para revogá-los.</li>
   </ul>
 
-  <p>Não apague a tabela <code>personal_access_tokens</code> nem revogue tokens em lote como parte automática da migração. Com Personal Access Tokens do Sanctum e o trait <code>HasApiTokens</code> mantidos, o guard pode aceitar sessões stateful e Bearer tokens nas mesmas rotas protegidas; os tokens antigos continuam válidos enquanto a aplicação os aceitar e eles não forem expirados ou revogados. Para um frontend em outra origem ou subdomínio, configure cookies com credenciais e CORS conforme a <a href="https://laravel.com/docs/12.x/sanctum#cors-and-cookies">documentação do Sanctum</a>.</p>
+  <p>Não apague a tabela <code>personal_access_tokens</code> nem revogue tokens em lote como parte automática da migração. Com Personal Access Tokens do Sanctum e o trait <code>HasApiTokens</code> mantidos, o guard pode aceitar sessões stateful e Bearer tokens nas mesmas rotas protegidas; os tokens antigos continuam válidos enquanto a aplicação os aceitar e eles não forem expirados ou revogados. Este tutorial já configura CORS e cookies com credenciais para o front e a API em portas diferentes no mesmo host. Se usar outro host ou subdomínio, ajuste também os domínios stateful e o domínio do cookie conforme a <a href="https://laravel.com/docs/12.x/sanctum#cors-and-cookies">documentação do Sanctum</a>.</p>
 
   <div class="verify">
     <h4>Checklist da migração</h4>
