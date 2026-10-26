@@ -417,7 +417,7 @@ footer.end {
 
   <p>Em operações que mudam dados, como <code>POST</code>, <code>PUT</code>, <code>PATCH</code> e <code>DELETE</code>, o frontend também envia o valor do cookie <code>XSRF-TOKEN</code> no cabeçalho <code>X-XSRF-TOKEN</code>. O Laravel compara esse valor com a sessão. O cookie de sessão é enviado pelo navegador e não pode ser lido pelo JavaScript.</p>
 
-  <p>As origens são diferentes por causa da porta, então o Laravel precisa permitir a origem exata do frontend em CORS e aceitar credenciais. O frontend usa <code>credentials: 'include'</code>; os caminhos <code>/api/...</code> e <code>/sanctum/...</code> nos próximos exemplos são anexados à URL base da API.</p>
+  <p>As origens são diferentes por causa da porta, então o Laravel precisa permitir a origem exata do frontend em CORS e aceitar credenciais. O frontend usa <code>withCredentials: true</code>; os caminhos <code>/api/...</code> e <code>/sanctum/...</code> nos próximos exemplos são anexados à URL base da API.</p>
 
   <div class="callout callout--tip">
     <p class="callout-label">Para este projeto</p>
@@ -766,69 +766,45 @@ use Illuminate\Support\Facades\Route;
 <section class="step" id="passo-6">
   <h2><span class="step-badge">Passo 6</span> Chamando a API no navegador</h2>
 
-  <p>Abra o frontend em <code>http://127.0.0.1</code>, abra as ferramentas de desenvolvedor e cole o exemplo no Console. O helper envia as chamadas à API em <code>http://127.0.0.1:8000</code>, inclui cookies entre origens e lê o cookie <code>XSRF-TOKEN</code> para montar o cabeçalho CSRF.</p>
+  <p>Abra o frontend em <code>http://127.0.0.1</code>, abra as ferramentas de desenvolvedor e cole o exemplo no Console, com o Axios carregado no frontend. A instância envia chamadas à API em <code>http://127.0.0.1:8000</code>, inclui cookies entre origens e configura o envio automático do cabeçalho CSRF.</p>
 
   <figure class="code code--js">
     <figcaption>JavaScript no Console do navegador</figcaption>
-    <pre><code>const API_BASE_URL = 'http://127.0.0.1:8000';
-
-function csrfToken() {
-  const cookie = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
-
-  return cookie ? decodeURIComponent(cookie[1]) : '';
-}
-
-async function apiRequest(path, options = {}) {
-  const method = (options.method || 'GET').toUpperCase();
-  const headers = new Headers(options.headers || {});
-
-  headers.set('Accept', 'application/json');
-
-  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-    headers.set('X-XSRF-TOKEN', csrfToken());
-  }
-
-  return fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    method,
-    headers,
-    credentials: 'include',
-  });
-}
-
-// Start CSRF protection before registration or login.
-await apiRequest('/sanctum/csrf-cookie');
-
-// Create the first account. Use a new email the first time you run this.
-const registration = await apiRequest('/api/register', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    name: 'Ada Lovelace',
-    email: 'ada@example.com',
-    password: 'example-password',
-    password_confirmation: 'example-password',
-  }),
+    <pre><code>const api = axios.create({
+  baseURL: 'http://127.0.0.1:8000',
+  withCredentials: true,
+  withXSRFToken: true,
+  headers: { Accept: 'application/json' },
 });
 
-const result = await registration.json();
-console.log(registration.status, result);</code></pre>
+// Start CSRF protection before registration or login.
+await api.get('/sanctum/csrf-cookie');
+
+// Create the first account. Use a new email the first time you run this.
+const registration = await api.post('/api/register', {
+  name: 'Ada Lovelace',
+  email: 'ada@example.com',
+  password: 'example-password',
+  password_confirmation: 'example-password',
+});
+
+console.log(registration.status, registration.data);</code></pre>
   </figure>
 
-  <p>O cadastro cria a conta e inicia a sessão. Agora as chamadas protegidas usam o mesmo helper:</p>
+  <p>O cadastro cria a conta e inicia a sessão. Agora as chamadas protegidas usam a mesma instância Axios:</p>
 
   <figure class="code code--js">
     <figcaption>JavaScript — usuário atual e catálogo</figcaption>
-    <pre><code>const me = await apiRequest('/api/me');
+    <pre><code>const me = await api.get('/api/me');
 
-// POST, PUT, PATCH e DELETE recebem X-XSRF-TOKEN pelo helper.
-const books = await apiRequest('/api/books');</code></pre>
+// POST, PUT, PATCH e DELETE recebem X-XSRF-TOKEN automaticamente.
+const books = await api.get('/api/books');</code></pre>
   </figure>
 
-  <p>O JavaScript lê o cookie <code>XSRF-TOKEN</code> para preencher o cabeçalho. Como o cookie é associado ao host <code>127.0.0.1</code>, a página na porta 80 consegue lê-lo mesmo que a API o tenha definido na porta 8000. O cookie de sessão é separado e protegido contra leitura por JavaScript; <code>credentials: 'include'</code> faz o navegador enviá-lo à API. Não salve credenciais de sessão em <code>localStorage</code> nem envie um header <code>Authorization</code>.</p>
+  <p>Com <code>withXSRFToken: true</code>, o Axios lê o cookie <code>XSRF-TOKEN</code> e preenche o cabeçalho automaticamente. Como o cookie é associado ao host <code>127.0.0.1</code>, a página na porta 80 consegue lê-lo mesmo que a API o tenha definido na porta 8000. O cookie de sessão é separado e protegido contra leitura por JavaScript; <code>withCredentials: true</code> faz o navegador enviá-lo à API. Não salve credenciais de sessão em <code>localStorage</code> nem envie um header <code>Authorization</code>.</p>
 
   <div class="callout callout--warn">
-    <p class="callout-label">Se usar Axios</p>
+    <p class="callout-label">Configuração no frontend</p>
     <p>Configure a instância global para enviar cookies e o cabeçalho CSRF:</p>
     <figure class="code code--js">
       <figcaption>resources/js/bootstrap.js</figcaption>
@@ -844,29 +820,25 @@ axios.defaults.withXSRFToken = true;</code></pre>
 
   <p>O cookie mantém a sessão até o usuário sair ou ela expirar. O tempo é controlado pela configuração de sessão do Laravel, como <code>SESSION_LIFETIME</code>.</p>
 
-  <p>O botão de logout deve fazer um <code>POST</code> para <code>/api/logout</code>. O helper do passo anterior inclui o cabeçalho CSRF:</p>
+  <p>O botão de logout deve fazer um <code>POST</code> para <code>/api/logout</code>. A instância Axios do passo anterior inclui o cabeçalho CSRF:</p>
 
   <figure class="code code--js">
     <figcaption>JavaScript — logout</figcaption>
-    <pre><code>await apiRequest('/api/logout', { method: 'POST' });</code></pre>
+    <pre><code>await api.post('/api/logout');</code></pre>
   </figure>
 
   <p>Depois disso, <code>/api/me</code> deve responder <strong>401</strong>. Para entrar novamente com a conta criada no passo anterior:</p>
 
   <figure class="code code--js">
     <figcaption>JavaScript — login</figcaption>
-    <pre><code>await apiRequest('/sanctum/csrf-cookie');
+    <pre><code>await api.get('/sanctum/csrf-cookie');
 
-const login = await apiRequest('/api/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    email: 'ada@example.com',
-    password: 'example-password',
-  }),
+const login = await api.post('/api/login', {
+  email: 'ada@example.com',
+  password: 'example-password',
 });
 
-console.log(login.status, await login.json());</code></pre>
+console.log(login.status, login.data);</code></pre>
   </figure>
 
   <p>O login inicia uma sessão nova. Peça <code>/sanctum/csrf-cookie</code> antes de cada novo login para obter um token CSRF válido.</p>
@@ -894,7 +866,7 @@ console.log(login.status, await login.json());</code></pre>
   <div class="callout callout--tip">
     <p class="callout-label">Erros comuns</p>
     <ul>
-      <li><strong>Erro de CORS ou <code>Failed to fetch</code>:</strong> confira se <code>allowed_origins</code> corresponde à origem do frontend (<code>http://127.0.0.1</code>), se <code>supports_credentials</code> está ativo e se o cliente usa credenciais.</li>
+      <li><strong>Erro de CORS ou <code>Network Error</code>:</strong> confira se <code>allowed_origins</code> corresponde à origem do frontend (<code>http://127.0.0.1</code>), se <code>supports_credentials</code> está ativo e se o Axios usa <code>withCredentials: true</code>.</li>
       <li><strong>401:</strong> não há sessão válida. Confira se o login funcionou e se o navegador enviou o cookie de sessão.</li>
       <li><strong>419:</strong> o token CSRF não chegou ou não corresponde à sessão. Faça de novo a chamada a <code>/sanctum/csrf-cookie</code> e envie <code>X-XSRF-TOKEN</code>.</li>
       <li><strong>422:</strong> algum dado enviado não passou pela validação.</li>
@@ -964,16 +936,17 @@ console.log(login.status, await login.json());</code></pre>
   <p>Se a versão antiga já tinha um <code>POST /api/login</code> para emitir Bearer, substitua a implementação pela versão de sessão do Passo 4. Não mantenha duas rotas com o mesmo método e caminho. Se um app mobile ou script ainda precisa emitir e revogar Bearer tokens, reserve caminhos próprios para esse cliente, por exemplo <code>POST /api/tokens</code> e <code>DELETE /api/tokens/current</code>. Proteja a rota de revogação com <code>auth:sanctum</code>, mantenha-a exclusiva para clientes Bearer e continue enviando o cabeçalho Bearer nesses pedidos.</p>
 
   <h3>2. Troque as chamadas do navegador</h3>
-  <p>Remova a leitura do token salvo e o cabeçalho <code>Authorization</code>. Antes de cadastro ou login, chame <code>/sanctum/csrf-cookie</code>; depois, use o helper do Passo 6 para enviar o cookie de sessão automaticamente e o cabeçalho CSRF nas operações que alteram dados:</p>
+  <p>Remova a leitura do token salvo e o cabeçalho <code>Authorization</code>. Antes de cadastro ou login, chame <code>/sanctum/csrf-cookie</code>; depois, use a instância Axios do Passo 6 para enviar o cookie de sessão e o cabeçalho CSRF automaticamente:</p>
 
   <figure class="code code--js">
     <figcaption>Frontend — substituição do cabeçalho Bearer</figcaption>
     <pre><code><span class="diff-del">const token = localStorage.getItem('token');</span>
 <span class="diff-del">headers.set('Authorization', 'Bearer ' + token);</span>
-<span class="diff-add">headers.set('X-XSRF-TOKEN', csrfToken());</span></code></pre>
+<span class="diff-add">withCredentials: true,</span>
+<span class="diff-add">withXSRFToken: true,</span></code></pre>
   </figure>
 
-  <p>O helper completo do Passo 6 só adiciona <code>X-XSRF-TOKEN</code> em <code>POST</code>, <code>PUT</code>, <code>PATCH</code> e <code>DELETE</code>. Remova também o salvamento do Bearer token em <code>localStorage</code> ou <code>sessionStorage</code>. Peça que cada usuário faça login novamente: um Bearer token existente não se transforma em sessão.</p>
+  <p>O Axios envia <code>X-XSRF-TOKEN</code> automaticamente nas chamadas que alteram dados. Remova também o salvamento do Bearer token em <code>localStorage</code> ou <code>sessionStorage</code>. Peça que cada usuário faça login novamente: um Bearer token existente não se transforma em sessão.</p>
 
   <h3>3. Decida como tratar os tokens existentes</h3>
   <ul>
