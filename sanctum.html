@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Módulo 5 do tutorial BookShelf API: autenticação web com Laravel Sanctum, sessão, cookie e proteção CSRF.">
-<title>BookShelf API protegida — sessão e cookie com Laravel Sanctum</title>
+<meta name="description" content="Aula 2 do Módulo 4: continuação da BookShelf API com autenticação por sessão, cookies e proteção CSRF usando Laravel Sanctum.">
+<title>Laravel — Aula 2: sessão e cookie com Sanctum</title>
 <style>
 :root {
   --bg: #ffffff;
@@ -331,41 +331,41 @@ footer.end {
 <div class="layout">
 
 <nav class="sidebar" aria-label="Sumário">
-  <p class="brand">BookShelf <span>Auth</span></p>
-  <p class="brand-sub">Laravel Sanctum: sessão, cookie e CSRF</p>
+  <p class="brand">BookShelf <span>Laravel</span></p>
+  <p class="brand-sub">Módulo 4 · Aula 2 — Sanctum</p>
   <ol class="toc">
-    <li><a href="#introducao">Introdução — o fluxo deste módulo</a></li>
+    <li><a href="#introducao">Introdução — estado inicial da API</a></li>
     <li><a href="#passo-1">Passo 1 — Como o navegador mantém o login</a></li>
     <li><a href="#passo-2">Passo 2 — Ativando o modo stateful</a></li>
     <li><a href="#passo-3">Passo 3 — Preparando o usuário</a></li>
     <li><a href="#passo-4">Passo 4 — Cadastro, login e logout</a></li>
     <li><a href="#passo-5">Passo 5 — Protegendo as rotas</a></li>
-    <li><a href="#passo-6">Passo 6 — Chamando a API pelo frontend</a></li>
+    <li><a href="#passo-6">Passo 6 — Chamando a API no navegador</a></li>
     <li><a href="#passo-7">Passo 7 — Sessão e logout</a></li>
     <li><a href="#passo-8">Passo 8 — Conferindo no navegador</a></li>
     <li><a href="#passo-9">Passo 9 — O que falta para produção</a></li>
     <li><a href="#passo-10">Passo 10 — Revisão</a></li>
-    <li><a href="#passo-11">Passo 11 — Migrando de Bearer para cookie</a></li>
+    <li><a href="#adendo-bearer-cookie">Adendo — migrando de Bearer para sessão e CSRF</a></li>
   </ol>
-  <a class="toc-back" href="laravel.html">← Módulo 4: construindo a BookShelf API</a>
+  <a class="toc-back" href="laravel.html">← Aula 1: construindo a BookShelf API</a>
 </nav>
 
 <main id="conteudo" tabindex="-1">
 
 <header class="hero">
-  <p class="hero-kicker">Curso de Programação — Módulo 5</p>
-  <h1>BookShelf API protegida: sessão e cookie com Laravel Sanctum</h1>
-  <p class="lead">A API do Módulo 4 está pronta, mas qualquer pessoa pode usá-la. Neste módulo, vamos exigir login. O navegador vai manter a sessão em um cookie e enviar um token CSRF nas operações que alteram dados.</p>
+  <p class="hero-kicker">Curso de Programação — Módulo 4 · Aula 2</p>
+  <h1>Protegendo a BookShelf API com sessão e Laravel Sanctum</h1>
+  <p class="lead">Na Aula 1, construímos a API de livros e gêneros e deixamos suas rotas públicas. Agora vamos continuar esse mesmo projeto: cadastro e login criam uma sessão, o navegador guarda o cookie e o Laravel exige autenticação para acessar o catálogo.</p>
 </header>
 
 <section id="introducao">
-  <h2>Introdução — o fluxo deste módulo</h2>
+  <h2>Introdução — estado inicial da API</h2>
 
-  <p>Vamos proteger os endpoints de <code>genres</code> e <code>books</code> e criar rotas de cadastro, login, usuário atual e logout.</p>
+  <p>Partimos do estado final da aula anterior: o Laravel 12 já tem Sanctum instalado por <code>php artisan install:api</code>, o banco já foi migrado e <code>routes/api.php</code> expõe os CRUDs de <code>genres</code> e <code>books</code> sem autenticação. Nesta aula, vamos manter os controllers, services, Form Requests e Resources do catálogo e alterar o acesso às rotas.</p>
 
-  <p>O frontend deste exemplo roda no navegador em <code>http://localhost:8080</code>. A API fica disponível em <code>http://localhost:8080/api</code> e é encaminhada por outro Nginx. Para o navegador, página e API têm a mesma origem: protocolo, endereço e porta são iguais. O Nginx que recebeu cada caminho não muda isso.</p>
+  <p>A Aula 1 sobe o Laravel em <code>http://localhost:8000</code>. Para acompanhar sem criar outro projeto de frontend, abra esse endereço no navegador e use o Console das ferramentas de desenvolvedor como cliente temporário. As chamadas para <code>/api</code> e <code>/sanctum</code> ficam na mesma origem da página.</p>
 
-  <p>Use o mesmo endereço no navegador em todas as chamadas: <code>localhost</code> e <code>127.0.0.1</code> contam como origens diferentes. O endereço <code>0.0.0.0</code> serve para o servidor escutar conexões; no navegador, use <code>localhost</code> ou <code>127.0.0.1</code>.</p>
+  <p>Use o mesmo host e a mesma porta em todas as chamadas. <code>localhost:8000</code> e <code>127.0.0.1:8000</code> são origens diferentes; se preferir o segundo, troque também o domínio stateful no <code>.env</code>. O endereço <code>0.0.0.0</code> serve para o servidor escutar conexões, não para abrir a página no navegador.</p>
 
   <div class="table-wrap">
     <table>
@@ -375,7 +375,7 @@ footer.end {
         <tr><td><span class="m m-post">POST</span></td><td><code>/api/login</code></td><td>Confere e-mail e senha e inicia a sessão</td></tr>
         <tr><td><span class="m m-get">GET</span></td><td><code>/api/me</code></td><td>Retorna o usuário conectado</td></tr>
         <tr><td><span class="m m-post">POST</span></td><td><code>/api/logout</code></td><td>Encerra a sessão</td></tr>
-        <tr><td colspan="2"><code>/api/genres</code> e <code>/api/books</code></td><td>Rotas do Módulo 4; agora exigem login</td></tr>
+        <tr><td colspan="2"><code>/api/genres</code> e <code>/api/books</code></td><td>CRUDs da Aula 1; agora exigem uma sessão autenticada</td></tr>
       </tbody>
     </table>
   </div>
@@ -390,11 +390,16 @@ footer.end {
     <p>O cadastro fica público e todas as contas podem alterar o mesmo catálogo. Antes de publicar, decida quem pode criar contas e implemente propriedade dos dados e regras de acesso.</p>
   </div>
 
+  <div class="callout callout--tip">
+    <p class="callout-label">Como ler os trechos alterados</p>
+    <p>Nos arquivos que já existiam, o fundo verde com <code>+</code> indica linhas adicionadas; o fundo vermelho com <code>−</code> indica linhas removidas; linhas sem destaque continuam iguais. O botão Copiar ignora as linhas removidas.</p>
+  </div>
+
   <h3>O que você precisa ter</h3>
   <ul>
-    <li>O projeto do Módulo 4 funcionando.</li>
-    <li>Laravel Sanctum instalado pelo <code>php artisan install:api</code>. O Módulo 4 já fez isso.</li>
-    <li>O Nginx local encaminhando <code>/api/*</code> e <code>/sanctum/*</code> para o Laravel, mantendo o mesmo endereço e porta que o frontend usa no navegador.</li>
+    <li>O projeto e o banco do BookShelf funcionando como ficaram ao fim da Aula 1.</li>
+    <li>Laravel Sanctum instalado por <code>php artisan install:api</code> e a tabela <code>users</code> criada pelas migrations da Aula 1.</li>
+    <li>O servidor Laravel acessível em <code>http://localhost:8000</code> e essa mesma página aberta no navegador.</li>
   </ul>
 </section>
 
@@ -412,7 +417,7 @@ footer.end {
 
   <p>Em operações que mudam dados, como <code>POST</code>, <code>PUT</code>, <code>PATCH</code> e <code>DELETE</code>, o frontend também envia o valor do cookie <code>XSRF-TOKEN</code> no cabeçalho <code>X-XSRF-TOKEN</code>. O Laravel compara esse valor com a sessão.</p>
 
-  <p>Como frontend e API usam a mesma origem, o navegador aceita os cookies sem configuração de CORS. O Nginx precisa apenas encaminhar os caminhos da API e do Sanctum ao Laravel.</p>
+  <p>Como a página de teste e a API usam a mesma origem, o navegador envia os cookies sem configuração de CORS. Aqui o próprio servidor Laravel atende a página, <code>/api</code> e <code>/sanctum</code>.</p>
 
   <div class="callout callout--tip">
     <p class="callout-label">Para este projeto</p>
@@ -423,35 +428,33 @@ footer.end {
 <section class="step" id="passo-2">
   <h2><span class="step-badge">Passo 2</span> Ativando o modo stateful do Sanctum</h2>
 
-  <p>O Laravel precisa tratar as chamadas do frontend como requisições que usam sessão. Abra <code>bootstrap/app.php</code>. Se o arquivo já tem <code>withMiddleware</code>, coloque <code>$middleware-&gt;statefulApi();</code> dentro dele:</p>
+  <p>O esqueleto criado na Aula 1 já tem um bloco <code>withMiddleware</code> em <code>bootstrap/app.php</code>. Adicione a linha marcada dentro desse bloco para que as requisições stateful da API usem a sessão do Laravel:</p>
 
   <figure class="code code--php">
-    <figcaption>bootstrap/app.php</figcaption>
+    <figcaption>bootstrap/app.php (trecho alterado)</figcaption>
     <pre><code>-&gt;withMiddleware(function (Middleware $middleware): void {
-    $middleware-&gt;statefulApi();
+<span class="diff-add">    $middleware-&gt;statefulApi();</span>
 })</code></pre>
   </figure>
 
-  <p>Se ainda não existe esse bloco, adicione-o à configuração do Laravel. O import de <code>Middleware</code> já vem no arquivo gerado pelo Laravel 12.</p>
-
-  <p>Informe o endereço que o navegador usa para abrir o frontend. Este exemplo usa <code>http://localhost:8080</code>:</p>
+  <p>Configure o host e a porta que aparecem na barra do navegador. Neste projeto, o endereço é <code>http://localhost:8000</code>:</p>
 
   <figure class="code code--file">
     <figcaption>.env</figcaption>
-    <pre><code>SANCTUM_STATEFUL_DOMAINS=localhost:8080
-SESSION_SECURE_COOKIE=false</code></pre>
+    <pre><code><span class="diff-add">SANCTUM_STATEFUL_DOMAINS=localhost:8000</span>
+<span class="diff-add">SESSION_SECURE_COOKIE=false</span></code></pre>
   </figure>
 
-  <p>Troque <code>8080</code> pela porta que aparece na barra do navegador. Se usar <code>127.0.0.1</code>, coloque esse endereço na configuração e use-o também nas chamadas do frontend. Quando o Nginx usa a porta padrão <code>80</code>, o valor pode ser apenas <code>localhost</code>. Em produção com HTTPS, use <code>SESSION_SECURE_COOKIE=true</code>.</p>
+  <p>Se abrir o projeto como <code>127.0.0.1:8000</code>, use exatamente esse valor em <code>SANCTUM_STATEFUL_DOMAINS</code>. Em produção com HTTPS, use <code>SESSION_SECURE_COOKIE=true</code>.</p>
 
-  <p>Com essa configuração local, deixe <code>SESSION_DOMAIN</code> sem configurar. O Nginx deve encaminhar <code>/sanctum/csrf-cookie</code> ao Laravel, assim como já encaminha <code>/api</code>.</p>
+  <p>Deixe <code>SESSION_DOMAIN</code> sem configurar neste caso local. O Laravel já atende diretamente <code>/sanctum/csrf-cookie</code> e as rotas de <code>/api</code>.</p>
 
   <div class="verify">
     <h4>Como conferir</h4>
     <ul class="checklist">
       <li><label><input type="checkbox" data-ck="p2-1"> <span><code>bootstrap/app.php</code> chama <code>$middleware-&gt;statefulApi()</code>.</span></label></li>
       <li><label><input type="checkbox" data-ck="p2-2"> <span><code>SANCTUM_STATEFUL_DOMAINS</code> inclui o mesmo endereço e porta que aparecem no navegador.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p2-3"> <span>O Nginx encaminha tanto <code>/api</code> quanto <code>/sanctum</code> ao Laravel.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p2-3"> <span>O endereço do navegador corresponde ao host e à porta em <code>SANCTUM_STATEFUL_DOMAINS</code>.</span></label></li>
     </ul>
   </div>
 </section>
@@ -486,7 +489,7 @@ protected function casts(): array
 <section class="step" id="passo-4">
   <h2><span class="step-badge">Passo 4</span> Cadastro, login e logout</h2>
 
-  <p>Vamos manter a organização usada no Módulo 4: Form Requests validam os dados, o service executa a autenticação e o controller devolve JSON.</p>
+  <p>Vamos manter a organização da Aula 1: Form Requests validam os dados, o service executa a autenticação e o controller devolve JSON.</p>
 
   <h3>Validação</h3>
   <p>Crie os dois Form Requests:</p>
@@ -697,50 +700,54 @@ class AuthController extends Controller
 <section class="step" id="passo-5">
   <h2><span class="step-badge">Passo 5</span> Protegendo as rotas</h2>
 
-  <p>Abra <code>routes/api.php</code>. Deixe cadastro e login fora do grupo protegido. Coloque <code>me</code>, logout e os recursos do catálogo dentro de <code>auth:sanctum</code>:</p>
+  <p>Edite o <code>routes/api.php</code> que terminou a Aula 1. Cadastro e login ficam públicos; <code>me</code>, logout e os dois recursos do catálogo passam para o grupo protegido. As linhas verdes e vermelhas comparam a rota antiga com o arquivo final:</p>
 
   <figure class="code code--php">
-    <figcaption>routes/api.php</figcaption>
+    <figcaption>routes/api.php — alterações sobre o arquivo da Aula 1</figcaption>
     <pre><code>&lt;?php
 
-use App\Http\Controllers\Api\AuthController;
+<span class="diff-add">use App\Http\Controllers\Api\AuthController;</span>
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\GenreController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('register', [AuthController::class, 'register'])
-    -&gt;middleware('throttle:6,1');
+<span class="diff-add">Route::post('register', [AuthController::class, 'register'])</span>
+<span class="diff-add">    -&gt;middleware('throttle:6,1');</span>
 
-Route::post('login', [AuthController::class, 'login'])
-    -&gt;middleware('throttle:6,1');
+<span class="diff-add">Route::post('login', [AuthController::class, 'login'])</span>
+<span class="diff-add">    -&gt;middleware('throttle:6,1');</span>
 
-Route::middleware('auth:sanctum')-&gt;group(function () {
-    Route::get('me', [AuthController::class, 'me']);
-    Route::post('logout', [AuthController::class, 'logout']);
+<span class="diff-add">Route::middleware('auth:sanctum')-&gt;group(function () {</span>
+<span class="diff-add">    Route::get('me', [AuthController::class, 'me']);</span>
+<span class="diff-add">    Route::post('logout', [AuthController::class, 'logout']);</span>
 
-    Route::apiResource('genres', GenreController::class)
-        -&gt;whereNumber('genre');
+<span class="diff-del">Route::apiResource('genres', GenreController::class)</span>
+<span class="diff-del">    -&gt;whereNumber('genre');</span>
+<span class="diff-add">    Route::apiResource('genres', GenreController::class)</span>
+<span class="diff-add">        -&gt;whereNumber('genre');</span>
 
-    Route::apiResource('books', BookController::class)
-        -&gt;whereNumber('book');
-});</code></pre>
+<span class="diff-del">Route::apiResource('books', BookController::class)</span>
+<span class="diff-del">    -&gt;whereNumber('book');</span>
+<span class="diff-add">    Route::apiResource('books', BookController::class)</span>
+<span class="diff-add">        -&gt;whereNumber('book');</span>
+<span class="diff-add">});</span></code></pre>
   </figure>
 
-  <p>O middleware <code>auth:sanctum</code> aceita a sessão do navegador quando o modo stateful está ativo. Se ninguém estiver conectado, a API responde <strong>401</strong>.</p>
+  <p>O grupo <code>auth:sanctum</code> agora protege <code>me</code>, logout e os dois CRUDs. Com a configuração stateful ativa, Sanctum autentica o navegador pela sessão; sem uma sessão válida, a API responde <strong>401</strong>.</p>
 
   <div class="callout callout--tip">
     <p class="callout-label">O catálogo continua igual</p>
-    <p>Os controllers, Form Requests, services e resources de <code>books</code> e <code>genres</code> continuam como no Módulo 4. A mudança é que agora as rotas pedem uma sessão autenticada.</p>
+    <p>Os controllers, Form Requests, services e resources de <code>books</code> e <code>genres</code> continuam como na Aula 1. A mudança no catálogo está nas rotas: agora elas exigem uma sessão autenticada.</p>
   </div>
 </section>
 
 <section class="step" id="passo-6">
-  <h2><span class="step-badge">Passo 6</span> Chamando a API pelo frontend</h2>
+  <h2><span class="step-badge">Passo 6</span> Chamando a API no navegador</h2>
 
-  <p>Use caminhos relativos, como <code>/api/login</code>. Assim, o navegador chama o mesmo endereço que serviu o frontend. Antes do login, peça o cookie CSRF:</p>
+  <p>Como a Aula 1 ainda não criou um frontend, abra <code>http://localhost:8000</code>, abra as ferramentas de desenvolvedor e cole o exemplo no Console. A página de boas-vindas serve como cliente temporário na mesma origem. Num frontend próprio, mantenha os caminhos relativos e use o mesmo helper.</p>
 
   <figure class="code code--js">
-    <figcaption>JavaScript no frontend</figcaption>
+    <figcaption>JavaScript no Console do navegador</figcaption>
     <pre><code>function csrfToken() {
   const cookie = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
 
@@ -765,33 +772,36 @@ async function apiRequest(path, options = {}) {
   });
 }
 
-// Call once when the frontend starts, before login.
+// Start CSRF protection before registration or login.
 await apiRequest('/sanctum/csrf-cookie');
 
-// Log in. The browser keeps the session cookie from the response.
-const response = await apiRequest('/api/login', {
+// Create the first account. Use a new email the first time you run this.
+const registration = await apiRequest('/api/register', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
+    name: 'Ada Lovelace',
     email: 'ada@example.com',
     password: 'example-password',
+    password_confirmation: 'example-password',
   }),
 });
 
-const result = await response.json();</code></pre>
+const result = await registration.json();
+console.log(registration.status, result);</code></pre>
   </figure>
 
-  <p>Depois do login, as chamadas usam o mesmo helper:</p>
+  <p>O cadastro cria a conta e inicia a sessão. Agora as chamadas protegidas usam o mesmo helper:</p>
 
   <figure class="code code--js">
-    <figcaption>JavaScript — usuário atual e alteração de dados</figcaption>
+    <figcaption>JavaScript — usuário atual e catálogo</figcaption>
     <pre><code>const me = await apiRequest('/api/me');
 
 // POST, PUT, PATCH e DELETE recebem X-XSRF-TOKEN pelo helper.
 const books = await apiRequest('/api/books');</code></pre>
   </figure>
 
-  <p>O JavaScript lê o cookie <code>XSRF-TOKEN</code> para preencher o cabeçalho. O cookie de sessão é separado e protegido contra leitura por JavaScript. Não salve a sessão em <code>localStorage</code> e não envie um header <code>Authorization</code>.</p>
+  <p>O JavaScript lê o cookie <code>XSRF-TOKEN</code> para preencher o cabeçalho. O cookie de sessão é separado e protegido contra leitura por JavaScript. O navegador o envia automaticamente; não salve credenciais de sessão em <code>localStorage</code> nem envie um header <code>Authorization</code>.</p>
 
   <div class="callout callout--warn">
     <p class="callout-label">Se usar Axios</p>
@@ -807,7 +817,7 @@ axios.defaults.withXSRFToken = true;</code></pre>
 <section class="step" id="passo-7">
   <h2><span class="step-badge">Passo 7</span> Sessão e logout</h2>
 
-  <p>O cookie mantém a sessão até o usuário sair ou ela expirar. O tempo é controlado pela configuração de sessão do Laravel, não por <code>SANCTUM_TOKEN_EXPIRATION</code>.</p>
+  <p>O cookie mantém a sessão até o usuário sair ou ela expirar. O tempo é controlado pela configuração de sessão do Laravel, como <code>SESSION_LIFETIME</code>.</p>
 
   <p>O botão de logout deve fazer um <code>POST</code> para <code>/api/logout</code>. O helper do passo anterior inclui o cabeçalho CSRF:</p>
 
@@ -816,7 +826,25 @@ axios.defaults.withXSRFToken = true;</code></pre>
     <pre><code>await apiRequest('/api/logout', { method: 'POST' });</code></pre>
   </figure>
 
-  <p>Depois disso, <code>/api/me</code> deve responder <strong>401</strong>. O próximo login cria uma sessão nova.</p>
+  <p>Depois disso, <code>/api/me</code> deve responder <strong>401</strong>. Para entrar novamente com a conta criada no passo anterior:</p>
+
+  <figure class="code code--js">
+    <figcaption>JavaScript — login</figcaption>
+    <pre><code>await apiRequest('/sanctum/csrf-cookie');
+
+const login = await apiRequest('/api/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    email: 'ada@example.com',
+    password: 'example-password',
+  }),
+});
+
+console.log(login.status, await login.json());</code></pre>
+  </figure>
+
+  <p>O login inicia uma sessão nova. Peça <code>/sanctum/csrf-cookie</code> antes de cada novo login para obter um token CSRF válido.</p>
 
   <p>Para encurtar ou alongar a sessão, ajuste <code>SESSION_LIFETIME</code> em minutos no <code>.env</code>. Por exemplo, <code>SESSION_LIFETIME=120</code> mantém a sessão por até duas horas sem atividade.</p>
 </section>
@@ -828,10 +856,12 @@ axios.defaults.withXSRFToken = true;</code></pre>
 
   <ol class="flow">
     <li><code>GET /sanctum/csrf-cookie</code> responde e cria o cookie <code>XSRF-TOKEN</code>.</li>
-    <li><code>POST /api/login</code> responde <strong>200</strong> e inicia a sessão.</li>
+    <li><code>POST /api/register</code> responde <strong>201</strong>, cria a conta e inicia a sessão.</li>
     <li><code>GET /api/me</code> responde <strong>200</strong> com os dados do usuário.</li>
+    <li><code>GET /api/books</code> responde <strong>200</strong> com o catálogo.</li>
     <li><code>POST /api/logout</code> responde <strong>204</strong>.</li>
     <li>Uma nova chamada a <code>GET /api/me</code> responde <strong>401</strong>.</li>
+    <li><code>POST /api/login</code> responde <strong>200</strong> e inicia outra sessão.</li>
   </ol>
 
   <p>Nas chamadas que alteram dados, confira se o frontend envia <code>X-XSRF-TOKEN</code>. Nenhuma chamada de navegador precisa enviar <code>Authorization: Bearer</code>.</p>
@@ -865,7 +895,7 @@ axios.defaults.withXSRFToken = true;</code></pre>
 <section class="step" id="passo-10">
   <h2><span class="step-badge">Passo 10</span> Revisão</h2>
 
-  <p>Neste módulo, você configurou o Sanctum para reconhecer o frontend, iniciou uma sessão no cadastro/login e protegeu o catálogo com <code>auth:sanctum</code>.</p>
+  <p>Nesta segunda aula do Módulo 4, você ativou a autenticação stateful do Sanctum, criou cadastro/login por sessão e protegeu os CRUDs existentes com <code>auth:sanctum</code>.</p>
 
   <div class="table-wrap">
     <table>
@@ -874,7 +904,7 @@ axios.defaults.withXSRFToken = true;</code></pre>
         <tr><td>Identidade do usuário</td><td>Cookie de sessão do Laravel</td></tr>
         <tr><td>Proteção contra CSRF</td><td>Cookie <code>XSRF-TOKEN</code> enviado no cabeçalho <code>X-XSRF-TOKEN</code></td></tr>
         <tr><td>Rotas privadas</td><td>Middleware <code>auth:sanctum</code></td></tr>
-        <tr><td>Origem do frontend</td><td>Mesmo endereço e porta da API; o Nginx encaminha os caminhos</td></tr>
+        <tr><td>Origem do frontend</td><td>Mesmo endereço e porta da API; o exemplo usa <code>localhost:8000</code></td></tr>
       </tbody>
     </table>
   </div>
@@ -891,57 +921,58 @@ axios.defaults.withXSRFToken = true;</code></pre>
   </div>
 </section>
 
-<section class="step" id="passo-11">
-  <h2><span class="step-badge">Passo 11</span> Migrando de Bearer token para cookie</h2>
+<section class="step" id="adendo-bearer-cookie">
+  <h2><span class="step-badge step-badge--alt">Adendo</span> Migrando de Bearer para sessão e CSRF</h2>
 
-  <p>Se você já terminou uma versão da BookShelf que emite Bearer tokens, não precisa refazer os controllers de livros e gêneros. O Sanctum permite que as mesmas rotas com <code>auth:sanctum</code> aceitem sessão de navegador quando a configuração stateful estiver ativa.</p>
+  <p>Se você seguiu uma versão anterior do tutorial que emitia Bearer tokens, use este adendo para migrar o cliente navegador para o fluxo desta aula.</p>
+  <p>As instruções de tokens abaixo presumem que a versão antiga usava Personal Access Tokens do Sanctum. Se ela usava JWT ou outro pacote, o frontend ainda pode migrar para sessão, mas o middleware antigo precisa ser tratado conforme esse pacote.</p>
 
-  <h3>1. Ative sessão e CSRF</h3>
-  <p>Siga os Passos 2 e 4: habilite <code>statefulApi()</code>, configure <code>SANCTUM_STATEFUL_DOMAINS</code> e adicione o login por sessão. O frontend deve chamar <code>/sanctum/csrf-cookie</code> antes de fazer login.</p>
+  <div class="callout callout--concept">
+    <p class="callout-label">São duas funções diferentes</p>
+    <p>O Bearer token identificava o usuário. No fluxo novo, quem autentica é o <strong>cookie de sessão</strong>; o cookie <code>XSRF-TOKEN</code> e o cabeçalho <code>X-XSRF-TOKEN</code> protegem as operações que alteram dados contra CSRF. O token CSRF não substitui a credencial de autenticação.</p>
+  </div>
 
-  <h3>2. Troque o fluxo do frontend</h3>
+  <h3>1. Reaproveite as rotas do catálogo</h3>
+  <p>Mantenha o grupo <code>auth:sanctum</code> protegendo <code>books</code> e <code>genres</code>. Com <code>statefulApi()</code> e o domínio do navegador configurados como no Passo 2, esse guard aceita a sessão do navegador. Os controllers, services e Resources do catálogo não precisam mudar.</p>
+
+  <p>Se a versão antiga já tinha um <code>POST /api/login</code> para emitir Bearer, substitua a implementação pela versão de sessão do Passo 4. Não mantenha duas rotas com o mesmo método e caminho. Se um app mobile ou script ainda precisa emitir e revogar Bearer tokens, reserve caminhos próprios para esse cliente, por exemplo <code>POST /api/tokens</code> e <code>DELETE /api/tokens/current</code>. Proteja a rota de revogação com <code>auth:sanctum</code>, mantenha-a exclusiva para clientes Bearer e continue enviando o cabeçalho Bearer nesses pedidos.</p>
+
+  <h3>2. Troque as chamadas do navegador</h3>
+  <p>Remova a leitura do token salvo e o cabeçalho <code>Authorization</code>. Antes de cadastro ou login, chame <code>/sanctum/csrf-cookie</code>; depois, use o helper do Passo 6 para enviar o cookie de sessão automaticamente e o cabeçalho CSRF nas operações que alteram dados:</p>
+
+  <figure class="code code--js">
+    <figcaption>Frontend — substituição do cabeçalho Bearer</figcaption>
+    <pre><code><span class="diff-del">const token = localStorage.getItem('token');</span>
+<span class="diff-del">headers.set('Authorization', 'Bearer ' + token);</span>
+<span class="diff-add">headers.set('X-XSRF-TOKEN', csrfToken());</span></code></pre>
+  </figure>
+
+  <p>O helper completo do Passo 6 só adiciona <code>X-XSRF-TOKEN</code> em <code>POST</code>, <code>PUT</code>, <code>PATCH</code> e <code>DELETE</code>. Remova também o salvamento do Bearer token em <code>localStorage</code> ou <code>sessionStorage</code>. Peça que cada usuário faça login novamente: um Bearer token existente não se transforma em sessão.</p>
+
+  <h3>3. Decida como tratar os tokens existentes</h3>
   <ul>
-    <li>Remova a leitura e gravação do token em <code>localStorage</code> ou <code>sessionStorage</code>.</li>
-    <li>Pare de enviar <code>Authorization: Bearer ...</code> nas chamadas do navegador.</li>
-    <li>Faça login para receber o cookie de sessão e use <code>X-XSRF-TOKEN</code> nas operações que alteram dados.</li>
-    <li>Peça que o usuário faça login novamente. Um Bearer token existente não se transforma em uma sessão.</li>
+    <li>Se só o navegador usava Bearer, migre o frontend e revogue os tokens antigos depois que os usuários fizerem login novamente.</li>
+    <li>Se outros clientes ainda usam Bearer, mantenha a emissão desses tokens em uma rota separada e preserve o trait <code>HasApiTokens</code> e a tabela <code>personal_access_tokens</code> enquanto forem necessários.</li>
+    <li>O logout de sessão desta aula encerra a sessão do navegador; ele não revoga os Bearer tokens de outros dispositivos. Mantenha um fluxo separado para revogá-los.</li>
   </ul>
 
-  <h3>3. Decida o que fazer com os tokens antigos</h3>
-  <p>Os tokens já emitidos continuam válidos enquanto o código ainda aceita Bearer e eles não expiraram ou foram revogados. Se algum app mobile, script ou integração ainda usa esses endpoints, mantenha o cadastro/login Bearer para eles e crie endpoints separados para a sessão do navegador, por exemplo <code>/api/session/login</code> e <code>/api/session/logout</code>. Os dois tipos de cliente podem usar as mesmas rotas de livros e gêneros protegidas por <code>auth:sanctum</code>.</p>
-
-  <p>Quando nenhum cliente precisar mais de Bearer, remova o código que emite tokens e revogue os tokens antigos. O comando abaixo apaga <strong>todos</strong> os tokens pessoais do Sanctum; use-o somente se nenhum outro cliente depender deles:</p>
-
-  <figure class="code code--term">
-    <figcaption>Terminal — revogar todos os tokens pessoais</figcaption>
-    <pre><code>php artisan tinker</code></pre>
-  </figure>
-
-  <figure class="code code--term">
-    <figcaption>Tinker</figcaption>
-    <pre><code>\Laravel\Sanctum\PersonalAccessToken::query()-&gt;delete();</code></pre>
-  </figure>
-
-  <p>Depois de remover todo o código de emissão e uso de tokens, você pode tirar <code>HasApiTokens</code> do model <code>User</code>. A tabela <code>personal_access_tokens</code> pode ficar no banco; ela não interfere na autenticação por sessão. A configuração <code>SANCTUM_TOKEN_EXPIRATION</code> também não controla a duração da sessão: sessões usam <code>SESSION_LIFETIME</code>.</p>
-
-  <div class="callout callout--warn">
-    <p class="callout-label">Se a API atende outros clientes</p>
-    <p>O logout de sessão encerra o cookie do navegador. Um cliente Bearer continua usando o logout que revoga o token enviado por esse cliente.</p>
-  </div>
+  <p>Não apague a tabela <code>personal_access_tokens</code> nem revogue tokens em lote como parte automática da migração. Com Personal Access Tokens do Sanctum e o trait <code>HasApiTokens</code> mantidos, o guard pode aceitar sessões stateful e Bearer tokens nas mesmas rotas protegidas; os tokens antigos continuam válidos enquanto a aplicação os aceitar e eles não forem expirados ou revogados. Para um frontend em outra origem ou subdomínio, configure cookies com credenciais e CORS conforme a <a href="https://laravel.com/docs/12.x/sanctum#cors-and-cookies">documentação do Sanctum</a>.</p>
 
   <div class="verify">
     <h4>Checklist da migração</h4>
     <ul class="checklist">
-      <li><label><input type="checkbox" data-ck="p11-1"> <span>A API aceita login por sessão e as rotas protegidas continuam usando <code>auth:sanctum</code>.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p11-2"> <span>O frontend não armazena nem envia Bearer token.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p11-3"> <span>Os usuários fizeram login novamente e as operações que alteram dados enviam o cabeçalho CSRF.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p11-4"> <span>Tokens antigos só foram revogados depois de confirmar que nenhum outro cliente depende deles.</span></label></li>
+      <li><label><input type="checkbox" data-ck="migration-1"> <span>O frontend chama <code>/sanctum/csrf-cookie</code> antes de cadastro ou login.</span></label></li>
+      <li><label><input type="checkbox" data-ck="migration-2"> <span>O navegador não lê, salva ou envia Bearer token.</span></label></li>
+      <li><label><input type="checkbox" data-ck="migration-3"> <span>Os CRUDs continuam protegidos por <code>auth:sanctum</code> e funcionam com a sessão.</span></label></li>
+      <li><label><input type="checkbox" data-ck="migration-4"> <span>Clientes mobile ou scripts que ainda usam Bearer têm uma rota de emissão e logout próprios.</span></label></li>
+      <li><label><input type="checkbox" data-ck="migration-5"> <span>Tokens antigos só foram revogados depois de confirmar que nenhum cliente depende deles.</span></label></li>
     </ul>
   </div>
 </section>
 
+
 <footer class="end">
-  <p>BookShelf API protegida — material didático do Módulo 5 do Curso de Programação. Continuação de <a href="laravel.html">BookShelf API: aprenda Laravel 12 construindo uma API REST completa</a>.</p>
+  <p>BookShelf API protegida — Módulo 4, Aula 2 do Curso de Programação. Continuação direta da Aula 1: <a href="laravel.html">BookShelf API: aprenda Laravel 12 construindo uma API REST completa</a>.</p>
   <p>Referências: <a href="https://laravel.com/docs/12.x/sanctum">Laravel 12 — Sanctum</a> · <a href="https://laravel.com/docs/12.x/csrf">Laravel 12 — CSRF Protection</a> · <a href="https://laravel.com/docs/12.x/session">Laravel 12 — Session</a></p>
 </footer>
 
@@ -950,10 +981,10 @@ axios.defaults.withXSRFToken = true;</code></pre>
 <script>
 (function () {
   // Persist checklist state in localStorage (own namespace, so it does not
-  // collide with the Module 4 checklists)
+  // collide with the Aula 1 checklists)
   var boxes = document.querySelectorAll('.checklist input[type="checkbox"]');
   Array.prototype.forEach.call(boxes, function (cb) {
-    var key = 'bookshelf-sanctum-cookies:' + cb.getAttribute('data-ck');
+    var key = 'bookshelf-sanctum-session:' + cb.getAttribute('data-ck');
     try {
       if (localStorage.getItem(key) === '1') { cb.checked = true; }
     } catch (e) {}
