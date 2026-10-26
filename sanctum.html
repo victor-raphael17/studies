@@ -363,7 +363,9 @@ footer.end {
 
   <p>Vamos proteger os endpoints de <code>genres</code> e <code>books</code> e criar rotas de cadastro, login, usuário atual e logout.</p>
 
-  <p>O frontend deste exemplo roda no navegador em <code>https://www.meusite.com</code>. A API fica disponível em <code>https://www.meusite.com/api</code> e é encaminhada por outro Nginx. Para o navegador, página e API têm a mesma origem: o protocolo, o domínio e a porta são iguais. O Nginx que recebeu cada caminho não muda isso.</p>
+  <p>O frontend deste exemplo roda no navegador em <code>http://localhost:8080</code>. A API fica disponível em <code>http://localhost:8080/api</code> e é encaminhada por outro Nginx. Para o navegador, página e API têm a mesma origem: protocolo, endereço e porta são iguais. O Nginx que recebeu cada caminho não muda isso.</p>
+
+  <p>Use o mesmo endereço no navegador em todas as chamadas: <code>localhost</code> e <code>127.0.0.1</code> contam como origens diferentes. O endereço <code>0.0.0.0</code> serve para o servidor escutar conexões; no navegador, use <code>localhost</code> ou <code>127.0.0.1</code>.</p>
 
   <div class="table-wrap">
     <table>
@@ -392,7 +394,7 @@ footer.end {
   <ul>
     <li>O projeto do Módulo 4 funcionando.</li>
     <li>Laravel Sanctum instalado pelo <code>php artisan install:api</code>. O Módulo 4 já fez isso.</li>
-    <li>O Nginx público encaminhando <code>/api/*</code> e <code>/sanctum/*</code> para o Laravel, mantendo o domínio público da requisição.</li>
+    <li>O Nginx local encaminhando <code>/api/*</code> e <code>/sanctum/*</code> para o Laravel, mantendo o mesmo endereço e porta que o frontend usa no navegador.</li>
   </ul>
 </section>
 
@@ -432,25 +434,23 @@ footer.end {
 
   <p>Se ainda não existe esse bloco, adicione-o à configuração do Laravel. O import de <code>Middleware</code> já vem no arquivo gerado pelo Laravel 12.</p>
 
-  <p>Agora informe de qual domínio o navegador fará as chamadas. No <code>.env</code> de produção:</p>
+  <p>Informe o endereço que o navegador usa para abrir o frontend. Este exemplo usa <code>http://localhost:8080</code>:</p>
 
   <figure class="code code--file">
     <figcaption>.env</figcaption>
-    <pre><code>SANCTUM_STATEFUL_DOMAINS=www.meusite.com
-SESSION_SECURE_COOKIE=true</code></pre>
+    <pre><code>SANCTUM_STATEFUL_DOMAINS=localhost:8080
+SESSION_SECURE_COOKIE=false</code></pre>
   </figure>
 
-  <p><code>SESSION_SECURE_COOKIE=true</code> é para produção em HTTPS. Em desenvolvimento local com HTTP, deixe esse valor desativado.</p>
+  <p>Troque <code>8080</code> pela porta que aparece na barra do navegador. Se usar <code>127.0.0.1</code>, coloque esse endereço na configuração e use-o também nas chamadas do frontend. Quando o Nginx usa a porta padrão <code>80</code>, o valor pode ser apenas <code>localhost</code>. Em produção com HTTPS, use <code>SESSION_SECURE_COOKIE=true</code>.</p>
 
-  <p>Na máquina local, liste o domínio e a porta que aparecem no navegador, por exemplo <code>localhost:5173</code>. Configure o servidor de desenvolvimento para encaminhar <code>/api</code> e <code>/sanctum</code> ao Laravel. Assim, o navegador continua chamando o mesmo endereço que serviu o frontend.</p>
-
-  <p>Com a mesma origem, deixe <code>SESSION_DOMAIN</code> sem configurar. O Nginx público deve encaminhar <code>/sanctum/csrf-cookie</code> ao Laravel, assim como já encaminha <code>/api</code>.</p>
+  <p>Com essa configuração local, deixe <code>SESSION_DOMAIN</code> sem configurar. O Nginx deve encaminhar <code>/sanctum/csrf-cookie</code> ao Laravel, assim como já encaminha <code>/api</code>.</p>
 
   <div class="verify">
     <h4>Como conferir</h4>
     <ul class="checklist">
       <li><label><input type="checkbox" data-ck="p2-1"> <span><code>bootstrap/app.php</code> chama <code>$middleware-&gt;statefulApi()</code>.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p2-2"> <span><code>SANCTUM_STATEFUL_DOMAINS</code> inclui o domínio que aparece na barra do navegador.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p2-2"> <span><code>SANCTUM_STATEFUL_DOMAINS</code> inclui o mesmo endereço e porta que aparecem no navegador.</span></label></li>
       <li><label><input type="checkbox" data-ck="p2-3"> <span>O Nginx encaminha tanto <code>/api</code> quanto <code>/sanctum</code> ao Laravel.</span></label></li>
     </ul>
   </div>
@@ -737,7 +737,7 @@ Route::middleware('auth:sanctum')-&gt;group(function () {
 <section class="step" id="passo-6">
   <h2><span class="step-badge">Passo 6</span> Chamando a API pelo frontend</h2>
 
-  <p>Use caminhos relativos, como <code>/api/login</code>. Assim, o navegador chama o mesmo domínio que serviu o frontend. Antes do login, peça o cookie CSRF:</p>
+  <p>Use caminhos relativos, como <code>/api/login</code>. Assim, o navegador chama o mesmo endereço que serviu o frontend. Antes do login, peça o cookie CSRF:</p>
 
   <figure class="code code--js">
     <figcaption>JavaScript no frontend</figcaption>
@@ -874,7 +874,7 @@ axios.defaults.withXSRFToken = true;</code></pre>
         <tr><td>Identidade do usuário</td><td>Cookie de sessão do Laravel</td></tr>
         <tr><td>Proteção contra CSRF</td><td>Cookie <code>XSRF-TOKEN</code> enviado no cabeçalho <code>X-XSRF-TOKEN</code></td></tr>
         <tr><td>Rotas privadas</td><td>Middleware <code>auth:sanctum</code></td></tr>
-        <tr><td>Origem do frontend</td><td>Mesmo domínio público da API; o Nginx encaminha os caminhos</td></tr>
+        <tr><td>Origem do frontend</td><td>Mesmo endereço e porta da API; o Nginx encaminha os caminhos</td></tr>
       </tbody>
     </table>
   </div>
@@ -882,7 +882,7 @@ axios.defaults.withXSRFToken = true;</code></pre>
   <div class="verify">
     <h4>Checklist final</h4>
     <ul class="checklist">
-      <li><label><input type="checkbox" data-ck="p10-1"> <span><code>statefulApi()</code> está ativo e o domínio do frontend consta em <code>SANCTUM_STATEFUL_DOMAINS</code>.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p10-1"> <span><code>statefulApi()</code> está ativo e o endereço local do frontend consta em <code>SANCTUM_STATEFUL_DOMAINS</code>.</span></label></li>
       <li><label><input type="checkbox" data-ck="p10-2"> <span>O frontend chama <code>/sanctum/csrf-cookie</code> antes do login.</span></label></li>
       <li><label><input type="checkbox" data-ck="p10-3"> <span>O login cria uma sessão e não devolve Bearer token.</span></label></li>
       <li><label><input type="checkbox" data-ck="p10-4"> <span>As rotas de livros e gêneros exigem <code>auth:sanctum</code>.</span></label></li>
